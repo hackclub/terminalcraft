@@ -212,7 +212,7 @@ export default function Home() {
         return "";
 
       default:
-        return `terminalcraft: command not found: ${command}`;
+        return `bash: command not found: ${command}`;
     }
   }
 
