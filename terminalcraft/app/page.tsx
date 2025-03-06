@@ -14,8 +14,11 @@ export default function Home() {
     type: "output",
     content: "type 'help' to get started"
   }]);
+  const [inputDisabled, setInputDisabled] = useState<boolean>(false);
 
   function handleCommand(command: string) {
+    if (inputDisabled) return;
+
     if (command == "clear") {
       setHistory([]);
       setCommand("");
@@ -64,6 +67,14 @@ export default function Home() {
         window.open('https://hackclub.slack.com/archives/C08F58MT3GV', '_blank');
         return "Opening #terminal-craft channel on Slack...";
       }
+      case "sudo": {
+        const fullCommand = commandAndParams.join(" ");
+        if (fullCommand.match(/rm\s+-rf\s+(\/?|--no-preserve-root\s*\/)/)) {
+          return simulateFullSystemMeltdown();
+        } else {
+          return "Permission denied: Are you trying to break something? 🤨";
+        }
+      }
       case "exit": {
         document.body.classList.add('crt-off');
         setTimeout(() => {
@@ -88,6 +99,71 @@ export default function Home() {
     return `
     Lo, there walks among us a Hack Clubber most peculiar, one who scorns the frilly gewgaws of modern UI and finds solace in the cold, unfeeling embrace of the terminal. Where others prattle of their "drag-and-drop" and their "material design," this steadfast soul wields naught but a blinking cursor and the righteous fury of a well-placed grep. They craft tools not for the faint of heart, but for those brave enough to dance with stdin and stdout, their fingers moving with eldritch speed across the keys, summoning forth mighty applications that demand respect—or at the very least, a well-formatted man page. Speak to them of "mouse support," and they shall laugh, a grim and knowing laugh, before returning to their endless battle with sed and awk. And lo, though their ways be arcane and their scripts indecipherable to lesser mortals, those who walk the path of the terminal know: theirs is the true and noble craft, unsullied by the bloat of the modern age.
     `
+  }
+
+  function simulateFullSystemMeltdown() {
+    setInputDisabled(true);
+    const repoFiles = [
+      "package.json",
+      "package-lock.json",
+      "tsconfig.json",
+      "next.config.ts",
+      "postcss.config.mjs",
+      "tailwind.config.ts",
+      "README.md",
+      ".gitignore",
+      "app/page.tsx",
+      "app/layout.tsx",
+      "app/globals.css",
+      "app/favicon.ico",
+      "components/Prompt.tsx",
+      "public/favicon.png",
+      "public/hackclub.svg",
+      "node_modules/react/index.js",
+      "node_modules/next/dist/server/app-render.js",
+      "node_modules/typescript/lib/typescript.js",
+      ".next/cache/webpack/client-development/0.pack",
+      ".next/static/chunks/main.js",
+      ".next/server/pages/index.js",
+      ".git/HEAD",
+      ".git/config",
+      ".git/index",
+      ".catpics/" // There really is no cat pics folder :3
+    ];
+
+    let index = 0;
+
+    const addDeletionMessage = () => {
+      if (index < repoFiles.length) {
+        const file = repoFiles[index];
+        setHistory(prev => [...prev, {
+          type: "output",
+          content: `<span class="text-red-500">rm: removing '${file}'</span>`
+        }]);
+        index++;
+        setTimeout(addDeletionMessage, Math.random() * 150 + 50);
+      } else {
+        setTimeout(() => {
+          setHistory(prev => [...prev, {
+            type: "output",
+            content: `<span class="text-red-500 font-bold">
+Kernel panic - not syncing: Attempted to kill the idle task!
+CPU: 0 PID: 1 Comm: swapper/0 Not tainted
+Hardware name: TerminalCraft Virtual Machine
+            </span>`
+          }]);
+
+          setTimeout(() => {
+            setTimeout(() => {
+              window.close();
+              window.location.href = "about:blank";
+            }, 4000);
+          }, 1500);
+        }, 800);
+      }
+    };
+    addDeletionMessage();
+    return "WARNING: System meltdown initiated! Deleting all files...";
   }
 
   function cat(filename: string) {
