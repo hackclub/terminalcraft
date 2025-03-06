@@ -1,0 +1,3 @@
+[console_scripts]
+picflip = picflip.cli:main
+
