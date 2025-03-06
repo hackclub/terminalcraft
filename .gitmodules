@@ -1,0 +1,3 @@
+[submodule "submissions/chessminal"]
+	path = submissions/chessminal
+	url = https://github.com/daamin909/chessminal
