@@ -27,7 +27,7 @@ A terminal-based Wordle game where you guess a 5-letter word in 6 attempts, with
 
 1. Clone or download the repository:
     ```bash
-    git clone https://github.com/yourusername/wordle-game.git
+    git clone https://github.com/Abeer6171/wordle-game.git
     ```
 2. Navigate to the project directory:
     ```bash
