@@ -1,4 +1,0 @@
-rembg
-Pillow
-cairosvg
-onnxruntime
