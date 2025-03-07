@@ -1,0 +1,14 @@
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\TerminalCraft.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\TerminalCraft.AssemblyInfoInputs.cache
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\TerminalCraft.AssemblyInfo.cs
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\TerminalCraft.csproj.CoreCompileInputs.cache
+c:\Users\koala\TerminalCraft\bin\Debug\net9.0\TerminalCraft.exe
+c:\Users\koala\TerminalCraft\bin\Debug\net9.0\TerminalCraft.deps.json
+c:\Users\koala\TerminalCraft\bin\Debug\net9.0\TerminalCraft.runtimeconfig.json
+c:\Users\koala\TerminalCraft\bin\Debug\net9.0\TerminalCraft.dll
+c:\Users\koala\TerminalCraft\bin\Debug\net9.0\TerminalCraft.pdb
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\TerminalCraft.dll
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\refint\TerminalCraft.dll
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\TerminalCraft.pdb
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\TerminalCraft.genruntimeconfig.cache
+c:\Users\koala\TerminalCraft\obj\Debug\net9.0\ref\TerminalCraft.dll
