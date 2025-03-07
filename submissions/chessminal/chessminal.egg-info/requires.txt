@@ -1,5 +1,0 @@
-chess
-python-chess
-stockfish
-requests
-rich
