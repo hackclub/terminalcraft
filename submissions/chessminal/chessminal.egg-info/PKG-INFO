@@ -1,0 +1,57 @@
+Metadata-Version: 2.2
+Name: chessminal
+Version: 2.1.4
+Summary: chess.com's paid Game Review feature for free in a terminal.
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: chess
+Requires-Dist: python-chess
+Requires-Dist: stockfish
+Requires-Dist: requests
+Requires-Dist: rich
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: requires-dist
+Dynamic: summary
+
+
+# chessminal - free game review in a terminal
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-2.1.4-brightgreen.svg)
+
+A terminal application that grades your chess games from their PGN notation.
+
+## How it works.
+This app utilises [Stockfish](https://stockfishchess.org) chess engine that grades positions based on the Eval system. This app grades the difference between the eval values and uses a top-notch algorithm to grade moves into 6 categories ranked best to worst:-
+
+- best_move
+- book_move
+- excellent_move
+- good_move
+- inaccuracy
+- mistake
+- blunder
+
+## Installation
+You can install chessminal via pip:
+```sh
+pip install chessminal
+```
+Ensure you have Python 3.x installed. The package automatically installs required dependencies.
+
+## Usage
+Once installed, you can run chessminal directly from the terminal. Run 👇🏻 for guide on how to use.
+```sh
+chessminal
+```
+
+### Game Review - Usage
+
+Download your chess game's PGN file and run.
+```sh
+chessminal 'path/to/your/pgn/file'
+```
+
+## Example Game Review
+
+![ss](https://i.imgur.com/RDb4pbu.png)

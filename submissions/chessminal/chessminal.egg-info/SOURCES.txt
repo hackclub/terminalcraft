@@ -1,0 +1,15 @@
+LICENSE
+README.md
+setup.py
+chessminal/__init__.py
+chessminal/classify_moves.py
+chessminal/game_review.py
+chessminal/main.py
+chessminal/openings.py
+chessminal/validation.py
+chessminal.egg-info/PKG-INFO
+chessminal.egg-info/SOURCES.txt
+chessminal.egg-info/dependency_links.txt
+chessminal.egg-info/entry_points.txt
+chessminal.egg-info/requires.txt
+chessminal.egg-info/top_level.txt
