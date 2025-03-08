@@ -6,7 +6,6 @@
   - [Installation](#installation)
     - [Running from source](#running-from-source)
   - [Usage](#usage)
-  - [Known Bugs](#known-bugs)
 
 ![Image of the game's menu](assets/menu.png)
 ![Image of playing the game in default mode](assets/game-pride-off.png)
