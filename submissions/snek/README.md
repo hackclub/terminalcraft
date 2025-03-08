@@ -31,7 +31,3 @@ The world width and height is automatically set to the maximum it can be for the
 ## Usage
 
 * Run the command `python snek.py` in the root of your clone of this repository.
-
-## Known Bugs
-
-Please see [**`bugs.md`**](bugs.md).
