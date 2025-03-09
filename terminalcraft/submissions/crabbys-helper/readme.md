@@ -34,15 +34,15 @@ helper <command>
 - `helper git here` → Initialize Git & guide next steps  
 
 ### **WakaTime Stats**  
-- `helper get time` → Fetch coding stats  to date
+- `helper get coding time` → Fetch coding stats  to date
 
 ### **Task Management**  
 - `helper tasks` → View all tasks  
-- `helper add-task` → Add a new task  
-- `helper remove-task` → Remove a task
+- `helper add task` → Add a new task  
+- `helper remove task` → Remove a task
 
 ### **Ask AI**
-- ` helper ask ai` → ask ChatGPT questions from the CLI
+- ` helper ask ai` → ask ChatGPT, Gemini or deepseek questions from the CLI
 
 ---
 
