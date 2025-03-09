@@ -33,8 +33,14 @@ def get_user_input():
     answers = inquirer.prompt(questions)
     return answers
 
-#Check if settings.json exists
-if not os.path.exists('settings.json'):
+
+
+# Get the parent directory of the current script
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+settings_path = os.path.join(parent_dir, 'settings.json')
+
+# Check if settings.json exists in the parent directory
+if not os.path.exists(settings_path):
     print("Settings file not found, initializing setup...")
     user_input = get_user_input()
     settings = {
@@ -44,16 +50,15 @@ if not os.path.exists('settings.json'):
         "max_token": user_input['max_token'],
         "prompt": f"You are a helpful assistant that helps users with problems regarding {user_input['desktop_os']} terminal commands and {user_input['desktop_os']} commands in general. You should always aim to give the most accurate and helpful response to the user's query and to also always respond as short as possible. Aim to provide user with the relavant command that solves their problem. Format the response but never respond in markdown, you are a tool that prints in terminal where markdown is not supported."
     }
-    with open('settings.json', 'w') as settings_file:
+    with open(settings_path, 'w') as settings_file:
         json.dump(settings, settings_file, indent=4)
     print("User settings have been saved to settings.json")
     sys.exit()
-    
-    
 
-#Load settings.json
-with open('settings.json') as f:
+# Load settings.json from the parent directory
+with open(settings_path) as f:
     settings = json.load(f)
+
 
 client = genai.Client(api_key=settings["api_key"])
 
