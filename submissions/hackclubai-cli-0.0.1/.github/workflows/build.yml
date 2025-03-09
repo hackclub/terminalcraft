@@ -1,0 +1,35 @@
+name: Build and Release Deno Chat
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # Runs when you push a version tag like v1.0.0
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Compile Deno App
+        run: |
+          deno compile --allow-env --allow-net --allow-run  --output chat-${{ runner.os }} main.ts
+
+      - name: Upload Binary to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ai-${{ runner.os }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
