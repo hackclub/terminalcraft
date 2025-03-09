@@ -60,12 +60,17 @@ def encode():
     name_without_ext, file_extension = os.path.splitext(base_name)
     file_extension = file_extension.lower()[1:]
 
+    frames_per_data_frame = 5
+
     clear_terminal()
 
     width, height = 2560, 1440
     ppf = width * height
     fps = 60
     output_filename = f"{name_without_ext}.mp4"
+    
+    os.makedirs("Data/outputs", exist_ok=True)
+    
     output_path = os.path.join("Data/outputs", output_filename)
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     video_writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
@@ -73,11 +78,15 @@ def encode():
     file_size = os.path.getsize(file_path)
     bytes_per_frame = ppf // 8
 
-    total_frames = (file_size * 8 + ppf - 1) // ppf
-    print(f"Encoding {file_size} bytes into {total_frames} frames.")
+    total_data_frames = (file_size * 8 + ppf - 1) // ppf
+    total_video_frames = total_data_frames * frames_per_data_frame
+    
+    print(f"Encoding {file_size} bytes into {total_data_frames} unique data frames.")
+    print(f"Each frame will be repeated {frames_per_data_frame} times.")
+    print(f"Total video frames: {total_video_frames}")
 
     with open(file_path, "rb") as file:
-        for frame_idx in range(total_frames):
+        for frame_idx in range(total_data_frames):
             frame = np.ones((height, width), dtype=np.uint8) * 255 
 
             chunk = file.read(bytes_per_frame)
@@ -93,15 +102,21 @@ def encode():
                     frame[row, col] = 0
 
             bgr_frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-            video_writer.write(bgr_frame)
-
-            print(f"Progress: {frame_idx + 1}/{total_frames} frames ({(frame_idx + 1) * 100 // total_frames}%)")
+            
+            for _ in range(frames_per_data_frame):
+                video_writer.write(bgr_frame)
+            
+            print(f"Progress: {frame_idx + 1}/{total_data_frames} data frames "
+                  f"({(frame_idx + 1) * frames_per_data_frame}/{total_video_frames} video frames) "
+                  f"({(frame_idx + 1) * 100 // total_data_frames}%)")
 
     video_writer.release()
     print("Encoding complete.")
 
     absolute_output_path = os.path.abspath(output_path)
-    print(f"Video saved to: {os.path.abspath(output_path)}")
+    print(f"Video saved to: {absolute_output_path}")
+    print(f"Total frames in video: {total_data_frames * frames_per_data_frame}")
+    print(f"Video duration: {total_video_frames / fps:.2f} seconds")
 
     try:
         yt_api = YouTubeAPI(youtube)
