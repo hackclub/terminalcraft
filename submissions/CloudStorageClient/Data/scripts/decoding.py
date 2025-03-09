@@ -3,6 +3,7 @@ import cv2
 import sys
 import yt_dlp
 import re
+import numpy as np
 from .clear_terminal import clear_terminal
 
 def decode():
@@ -54,53 +55,66 @@ def decode():
     width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
     ppf = width * height
+    frames_per_data_frame = 5
 
     print("Decoding...")
     print(f"Video dimensions: {width}x{height}")
-    print(f"Total frames: {frame_count}")
+    print(f"Total video frames: {frame_count}")
+    
+    total_data_frames = frame_count // frames_per_data_frame
+    
+    print(f"Expected data frames: {total_data_frames}")
 
     data = []
-
-    for frame_idx in range(frame_count):
-        success, frame = video.read()
-        if not success:
-            print(f"Error: Could not read frame {frame_idx}.")
-            break
-
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        _, binary_frame = cv2.threshold(gray_frame, 127, 1, cv2.THRESH_BINARY_INV)
-
+    
+    for data_frame_idx in range(total_data_frames):
+        accumulated_frame = np.zeros((height, width), dtype=np.float32)
+        
+        frames_read = 0
+        for _ in range(frames_per_data_frame):
+            success, frame = video.read()
+            if not success:
+                print(f"Warning: Could not read frame, reached end of video.")
+                break
+                
+            gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            accumulated_frame += gray_frame.astype(np.float32)
+            frames_read += 1
+            
+        if frames_read < frames_per_data_frame:
+            print(f"Warning: Incomplete frame group, expected {frames_per_data_frame} frames but got {frames_read}")
+            continue
+            
+        averaged_frame = accumulated_frame / frames_per_data_frame
+        
+        _, binary_frame = cv2.threshold(averaged_frame, 127.5, 1, cv2.THRESH_BINARY_INV)
+        
+        binary_frame = binary_frame.astype(np.uint8)
+        
         for row in range(height):
             for col in range(width):
-                if row * width + col < width * height:
+                if row * width + col < ppf:
                     data.append(str(binary_frame[row, col]))
 
-        print(f"Progress: {frame_idx + 1}/{frame_count} frames ({(frame_idx + 1) * 100 // frame_count}%)")
+        print(f"Progress: {data_frame_idx + 1}/{total_data_frames} data frames ({(data_frame_idx + 1) * 100 // total_data_frames}%)")
+    
     video.release()
+    print("Frame processing complete.")
 
     data_string = ''.join(data)
-    
-    total_bits_needed = frame_count * ppf
-    
-    if len(data_string) > total_bits_needed:
-        data_string = data_string[:total_bits_needed]
+    print(f"Total bits collected: {len(data_string)}")
     
     last_one_index = data_string.rfind('1')
     if last_one_index == -1:
         print("Error: No valid data found in the video.")
         return
-    
+
     data_string = data_string[:last_one_index + 1]
-    
-    print(f"Total data bits: {len(data_string)}")
     
     extension = ""
     if len(data_string) >= 32:
         extension_bits = data_string[-32:]
         data_string = data_string[:-32]
-        
-        print(f"Extension bits: {extension_bits}")
         
         for i in range(0, 32, 8):
             if i + 8 <= len(extension_bits):
