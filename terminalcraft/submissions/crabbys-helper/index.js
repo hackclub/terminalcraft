@@ -203,22 +203,26 @@ program.command('ask ai')
             return;
         }
 
-        if (model !== 'deepseek') {
-            let apiKey = getApiKey(model);
-            if (!apiKey) {
-                apiKey = readlineSync.question(`🔑 Enter your ${model} API key: `, { hideEchoBack: true });
-                if (!apiKey.trim()) {
-                    console.log(chalk.red('❌ API key is required.'));
-                    return;
-                }
-
-                const saveKey = readlineSync.question('💾 Save API key for future use? (y/n): ');
-                if (saveKey.toLowerCase() === 'y') {
-                    config[model] = { api_key: apiKey };
-                    saveConfig(config);
-                    console.log(chalk.green(`✅ ${model} API key saved.`));
-                }
+        let apiKey = getApiKey(model);
+        if (model !== 'deepseek' && !apiKey) {
+            apiKey = readlineSync.question(`🔑 Enter your ${model} API key: `, { hideEchoBack: true });
+            if (!apiKey.trim()) {
+                console.log(chalk.red('❌ API key is required.'));
+                return;
             }
+
+            const saveKey = readlineSync.question('💾 Save API key for future use? (y/n): ');
+            if (saveKey.toLowerCase() === 'y') {
+                config[model] = { api_key: apiKey };
+                saveConfig(config);
+                console.log(chalk.green(`✅ ${model} API key saved.`));
+            }
+        }
+
+        // Use the API key regardless of save or not
+        if (!apiKey && model !== 'deepseek') {
+            console.log(chalk.red('❌ No API key provided.'));
+            return;
         }
 
         config.model = model;
@@ -238,13 +242,13 @@ program.command('ask ai')
                 response = await axios.post(
                     'https://api.openai.com/v1/chat/completions',
                     { model: 'gpt-4', messages: [{ role: 'user', content: userQuestion }] },
-                    { headers: { 'Authorization': `Bearer ${config.openai.api_key}`, 'Content-Type': 'application/json' } }
+                    { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
                 );
             } else if (model === 'gemini') {
                 response = await axios.post(
                     'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateMessage',
                     { contents: [{ parts: [{ text: userQuestion }] }] },
-                    { headers: { 'Authorization': `Bearer ${config.gemini.api_key}`, 'Content-Type': 'application/json' } }
+                    { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
                 );
             } else if (model === 'deepseek') {
                 response = await axios.post(
@@ -260,6 +264,7 @@ program.command('ask ai')
             console.log(chalk.red(`❌ API error: ${error.response?.data?.error?.message || error.message}`));
         }
     });
+
 
 const catState = { food: 5, water: 5, happiness: 5 };
 const MAX_LEVEL = 10;
