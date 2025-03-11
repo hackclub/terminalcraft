@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "baccarat.h"
 #include "../core/card.h"
 
-constexpr int HAND_SIZE = 3;
+#define HAND_SIZE 3
 
 int get_hand_value(const Card *hand, const bool include_third_card) {
     return (hand[0].value + hand[1].value + (include_third_card ? hand[2].value : 0)) % 10;

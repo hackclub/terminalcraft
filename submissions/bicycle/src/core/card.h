@@ -1,4 +1,5 @@
 #pragma once
+#include <stdbool.h>
 
 typedef enum Suit : int {
     CLUBS = 1,
@@ -7,7 +8,7 @@ typedef enum Suit : int {
     SPADES,
 } Suit;
 
-constexpr int MAX_CARD_VALUE = 10;
+#define MAX_CARD_VALUE 10
 
 typedef enum Rank : int {
     ACE = 1,

@@ -1,17 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 #include <cargs.h>
 #include "core/deck.h"
 #include "core/clock.h"
 #include "games/baccarat.h"
 
-static constexpr int CARDS_PER_DECK = 52;
-static int row_size = 5, hand_size = 1, deck_size = CARDS_PER_DECK;
-static long int seed = -1;
-static bool shuffle = true, baccarat = false;
+#define CARDS_PER_DECK 52
+int row_size = 5, hand_size = 1, deck_size = CARDS_PER_DECK;
+long int seed = -1;
+bool shuffle = true, baccarat = false;
 
-static struct cag_option options[] = {
+struct cag_option options[] = {
     {
         .identifier = 'r',
         .access_letters = "r",
@@ -44,14 +43,14 @@ static struct cag_option options[] = {
         .identifier = 'b',
         .access_letters = "b",
         .access_name = "baccarat",
-        .value_name = nullptr,
+        .value_name = NULL,
         .description = "Play a game of baccarat"
     },
     {
         .identifier = 'n',
         .access_letters = "n",
         .access_name = "no-shuffle",
-        .value_name = nullptr,
+        .value_name = NULL,
         .description = "Deal cards without shuffling"
     },
     {
