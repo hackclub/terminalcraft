@@ -2,19 +2,26 @@ import os
 import shutil
 import json
 
-UNDO_LOG_FILE = "undo_log.json"
+UNDO_FILE = "undo.json"
 
 def undo_last_operation():
-    if not os.path.exists(UNDO_LOG_FILE):
-        print("\n❌ No undo log found! Nothing to undo.")
+    if not os.path.exists(UNDO_FILE):
+        print("\n⚠ No previous operation to undo.")
         return
-    
-    with open(UNDO_LOG_FILE, "r") as log:
-        moved_files = json.load(log)
 
-    for entry in moved_files:
-        if os.path.exists(entry["new"]):
-            shutil.move(entry["new"], entry["original"])
-    
-    os.remove(UNDO_LOG_FILE)
-    print("\n✅ Undo successful! Files restored to original locations.")
+    with open(UNDO_FILE, "r") as file:
+        data = json.load(file)
+
+    folder = data["folder"]
+    moved_files = data["files"]
+
+    for filename, category in moved_files:
+        old_path = os.path.join(folder, category, filename)
+        new_path = os.path.join(folder, filename)
+
+        if os.path.exists(old_path):
+            shutil.move(old_path, new_path)
+            print(f"🔄 Restored {filename} -> {folder}")
+
+    os.remove(UNDO_FILE)
+    print("\n✅ Undo complete!")
