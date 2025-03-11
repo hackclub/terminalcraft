@@ -1,5 +1,7 @@
 import json
 import random
+import curses
+# curses.initscr()
 
 
 def shuffleDeck(deck):
@@ -22,41 +24,71 @@ def setupGame(players, count, deck): # takes in a list of players and the count 
 
 	return players, deck
 
-rawDeck = json.load(open("deck.json")) # opens deck.json and assigns it
-
-# print ("UNSHUFFLED DECK:")
-# print(rawDeck)
-# print("\n\n\n")
-
-# players = [ # list of players (make it dynamic from user input later!!)
-#     {"name": "Player 1", "hand": []},
-#     {"name": "Player 2", "hand": []},
-#     {"name": "Player 3", "hand": []},
-#     {"name": "Player 4", "hand": []}
-# ]
-
 def getPlayerCount():
 	players = []
 	try:
 		numPlayers = int(input("Enter the number of players: "))
+		print("\n")
 		for each in range(numPlayers):
-			playerName = input("Enter player " + str(each + 1) + "'s name: ")
+			playerName = input("Enter Player " + str(each + 1) + "'s name: ")
+			# print ("\n")
 			players.append({"name": playerName, "hand": []})
 
+		
 		return players
 	except ValueError:
 		print("Please enter a number")
 		getPlayerCount()
 
-players = getPlayerCount()
+def startGame(deck):
+	discard = []
+	print(deck)
+	discard.append(deck.pop())
+	return deck, discard
 
-print(players)
+
+print(r"""
+
+                                                                                                                                        
+                                                                                                                                        
+  .--.--.                                                   ,--,                                 ,----..                                
+ /  /    '.   ,--,                                        ,--.'|                                /   /   \                         ,---, 
+|  :  /`. / ,--.'|         ,---,                     ,--, |  | :                __  ,-.        |   :     :             __  ,-.  ,---.'| 
+;  |  |--`  |  |,      ,-+-. /  |  ,----._,.       ,'_ /| :  : '              ,' ,'/ /|        .   |  ;. /           ,' ,'/ /|  |   | : 
+|  :  ;_    `--'_     ,--.'|'   | /   /  ' /  .--. |  | : |  ' |     ,--.--.  '  | |' |        .   ; /--`   ,--.--.  '  | |' |  |   | | 
+ \  \    `. ,' ,'|   |   |  ,"' ||   :     |,'_ /| :  . | '  | |    /       \ |  |   ,'        ;   | ;     /       \ |  |   ,',--.__| | 
+  `----.   \'  | |   |   | /  | ||   | .\  .|  ' | |  . . |  | :   .--.  .-. |'  :  /          |   : |    .--.  .-. |'  :  / /   ,'   | 
+  __ \  \  ||  | :   |   | |  | |.   ; ';  ||  | ' |  | | '  : |__  \__\/: . .|  | '           .   | '___  \__\/: . .|  | ' .   '  /  | 
+ /  /`--'  /'  : |__ |   | |  |/ '   .   . |:  | : ;  ; | |  | '.'| ," .--.; |;  : |           '   ; : .'| ," .--.; |;  : | '   ; |:  | 
+'--'.     / |  | '.'||   | |--'   `---`-'| |'  :  `--'   \;  :    ;/  /  ,.  ||  , ;           '   | '/  :/  /  ,.  ||  , ; |   | '/  ' 
+  `--'---'  ;  :    ;|   |/       .'__/\_: |:  ,      .-./|  ,   /;  :   .'   \---'            |   :    /;  :   .'   \---'  |   :    :| 
+            |  ,   / '---'        |   :    : `--`----'     ---`-' |  ,     .-./                 \   \ .' |  ,     .-./       \   \  /   
+             ---`-'                \   \  /                        `--`---'                      `---`    `--`---'            `----'    
+                                    `--`-'                                                                                              
+
+	  
+
+""")
+
+
+rawDeck = json.load(open("deck.json")) # opens deck.json and assigns it
 newDeck = shuffleDeck(rawDeck) # shuffles the deck and assigns it
-# print ("SHUFFLED DECK:")
-# print(newDeck)
-# print("\n\n\n")
 
+
+players = getPlayerCount()
 hands, gameDeck = setupGame(players, 7, newDeck) # sets up the game and assigns the modified deck
+
+gameDeck, discard = startGame(gameDeck)
+
+
+
+# print (gameDeck, discard)
+
+
+
+
+
+
 
 # print ("GAME DECK:")
 # print(gameDeck)
@@ -65,6 +97,7 @@ hands, gameDeck = setupGame(players, 7, newDeck) # sets up the game and assigns 
 # print ("PLAYERS:")
 # for player in players:
 # 	print(player["name"] + ": " + str(player["hand"]))
+
 
 
 
