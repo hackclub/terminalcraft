@@ -1,5 +1,4 @@
 #include "clock.h"
-#include <stddef.h>
 
 long int get_time_in_usec(void) {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -14,7 +13,7 @@ long int get_time_in_usec(void) {
 #else
 #include <sys/time.h>
     struct timeval tv;
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, 0);
     return tv.tv_usec;
 #endif
 }
