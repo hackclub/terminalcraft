@@ -186,7 +186,7 @@ while hp > 0 and enemy > 0:
                 time.sleep(0.7)
     elif decision == "3" and (healInterval - 10) > 0:
         startAttack = True
-        healInterval =- 10
+        healInterval = healInterval - 10
         if whichBinary <= len(healBinary) - 1:
             healInput = int(input(f"\033[11;1Hsolve: {healBinary[whichBinary]}\nanswer: "))
             if str(healInput) == healAnswers[whichBinary]:
@@ -194,9 +194,9 @@ while hp > 0 and enemy > 0:
                 time.sleep(0.5)
                 whichBinary += 1
                 if hp <= 6:
-                    hp += 2
+                    hp = hp + 2
                 else:
-                    hp += 8 - hp
+                    hp = hp + (8 - hp)
             else:
                 print("\033[12;1Hunlucky. -1hp.")
                 time.sleep(0.5)
