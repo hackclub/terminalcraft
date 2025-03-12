@@ -1,0 +1,66 @@
+BlockBar {
+    dock: bottom;
+    height: auto;
+    align-horizontal: center;
+    overflow-x: scroll;
+    # margin: 0 0 1 0;
+
+    Button {
+        margin: 0 1;
+        height: 3;
+        min-width: 11;
+    }
+
+    .active {
+        border-top: tall lavender;
+        background: #0a3b51;
+    }
+
+    HorizontalScroll {
+        height: auto;
+        width: auto;
+    }
+}
+
+WorldDisplay {
+    # margin: 1;
+    # max-height: 42;
+    # max-width: 125;
+    height: 100%;
+    width: 100%;
+}
+
+Screen {
+    align-horizontal: center;
+    align-vertical: middle;
+}
+
+ModalScreen {
+    align-horizontal: center;
+    align-vertical: middle;
+    overflow-x: auto;
+
+    Container {
+        border: solid white;
+        background: black;
+        width: auto;
+        height: auto;
+        padding: 1 2;
+
+        HorizontalGroup {
+            width: auto;
+
+            Button {
+                margin: 1 2 0 0;
+            }
+        }
+    }
+}
+
+HorizontalGroup {
+    width: auto;
+
+    Button {
+        margin: 0 1;
+    }
+}
