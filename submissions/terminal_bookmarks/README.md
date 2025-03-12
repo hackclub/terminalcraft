@@ -23,8 +23,8 @@ A command-line tool that helps you save, organize, and quickly access your most-
 
 ```bash
 # Clone and install
-git clone https://github.com/yourusername/terminal-bookmarks.git
-cd terminal-bookmarks
+git clone https://github.com/hackclub/terminalcraft.git
+cd terminalcraft/submissions/terminal-bookmarks
 
 # Set up virtual environment
 # Windows:
