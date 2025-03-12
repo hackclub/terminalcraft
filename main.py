@@ -1,8 +1,9 @@
 import json
 import random
-import curses
-# curses.initscr()
+from blessings import Terminal
 
+t = Terminal()
+print(t.clear())
 
 def shuffleDeck(deck):
 	# takes in a json object of a deck and shuffles it
@@ -28,30 +29,35 @@ def getPlayerCount():
 	players = []
 	try:
 		numPlayers = int(input("Enter the number of players: "))
+		logo()
 		print("\n")
+		logo()
 		for each in range(numPlayers):
+			logo()
+# make function to catch empty names
 			playerName = input("Enter Player " + str(each + 1) + "'s name: ")
+			logo()
 			# print ("\n")
 			players.append({"name": playerName, "hand": []})
 
 		
 		return players
 	except ValueError:
+		logo()
 		print("Please enter a number")
+		logo()
 		getPlayerCount()
 
 def startGame(deck):
 	discard = []
-	print(deck)
+	# print(deck)
 	discard.append(deck.pop())
 	return deck, discard
 
-
-print(r"""
-
-                                                                                                                                        
-                                                                                                                                        
-  .--.--.                                                   ,--,                                 ,----..                                
+def logo():
+	# print("blah")
+	with t.location(0,0):
+		print(t.bright_cyan(r"""  .--.--.                                                   ,--,                                 ,----..                                
  /  /    '.   ,--,                                        ,--.'|                                /   /   \                         ,---, 
 |  :  /`. / ,--.'|         ,---,                     ,--, |  | :                __  ,-.        |   :     :             __  ,-.  ,---.'| 
 ;  |  |--`  |  |,      ,-+-. /  |  ,----._,.       ,'_ /| :  : '              ,' ,'/ /|        .   |  ;. /           ,' ,'/ /|  |   | : 
@@ -65,22 +71,28 @@ print(r"""
             |  ,   / '---'        |   :    : `--`----'     ---`-' |  ,     .-./                 \   \ .' |  ,     .-./       \   \  /   
              ---`-'                \   \  /                        `--`---'                      `---`    `--`---'            `----'    
                                     `--`-'                                                                                              
+                                                                                                                                        
+                                                                                                                                        
+                                                                                                                                        
+		"""))
 
-	  
-
-""")
-
-
-rawDeck = json.load(open("deck.json")) # opens deck.json and assigns it
-newDeck = shuffleDeck(rawDeck) # shuffles the deck and assigns it
-
-
-players = getPlayerCount()
-hands, gameDeck = setupGame(players, 7, newDeck) # sets up the game and assigns the modified deck
-
-gameDeck, discard = startGame(gameDeck)
+def main():
+	logo()
+	with t.location(0, t.height - 1):
+	# print(t.height)
+		rawDeck = json.load(open("deck.json")) # opens deck.json and assigns it
+		newDeck = shuffleDeck(rawDeck) # shuffles the deck and assigns it
 
 
+		players = getPlayerCount()
+		hands, gameDeck = setupGame(players, 7, newDeck) # sets up the game and assigns the modified deck
+
+		gameDeck, discard = startGame(gameDeck)
+
+
+
+
+main()
 
 # print (gameDeck, discard)
 
