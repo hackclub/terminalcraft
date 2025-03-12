@@ -1,0 +1,24 @@
+{
+  "name": "taskterm",
+  "version": "1.0.0",
+  "bin": {
+    "taskterm": "dist/taskManager.js"
+  },
+  "scripts": {
+    "build": "tsc && echo '#!/usr/bin/env node' | cat - dist/taskManager.js > temp && mv temp dist/taskManager.js && chmod +x dist/taskManager.js",
+    "start": "ts-node src/taskManager.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@types/blessed": "^0.1.25",
+    "blessed": "^0.1.81"
+  }
+}
