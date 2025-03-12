@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include terminal_bookmarks *.py
+recursive-include terminal_bookmarks *.json 
