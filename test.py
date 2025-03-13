@@ -5,3 +5,13 @@ j = json.load(open("cardFont.json"))
 for each in j:
 	print(j[each])
 	print("\n")
+
+	
+	
+
+
+
+print("")
+
+
+print("")
