@@ -78,6 +78,10 @@ def print_help_message(ctx: click.Context):
         "List all bookmarks"
     )
     quick_start.add_row(
+        "tb search git",
+        "Search bookmarks"
+    )
+    quick_start.add_row(
         "tb run \"git status\"",
         "Run a bookmark"
     )
@@ -110,6 +114,11 @@ def print_help_message(ctx: click.Context):
         "list",
         "List all bookmarks",
         "tb list --detailed"
+    )
+    commands_table.add_row(
+        "search",
+        "Search bookmarks by title, command, or tags",
+        "tb search git --tags workflow"
     )
     commands_table.add_row(
         "edit",
