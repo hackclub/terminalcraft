@@ -43,8 +43,8 @@ def animate(frames, delay=0.7):
     for i in range(len(frames)):
         if i < len(frames) - 1:
             clearScreen()
-            print("\033[1;20H" + hps[abs(8 - enemy)])
-            print("\033[1;1H" + hps[abs(8 - hp)])
+            print("\033[1;20H" + hps[8 - enemy])
+            print("\033[1;1H" + hps[8 - hp])
         print("\033[5;1H" + frames[i])
         if len(frames) - 1 > 1:
             jeffreyFrame = 0
@@ -118,7 +118,7 @@ clearScreen()
 threading.Timer(1, updateHealInterval).start() 
 threading.Timer(20, jeffreyHealthUp).start() 
 while hp > 0 and enemy > 0:
-    print("\033[1;1H" + hps[min(abs(8 - hp),8)])
+    print("\033[1;1H" + hps[(8 - hp)])
     print("\n")
     if animationPlaying == True:
         animateChar(charFrames, 3)
@@ -131,7 +131,7 @@ while hp > 0 and enemy > 0:
     if jeffreyStay:
         print("\033[6;20H             ")
         print(jeffrey[0])
-        print("\033[1;20H" + hps[abs(8 - enemy)])
+        print("\033[1;20H" + hps[8 - enemy])
     print("\033[11;1H\033[2K")
     print("\033[12;1H\033[2K")
     decision = input("\033[10;1Hattack, defend or heal? ")
@@ -246,11 +246,11 @@ if hp <= 0 and enemy <= 0:
     clearScreen()
     print("a draw")
     print("\033[2;1H.")
-    time.sleep(0.3)
+    time.sleep(0.7)
     print("\033[2;1H..")
-    time.sleep(0.3)
+    time.sleep(0.7)
     print("\033[2;1H...")
-    time.sleep(0.3)
+    time.sleep(0.7)
     print("lame")
     time.sleep(0.5)
     exit()
