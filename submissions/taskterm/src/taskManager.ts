@@ -14,6 +14,8 @@ class TaskManager {
   private tasks: ITask[] = [];
   private configDir: string = path.join(os.homedir(), ".taskterm");
   private filePath: string = path.join(this.configDir, "tasks.json");
+  private filterMode: "all" | "completed" | "uncompleted" = "all";
+  private filteredTaskIndices: number[] = []; // Track indices of filtered tasks
 
   constructor() {
     this.loadTasks();
@@ -70,7 +72,7 @@ class TaskManager {
       left: 0,
       width: "100%",
       height: 1,
-      content: "Tasks: 0 | Completed: 0",
+      content: "Tasks: 0 | Completed: 0 | Filter: all",
       style: { bg: "blue", fg: "white" },
     });
 
@@ -80,7 +82,7 @@ class TaskManager {
       width: "100%",
       height: 1,
       content:
-        'Use arrow keys to select | "a" to add | "c" to complete | "d" to delete | "h" for help',
+        'Use arrow keys to select | "a" to add | "c" to complete | "d" to delete | "f" to filter | "h" for help',
       style: { fg: "white" },
     });
 
@@ -92,7 +94,7 @@ class TaskManager {
       border: { type: "line", fg: "cyan" as any },
       label: " Help ",
       content:
-        'Commands:\n"a" - Add task\n"c" - Toggle complete\n"d" - Delete task\n"q" - Quit',
+        'Commands:\n"a" - Add task\n"c" - Toggle complete\n"d" - Delete task\n"f" - Toggle filter (all/completed/uncompleted)\n"q" - Quit',
       style: { bg: "black", fg: "white" },
       hidden: true,
     });
@@ -110,6 +112,7 @@ class TaskManager {
     this.input.key(["enter"], () => this.addTask());
     this.taskList.key(["c"], () => this.toggleComplete());
     this.taskList.key(["d"], () => this.removeTask());
+    this.screen.key(["f"], () => this.toggleFilterMode());
     this.screen.key(["h"], () => {
       this.helpBox.toggle();
       this.screen.render();
@@ -133,12 +136,22 @@ class TaskManager {
 
   private updateTaskList() {
     this.taskList.clearItems();
-    this.tasks.forEach((task) => {
-      const text = task.completed
-        ? `[✓] ${task.description}`
-        : `[ ] ${task.description}`;
-      this.taskList.addItem(text);
+    this.filteredTaskIndices = [];
+
+    this.tasks.forEach((task, index) => {
+      if (
+        this.filterMode === "all" ||
+        (this.filterMode === "completed" && task.completed) ||
+        (this.filterMode === "uncompleted" && !task.completed)
+      ) {
+        const text = task.completed
+          ? `[✓] ${task.description}`
+          : `[ ] ${task.description}`;
+        this.taskList.addItem(text);
+        this.filteredTaskIndices.push(index);
+      }
     });
+
     this.updateStatusBar();
     this.screen.render();
   }
@@ -146,7 +159,18 @@ class TaskManager {
   private updateStatusBar() {
     const total = this.tasks.length;
     const completed = this.tasks.filter((t) => t.completed).length;
-    this.statusBar.setContent(`Tasks: ${total} | Completed: ${completed}`);
+    this.statusBar.setContent(
+      `Tasks: ${total} | Completed: ${completed} | Filter: ${this.filterMode}`
+    );
+  }
+
+  private toggleFilterMode() {
+    if (this.filterMode === "all") this.filterMode = "completed";
+    else if (this.filterMode === "completed") this.filterMode = "uncompleted";
+    else this.filterMode = "all";
+
+    this.updateTaskList();
+    this.setStatusMessage(`Filter: ${this.filterMode}`);
   }
 
   private setStatusMessage(message: string, timeout: number = 2000) {
@@ -177,13 +201,14 @@ class TaskManager {
   }
 
   private toggleComplete() {
-    const index = (this.taskList as any).selected;
-    if (index >= 0 && index < this.tasks.length) {
-      this.tasks[index].completed = !this.tasks[index].completed;
+    const selectedIndex = (this.taskList as any).selected;
+    if (selectedIndex >= 0 && selectedIndex < this.filteredTaskIndices.length) {
+      const taskIndex = this.filteredTaskIndices[selectedIndex];
+      this.tasks[taskIndex].completed = !this.tasks[taskIndex].completed;
       this.saveTasks();
       this.updateTaskList();
       this.setStatusMessage(
-        this.tasks[index].completed
+        this.tasks[taskIndex].completed
           ? "Task completed!"
           : "Task marked incomplete"
       );
@@ -191,9 +216,10 @@ class TaskManager {
   }
 
   private removeTask() {
-    const index = (this.taskList as any).selected;
-    if (index >= 0 && index < this.tasks.length) {
-      this.tasks.splice(index, 1);
+    const selectedIndex = (this.taskList as any).selected;
+    if (selectedIndex >= 0 && selectedIndex < this.filteredTaskIndices.length) {
+      const taskIndex = this.filteredTaskIndices[selectedIndex];
+      this.tasks.splice(taskIndex, 1);
       this.saveTasks();
       this.updateTaskList();
       this.setStatusMessage("Task deleted!");

@@ -11,6 +11,7 @@ administrators, or anyone who preferes working in the terminal
 - **add tasks**: quickly add new tasks with a simple input field.
 - **complete tasks**: mark tasks as completed or incomplete with single keypress
 - **delete tasks**: remove tasks you have completed
+- **filter tasks**: you can filter tasks: `all` | `completed` | `uncompleted`
 - **persistent storage**: tasks are saved to a json file in your home directory,
   so they persist between sessions
 - **cross-platform**: works on windows, macos, and linux.
@@ -43,10 +44,10 @@ taskterm
   and press `enter`
 - **complete a task**: use the arrow keys to select a task and press `c` to
   toggle it's completion status.
-
+- **toggle filters**: press `f` to toggle between filters.
 - **view tasks**: the task list is displayed in the main window. completed tasks
   are markded with `[✓]`, and incomplete tasks with `[ ]`
-- **help**: press h to show/hide a help popup with detailed command
+- **help**: press `h` to show/hide a help popup with detailed command
   instructions.
 - **quit**: press `q`,`esc`, or `ctrl+c` to exit the application.
 
