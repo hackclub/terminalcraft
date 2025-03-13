@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+* {
+  font-family: "JetBrains Mono", monospace, serif;
+}
+
+pre {
+  font-family: "JetBrains Mono", monospace, serif;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes crt-off {
+  0% {
+    transform: scale(1, 1) translate3d(0, 0, 0);
+    -webkit-filter: brightness(1);
+    filter: brightness(1);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(1.1, 1.2) translate3d(0, 0, 0);
+    -webkit-filter: brightness(1.5);
+    filter: brightness(1.5);
+  }
+  40% {
+    transform: scale(1, 1) translate3d(0, 0, 0);
+    -webkit-filter: brightness(2);
+    filter: brightness(2);
+  }
+  60% {
+    transform: scale(1, 0.002) translate3d(0, 0, 0);
+    -webkit-filter: brightness(8);
+    filter: brightness(8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.0001, 0.002) translate3d(0, 0, 0);
+    -webkit-filter: brightness(15);
+    filter: brightness(15);
+    opacity: 0;
+  }
+}
+
+.crt-off {
+  animation: crt-off 1.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+/* Enhanced CRT screen effects */
+.crt-off::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.4) 50%
+  ),
+  linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.06),
+    rgba(0, 255, 0, 0.02),
+    rgba(0, 0, 255, 0.06)
+  );
+  background-size: 100% 4px, 3px 100%;
+  z-index: 2;
+  pointer-events: none;
+  animation: fadeout 1.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+/* Add flicker effect */
+@keyframes flicker {
+  0% { opacity: 1; }
+  20% { opacity: 0.8; }
+  21% { opacity: 1; }
+  30% { opacity: 0.9; }
+  31% { opacity: 1; }
+  50% { opacity: 0.7; }
+  51% { opacity: 1; }
+}
+
+.crt-off::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(18, 16, 16, 0.1);
+  opacity: 0;
+  z-index: 3;
+  pointer-events: none;
+  animation: flicker 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeout {
+  0% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { opacity: 0; }
+}
