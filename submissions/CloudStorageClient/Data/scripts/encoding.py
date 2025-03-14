@@ -2,7 +2,6 @@ import os
 import cv2
 import numpy as np
 from .clear_terminal import clear_terminal
-
 from googleapiclient.http import MediaFileUpload
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -61,54 +60,62 @@ def encode():
     file_extension = file_extension.lower()[1:]
 
     frames_per_data_frame = 5
-
-    clear_terminal()
-
     width, height = 2560, 1440
     ppf = width * height
     fps = 60
     output_filename = f"{name_without_ext}.mp4"
     
     os.makedirs("Data/outputs", exist_ok=True)
-    
     output_path = os.path.join("Data/outputs", output_filename)
+    
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     video_writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     file_size = os.path.getsize(file_path)
     bytes_per_frame = ppf // 8
 
+    extension_padded = file_extension.ljust(6, "#")[:6]  
+    extension_bits = ''.join(format(ord(char), '08b') for char in extension_padded)
+
+    print(f"Encoding file extension: {file_extension} as {extension_padded} -> {extension_bits}")
+
     total_data_frames = (file_size * 8 + ppf - 1) // ppf
     total_video_frames = total_data_frames * frames_per_data_frame
-    
+
     print(f"Encoding {file_size} bytes into {total_data_frames} unique data frames.")
     print(f"Each frame will be repeated {frames_per_data_frame} times.")
     print(f"Total video frames: {total_video_frames}")
 
+    binary_data = ""
+
     with open(file_path, "rb") as file:
-        for frame_idx in range(total_data_frames):
-            frame = np.ones((height, width), dtype=np.uint8) * 255 
+        while chunk := file.read(bytes_per_frame):
+            binary_data += ''.join(format(byte, '08b') for byte in chunk)
 
-            chunk = file.read(bytes_per_frame)
-            if not chunk:
-                break
+    binary_data += extension_bits
+    total_data_frames = (len(binary_data) + ppf - 1) // ppf
 
-            binary_data = ''.join(format(byte, '08b') for byte in chunk)
-            binary_data = binary_data.ljust(ppf, '0')
+    print(f"Updated total data frames: {total_data_frames}")
 
-            for i, bit in enumerate(binary_data):
-                row, col = divmod(i, width)
-                if bit == "1":
-                    frame[row, col] = 0
+    for frame_idx in range(total_data_frames):
+        frame = np.ones((height, width), dtype=np.uint8) * 255  
+        
+        chunk = binary_data[frame_idx * ppf:(frame_idx + 1) * ppf]
+        chunk = chunk.ljust(ppf, '0')
 
-            bgr_frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+        for i, bit in enumerate(chunk):
+            row, col = divmod(i, width)
+            if bit == "1":
+                frame[row, col] = 0
+
+        bgr_frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+        
+        for _ in range(frames_per_data_frame):
+            video_writer.write(bgr_frame)
             
-            for _ in range(frames_per_data_frame):
-                video_writer.write(bgr_frame)
-            
-            print(f"Progress: {frame_idx + 1}/{total_data_frames} data frames "
-                  f"({(frame_idx + 1) * frames_per_data_frame}/{total_video_frames} video frames) "
-                  f"({(frame_idx + 1) * 100 // total_data_frames}%)")
+        print(f"Progress: {frame_idx + 1}/{total_data_frames} data frames "
+              f"({(frame_idx + 1) * frames_per_data_frame}/{total_video_frames} video frames) "
+              f"({(frame_idx + 1) * 100 // total_data_frames}%)")
 
     video_writer.release()
     print("Encoding complete.")
