@@ -10,5 +10,14 @@
 - Enter/Return : To print the Directory Location to your terminal
 - Type something during the program execution to search your files
 
+# Installation
+
+Navigate to the directory where `setup.py` is, and
+run this on your terminal
+
+```
+pip install .
+```
+
 ...
 Try this out today!

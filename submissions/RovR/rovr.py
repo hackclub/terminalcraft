@@ -4,7 +4,7 @@ import sys
 
 dotFiles = False
 
-def main(stdscr):
+def wrp(stdscr):
   curses.start_color()
   curses.use_default_colors()
   curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)
@@ -148,4 +148,5 @@ def searchResults(searchQ, file_list):
 
     return [item for item in file_list if searchQ.lower() in item.lower()]
 
-curses.wrapper(main)
+def main():
+  curses.wrapper(wrp)
