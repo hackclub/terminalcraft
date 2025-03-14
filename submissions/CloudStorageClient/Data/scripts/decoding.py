@@ -112,11 +112,11 @@ def decode():
     data_string = data_string[:last_one_index + 1]
     
     extension = ""
-    if len(data_string) >= 32:
-        extension_bits = data_string[-32:]
-        data_string = data_string[:-32]
+    if len(data_string) >= 48:
+        extension_bits = data_string[-48:]
+        data_string = data_string[:-48]
         
-        for i in range(0, 32, 8):
+        for i in range(0, 48, 8):
             if i + 8 <= len(extension_bits):
                 char_bits = extension_bits[i:i+8]
                 try:
