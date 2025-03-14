@@ -1,16 +1,22 @@
-﻿#include <print>
+﻿#include <iostream>
+#include <string>
+#include <sstream>
 #include "card.h"
 #include "deck.h"
 
-char suit_to_char(const Suit suit) {
-    return suit == CLUBS ? '♣' : suit == DIAMONDS ? '♦' : suit == HEARTS ? '♥' : '♠';
+std::string suit_to_char(const Suit suit) {
+    return suit == CLUBS ? "♣" : suit == DIAMONDS ? "♦" : suit == HEARTS ? "♥" : "♠";
 }
 
 std::string value_to_string(const Card card) {
-    if (card.face == ' ')
-        return std::format("{}{}", card.value == 10 ? "" : " ", card.value);
+    std::stringstream fmt;
+    if (card.face == ' ') {
+        fmt << (card.value == 10 ? "" : " ") << std::to_string(card.value) << ' ';
+    }
     else
-        return std::format(" {}", card.face);
+        fmt << ' ' << card.face << ' ';
+        
+    return fmt.str();
 }
 
 void deal_cards(std::vector<Card>& deck, uint32_t hand_size, const uint32_t row_size, const bool shuffle) {
@@ -26,11 +32,9 @@ void deal_cards(std::vector<Card>& deck, uint32_t hand_size, const uint32_t row_
         const Card card = deck.at(i);
 
         if (i % row_size == 0 && i != 0)
-            std::println("|");
+            std::cout << "|\n";
 
-        std::print("| {} {} ",
-            suit_to_char(card.suit),
-            value_to_string(card));
+        std::cout << "| " << suit_to_char(card.suit) << ' ' << value_to_string(card);
     }
-    std::println("|");
+    std::cout << "|\n";
 }

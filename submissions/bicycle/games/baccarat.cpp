@@ -1,4 +1,4 @@
-#include <print>
+#include <iostream>
 #include <vector>
 #include "baccarat.h"
 #include "../core/card.h"
@@ -35,12 +35,12 @@ void play_baccarat(const std::vector<Card>& deck, const int row_size) {
     const bool player_hits = should_player_hit(player_hand);
     const int player_value = get_hand_value(player_hand, player_hits);
     deal_cards(player_hand, player_hits ? HAND_SIZE : HAND_SIZE - 1, row_size, false);
-    std::println("Player hand value: {}\n", player_value);
+    std::cout << "Player hand value: " << player_value << '\n';
 
     const bool banker_hits = should_banker_hit(banker_hand, player_hand);
     const int banker_value = get_hand_value(banker_hand, banker_hits);
     deal_cards(banker_hand, banker_hits ? HAND_SIZE : HAND_SIZE - 1, row_size, false);
-    std::println("Banker hand value: {}\n", banker_value);
+    std::cout << "Banker hand value: " << banker_value << '\n';
 
-    std::println("{}!", player_value == banker_value ? "Tie" : player_value > banker_value ? "Player wins" : "Banker wins");
+    std::cout << (player_value == banker_value ? "Tie" : player_value > banker_value ? "Player wins" : "Banker wins") << "!\n";
 }
