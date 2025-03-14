@@ -10,6 +10,7 @@ import re
 import uuid
 import configparser
 import platform
+import subprocess
 
 CONFIG_PATH = "config.ini"
 config = configparser.ConfigParser()
@@ -56,9 +57,25 @@ class ZshHistoryApp(App):
         buttons = [Button(cmd, id=f"cmd_{uuid.uuid4()}") for cmd in filtered_commands]
         container.mount(*buttons)
 
+    def copy_to_clipboard(self, text: str) -> None:
+        text_str = str(text)  # Convert Text object to string
+        if platform.system() == 'Linux':
+            if not os.getenv("DISPLAY"):
+                print("Error: DISPLAY environment variable is not set. Clipboard functionality is not available.")
+                return
+            try:
+                subprocess.run(['xclip', '-selection', 'clipboard'], input=text_str.encode(), check=True)
+            except (FileNotFoundError, subprocess.CalledProcessError):
+                try:
+                    subprocess.run(['xsel', '--clipboard', '--input'], input=text_str.encode(), check=True)
+                except (FileNotFoundError, subprocess.CalledProcessError):
+                    print("Neither xclip nor xsel is installed or an error occurred. Please install one of them to enable clipboard functionality.")
+        else:
+            pyperclip.copy(text_str)
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         command = event.button.label
-        pyperclip.copy(command)
+        self.copy_to_clipboard(command)
         all_widgets = self.query("Static")
         print("All Static widgets:", [widget.id for widget in all_widgets if widget.id])
         try:
