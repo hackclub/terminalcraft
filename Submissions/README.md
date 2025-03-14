@@ -1,4 +1,4 @@
-# About the Creator
+#About the Creator
 I am Ryan Brandt a 15 year old Highschooler in Florida, I am very inmterested in coding and robotics, and i have a very large passion for my hobby yugioh!
 
 # About the project
