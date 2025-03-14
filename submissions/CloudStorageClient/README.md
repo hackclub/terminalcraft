@@ -12,5 +12,9 @@ The setup is quite simple. All you need to do is create a project through the Go
 - Now, start the program. It will prompt you for the path to the JSON you just downloaded, unless you already set up the app before. If you have, no worries. Just go into the `Data` folder and replace the contents of `client_secret.json` with the contents of your downloaded JSON.
 - That's it, you can now start using the app.
 
+## Google Cloud Console Setup Tutorial
+[![Google Cloud Setup Tutorial](https://img.youtube.com/vi/DSjeL0a19b8/0.jpg)](https://www.youtube.com/watch?v=DSjeL0a19b8)
+
 ## Bugs
 - It is possible that when trying to upload a file to YouTube,  even with a Google Cloud project created, Google will not give you a permission to use it when you try to log in. In that case, just add your account to the `Test users` list, in the `OAuth consent screen`/`Audience` tab.
+- If the program still doesn't work after installing `requirements.txt`, install `CV2` manually by using `pip install opencv-python`.
