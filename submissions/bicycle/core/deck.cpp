@@ -32,6 +32,6 @@ void generate_deck(std::vector<Card>& deck, const uint32_t deck_size) {
 }
 
 void shuffle_deck(std::vector<Card>& deck) {
-    auto rng = std::default_random_engine{};
+    auto rng = std::default_random_engine(std::random_device{}());
     std::shuffle(deck.begin(), deck.end(), rng);
 }

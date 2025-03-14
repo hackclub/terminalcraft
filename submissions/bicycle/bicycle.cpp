@@ -1,4 +1,4 @@
-#include <print>
+#include <iostream>
 #include <vector>
 #include "core/card.h"
 #include "core/deck.h"
@@ -55,7 +55,7 @@ struct cag_option options[]{
 };
 
 void print_usage(FILE* destination) {
-    std::println("Usage: bicycle [OPTION]...");
+    std::cout << "Usage: bicycle [OPTION]...\n";
     cag_option_print(options, CAG_vector_SIZE(options), destination);
 }
 
@@ -66,7 +66,7 @@ static uint32_t argtoi(const cag_option_context* context) {
 
     if (endptr == option_value || *endptr != '\0' || value <= 0) {
         print_usage(stderr);
-        std::println("Argument for option '%c' must be a number greater than 0.\n", cag_option_get_identifier(context));
+        std::cout << "Argument for option '" << cag_option_get_identifier(context) << "' must be a number greater than 0.\n";
         exit(EXIT_FAILURE);
     }
 
