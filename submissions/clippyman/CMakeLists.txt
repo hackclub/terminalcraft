@@ -14,8 +14,7 @@ file(GLOB
 	"src/*.cpp"
 	"src/clipboard/unix/*.cpp"
 	"src/clipboard/wayland/*.cpp"
-	"src/clipboard/x11/*.cpp"
-	"src/toml++/toml.cpp")
+	"src/clipboard/x11/*.cpp")
 
 if(PLATFORM_WAYLAND)
 set(TARGET_NAME clippyman-wayland)
@@ -64,7 +63,13 @@ if(PLATFORM_WAYLAND)
 	target_link_libraries(${TARGET_NAME} PUBLIC -lwayland-client)
 elseif(PLATFORM_XORG)
         target_link_libraries(${TARGET_NAME} PUBLIC -lxcb -lxcb-xfixes)
+else()
+	add_definitions(-DPLATOFORM_UNIX=1)
 endif()
+
+# ncurses
+set(CMAKE_CXX_FLAGS "-DNCURSES_STATIC ${CMAKE_CXX_FLAGS}")
+target_link_libraries(${TARGET_NAME} PUBLIC -lncurses)
 
 # fmt
 add_library(fmt STATIC

@@ -1,6 +1,7 @@
 #ifndef _CONFIG_HPP_
 #define _CONFIG_HPP_
 
+#define TOML_IMPLEMENTATION
 #include <string>
 #include <string_view>
 #include "toml++/toml.hpp"
