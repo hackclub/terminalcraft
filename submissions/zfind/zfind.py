@@ -40,7 +40,7 @@ class ZshHistoryApp(App):
     def compose(self) -> ComposeResult:
         yield Vertical(
             Static("Zfind", classes="header"),
-            Static("Press 'q' to quit, 'c' to clear search", classes="header-shortcuts"),
+            Static("Press 'q' to quit, 'c' to clear search 'h' to change history file 'esc key' to escape search bar", classes="header-shortcuts"),
             Static("Search:", classes="header"),
             Input(placeholder="Type to filter...", id="search", classes="input"),
             ScrollableContainer(id="command_list"),
