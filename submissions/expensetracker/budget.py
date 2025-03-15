@@ -80,30 +80,35 @@ def import_data(input_file, data_file):
     print(f"Data imported from {input_file}.")
 
 def main():
-    parser = argparse.ArgumentParser(description="Python CLI Budget Tracker")
-    parser.add_argument("--data-file", type=str, default="budget_data.json", help="File name to the budget data backup file") # Uses default name if its not given in the command
-    parser.add_argument("--export-chart", type=str, default="chart.png", help="File name to the exported pie chart image") # for example: python budget.py --export-chart=MYEXPORTIMAGE.png visualise
+    parser = argparse.ArgumentParser(
+        description="Python CLI Budget Tracker",
+        epilog="""
+Examples:
+  python budget.py set-budget 500           (Set total budget)
+  python budget.py add-expense BLAHAJ 20    (Add your expenses)
+  python budget.py summarise                (Show the data in the terminal)
+  python budget.py --export-chart=chart.png visualise (Generate a pie chart)
+  python budget.py export budget_backup.json (Export data to file)
+  python budget.py import budget_backup.json (Import data from file)
+""",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument("--data-file", type=str, default="budget_data.json", help="File name to store budget data")
+    parser.add_argument("--export-chart", type=str, default="chart.png", help="File name for exported pie chart")
     subparsers = parser.add_subparsers(dest="command")
 
-    parser_set_budget = subparsers.add_parser("set-budget", help="Set the monthly budget")
-    parser_set_budget.add_argument("amount", type=float, help="Budget amount in Pounds")
-
-    parser_add_expense = subparsers.add_parser("add-expense", help="Add a new expense")
-    parser_add_expense.add_argument("category", type=str, help="Expense category")
-    parser_add_expense.add_argument("amount", type=float, help="Expense amount in Pounds")
-
-    parser_summarise = subparsers.add_parser("summarise", help="Summarise expenses and budget")
-
-    parser_visualise = subparsers.add_parser("visualise", help="Visualise expenses as a pie chart")
-
-    parser_export = subparsers.add_parser("export", help="Export the data to a JSON file")
-    parser_export.add_argument("output_file", type=str, help="Output file name")
-
-    parser_import = subparsers.add_parser("import", help="Import the data from a JSON file")
-    parser_import.add_argument("input_file", type=str, help="Input file name")
-
+    subparsers.add_parser("set-budget", help="Set the monthly budget").add_argument("amount", type=float, help="Budget amount in Pounds")
+    add_exp = subparsers.add_parser("add-expense", help="Add a new expense")
+    add_exp.add_argument("category", type=str, help="Expense category")
+    add_exp.add_argument("amount", type=float, help="Expense amount in Pounds")
+    subparsers.add_parser("summarise", help="Summarise expenses and budget")
+    subparsers.add_parser("visualise", help="Visualise expenses as a pie chart")
+    exp = subparsers.add_parser("export", help="Export data to JSON file")
+    exp.add_argument("output_file", type=str, help="Output file name")
+    imp = subparsers.add_parser("import", help="Import data from JSON file")
+    imp.add_argument("input_file", type=str, help="Input file name")
+    
     args = parser.parse_args()
-
     data_file = args.data_file
     export_chart = args.export_chart
 
