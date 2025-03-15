@@ -10,7 +10,7 @@ extern struct wl_seat *seat;
 extern struct zwlr_data_control_manager_v1 *data_control_manager;
 extern const struct wl_registry_listener registry_listener;
 
-extern struct options {
+extern struct wc_options {
 	const char *type;
 	const char *seat;
 	bool foreground;
@@ -21,7 +21,7 @@ void wc_die(const char *const error);
 void wc_warn(const char *const error);
 void copyfd(int in, int out);
 
-int main_waycopy(struct wl_display *display, struct options options);
+int main_waycopy(struct wl_display *display, struct wc_options options);
 void main_waypaste(struct wl_display *display, const int fd);
 
 #endif // !_WAYCLIP_SRC_COMMON_H_

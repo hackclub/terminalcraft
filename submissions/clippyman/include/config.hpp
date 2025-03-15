@@ -11,11 +11,14 @@ class Config
 {
 public:
     // Create .config directories and files and load the config file (args or default)
-    Config(const std::string_view configFile, const std::string_view configDir);
+    void Init(const std::string_view configFile, const std::string_view configDir);
 
-    bool search = false;
-    bool terminal_input = false;
+    bool arg_search = false;
+    bool arg_terminal_input = false;
+    
     std::string path;
+    std::string wl_seat;
+    bool primary_clip = false;
 
     /**
      * Load config file and parse every config variables
@@ -50,10 +53,17 @@ private:
     }
 };
 
-inline constexpr std::string_view AUTOCONFIG = R"([config]
-terminal-input = false
+extern Config config;
 
+inline constexpr std::string_view AUTOCONFIG = R"([config]
+# Path to where we store the clipbpoard history
 path = "~/.cache/clippyman/history.json"
+
+# Use the primary clipbpoard instead
+primary = false
+
+# The seat for using in wayland (i don't know what that is tbh, just leave it empty)
+wl-seat = ""
 )";
 
 #endif // _CONFIG_HPP_

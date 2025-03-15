@@ -5,7 +5,6 @@
 
 #include <string>
 #include <vector>
-#include <linux/limits.h>
 
 #include "clipboard/ClipboardListener.hpp"
 
@@ -18,7 +17,7 @@ extern "C" {
 class CClipboardListenerWayland : public CClipboardListener
 {
 public:
-    CClipboardListenerWayland();
+    CClipboardListenerWayland(const wc_options& options);
     ~CClipboardListenerWayland();
 
     /*
@@ -36,12 +35,7 @@ private:
 
     std::string m_path{"/tmp"};
 
-    struct options m_options = {
-        "text/plain",
-        NULL,
-        false,
-        false
-    };
+    const wc_options& m_options;
 
     unsigned int m_lastModifiedFileTime = 0;
 

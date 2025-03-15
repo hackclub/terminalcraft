@@ -13,9 +13,8 @@ static bool seat_found = false;
 struct wl_seat *seat;
 struct zwlr_data_control_manager_v1 *data_control_manager;
 
-struct options options = {
+struct wc_options options = {
 	.type = "text/plain;charset=utf-8",
-        //.seat = "seat0"
 };
 
 static void

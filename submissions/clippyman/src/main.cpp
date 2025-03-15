@@ -1,6 +1,9 @@
+#ifndef PLATFORM_UNIX
+# define PLATFORM_UNIX 0
+#endif
+
 #include <getopt.h>
 #include <ncurses.h>
-#include <wchar.h>
 #include <unistd.h>
 
 #include <cstdint>
@@ -8,7 +11,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -36,6 +38,9 @@
 #include "clipboard/x11/ClipboardListenerX11.hpp"
 #elif PLATFORM_WAYLAND
 #include "clipboard/wayland/ClipboardListenerWayland.hpp"
+extern "C" {
+    #include "clipboard/wayland/wayclip/common.h"
+}
 #endif
 
 // clang-format off
@@ -48,8 +53,39 @@
      : (optarg != NULL))
 // clang-format on
 
+Config config;
+// src/box.cpp
+void draw_search_box(const std::string& query, const std::vector<std::string>& entries_id, const std::vector<std::string>& results, const size_t max_width,
+                            const size_t max_visible, const size_t selected, const size_t scroll_offset);
+void delete_draw_confirm(int seloption, const char* id);
 
-std::string g_path;
+
+static void version()
+{
+    fmt::print("clippyman " VERSION " branch " BRANCH "\n");
+    std::exit(EXIT_SUCCESS);
+}
+
+static void help(bool invalid_opt = false)
+{
+    constexpr std::string_view help =
+R"(Usage: clippyman [OPTIONS]...
+    -i, --input                 Enter in terminal input mode
+    -p, --path <path>           Path to where we'll search/save the clipboard history
+    -s, --search		Delete/Search history (d for delete, enter for output selected text)
+    -P, --primary [<bool>]      Use the primary clipboard instead
+    --wl-seat <name>            The seat for using in wayland (just leave it empty if you don't know what's this)
+
+    -C, --config <path>         Path to the config file to use
+    --gen-config [<path>]       Generate default config file to config folder (if path, it will generate to the path)
+                                Will ask for confirmation if file exists already
+
+    -h, --help                  Print this help menu
+    -V, --version               Print the version along with the git branch it was built
+)";
+    fmt::print("{}\n", help);
+    std::exit(invalid_opt);
+}
 
 void CopyCallback(const CopyEvent& event)
 {
@@ -58,7 +94,7 @@ void CopyCallback(const CopyEvent& event)
 
 void CopyEntry(const CopyEvent& event)
 {
-    FILE*                     file = fopen(g_path.c_str(), "r+");
+    FILE*                     file = fopen(config.path.c_str(), "r+");
     rapidjson::Document       doc;
     char                      buf[UINT16_MAX] = { 0 };
     rapidjson::FileReadStream stream(file, buf, sizeof(buf));
@@ -66,7 +102,7 @@ void CopyEntry(const CopyEvent& event)
     if (doc.ParseStream(stream).HasParseError())
     {
         fclose(file);
-        die("Failed to parse {}: {} at offset {}", g_path, rapidjson::GetParseError_En(doc.GetParseError()),
+        die("Failed to parse {}: {} at offset {}", config.path, rapidjson::GetParseError_En(doc.GetParseError()),
             doc.GetErrorOffset());
     }
 
@@ -142,67 +178,6 @@ R"({
     f.close();
 }
 
-std::vector<std::string> wrap_text(const std::string& text, size_t max_width)
-{
-    std::vector<std::string> lines;
-    std::stringstream        ss(text);
-    std::string              line;
-
-    while (std::getline(ss, line, '\n'))
-    {
-        while (line.length() > max_width)
-        {
-            lines.push_back(line.substr(0, max_width));
-            line = line.substr(max_width);
-        }
-
-        lines.push_back(line);
-    }
-
-    return lines;
-}
-
-void draw_search_box(const std::string& query, const std::vector<std::string>& results, const size_t max_width,
-                     const size_t max_visible, const size_t selected, const size_t scroll_offset)
-{
-    clear();
-    box(stdscr, 0, 0); // Draw the root box
-
-    attron(A_BOLD);
-    mvprintw(1, 2, "Search: %s", query.c_str());
-    attroff(A_BOLD);
-
-    int row = 2; // Start drawing items from row 2
-    size_t items_displayed = 0; // Track the number of items displayed
-
-    for (size_t i = scroll_offset; i < results.size() && items_displayed < max_visible; ++i)
-    {
-        const std::vector<std::string>& wrapped_lines = wrap_text(results[i], max_width - 6); // Adjust width for padding
-        const bool is_selected = (i == selected);
-
-        // Add vertical spacing between items
-        row++;
-
-        for (const std::string& line : wrapped_lines)
-        {
-            if (is_selected)
-                attron(A_REVERSE); // Apply highlight before printing
-
-            // Print the line with padding (4 spaces)
-            mvprintw(row++, 6, "%s", line.c_str()); // 6 for padding (2 + 4 spaces)
-
-            if (is_selected)
-                attroff(A_REVERSE); // Remove highlight after printing
-        }
-
-        items_displayed++;
-    }
-
-    const int cursor_x = 2 + 8 + query.length(); // 2 for box border, 8 for "Search: ", query.length() for the query
-    move(1, cursor_x); // Move the cursor near the search query
-    refresh();
-}
-
 int search_algo(const Config& config)
 {
     FILE*                     file = fopen(config.path.c_str(), "r+");
@@ -217,14 +192,17 @@ int search_algo(const Config& config)
             doc.GetErrorOffset());
     }
 
-    initscr();             // Initialize ncurses
-    noecho();              // Disable echoing
+    initscr();
+    noecho();
     cbreak();              // Enable immediate character input
     keypad(stdscr, TRUE);  // Enable arrow keys
 
-    std::vector<std::string> entries_value;
+    std::vector<std::string> entries_id, entries_value;
     for (auto it = doc["entries"].MemberBegin(); it != doc["entries"].MemberEnd(); ++it)
+    {
+        entries_id.push_back(it->name.GetString());
         entries_value.push_back(it->value.GetString());
+    }
 
     std::string              query;
     int                      ch            = 0;
@@ -232,15 +210,18 @@ int search_algo(const Config& config)
     size_t                   scroll_offset = 0;
     std::vector<std::string> results{ entries_value };  // Start with full list
 
-    bool copied = false;
-    const int max_width   =  getmaxx(stdscr) - 5;
+    const int max_width   = getmaxx(stdscr) - 5;
     const int max_visible = ((getmaxy(stdscr) - 3) / 2) * 0.75;
-    draw_search_box(query, results, max_width, max_visible, selected, scroll_offset);
+    draw_search_box(query, entries_id, results, max_width, max_visible, selected, scroll_offset);
 
-    // Press 'ESC' to exit
-    size_t i = 0;
-    while ((ch = getch()) != 27)
+    size_t i            = 0;
+    bool   del          = false;
+    bool   del_selected = false;
+    while ((ch = getch()) != ERR)
     {
+        if (ch == (del ? 'q':27)) // ESC
+            break;
+
         MEVENT event;
         if (ch == KEY_MOUSE && getmouse(&event) == OK)
         {
@@ -250,11 +231,18 @@ int search_algo(const Config& config)
         }
         else if (ch == KEY_BACKSPACE || ch == 127)
         {
-            if (!query.empty()) 
-            {query.pop_back(); i = 0;}
+            if (!query.empty())
+            {
+                query.pop_back();
+                i = 0;
+            }
         }
-        else if (ch == KEY_DOWN)
+        else if (ch == KEY_DOWN || ch == KEY_RIGHT)
         {
+            if (del)
+                del_selected = false;
+
+            else
             if (selected < results.size() - 1)
             {
                 ++selected;
@@ -262,8 +250,12 @@ int search_algo(const Config& config)
                     ++scroll_offset;
             }
         }
-        else if (ch == KEY_UP)
+        else if (ch == KEY_UP || ch == KEY_LEFT)
         {
+            if (del)
+                del_selected = true;
+
+            else
             if (selected > 0)
             {
                 --selected;
@@ -271,10 +263,44 @@ int search_algo(const Config& config)
                     --scroll_offset;
             }
         }
-        else if (ch == '\n' && selected < std::string::npos-1 && !results.empty())
+        else if (ch == 'd' && !del)
         {
-            copied = true;
-            goto endwin;
+            del = true;
+            curs_set(0);
+        }
+        else if (del && ch == '\n' && del_selected)
+        {
+            del = false;
+            results.erase(results.begin()+selected);
+            entries_value.erase(entries_value.begin()+selected);
+            doc["entries"].EraseMember(entries_id[selected].c_str());
+            // {"index":{"c":{"0": [1,3,7]}}}
+            for (auto it = doc["index"].MemberBegin(); it != doc["index"].MemberEnd(); ++it)
+                doc["index"][it->name.GetString()].EraseMember(entries_id[selected].c_str());
+
+            entries_id.erase(entries_id.begin()+selected);
+
+            selected = 0;
+            scroll_offset = 0;
+            fseek(file, 0, SEEK_SET);
+
+            char                                                writeBuffer[UINT16_MAX] = { 0 };
+            rapidjson::FileWriteStream                          writeStream(file, writeBuffer, sizeof(writeBuffer));
+            rapidjson::PrettyWriter<rapidjson::FileWriteStream> fileWriter(writeStream);
+            fileWriter.SetFormatOptions(rapidjson::kFormatSingleLineArray);  // Disable newlines between array elements
+            doc.Accept(fileWriter);
+            fflush(file);
+            ftruncate(fileno(file), ftell(file));
+        }
+        else if (del && !del_selected)
+        {
+            del = false;
+        }
+        else if (ch == '\n' && selected < std::string::npos - 1 && !results.empty())
+        {
+            endwin();
+            info("Copied selected content:\n{}", results[selected]);
+            return 0;
         }
         else if (isprint(ch))
         {
@@ -284,7 +310,7 @@ int search_algo(const Config& config)
 
             results.clear();
             rapidjson::GenericStringRef<char> ch_ref(&query.back());
-            // {"index":{"c":{"0": [1,3,7]}}
+            // {"index":{"c":{"0": [1,3,7]}}}
             if (doc["index"].HasMember(ch_ref))
             {
                 // {"0": [1,3,7]}
@@ -310,14 +336,20 @@ int search_algo(const Config& config)
                 selected = results.empty() ? -1 : 0;  // Keep selection valid
         }
 
-        draw_search_box(query, ((results.empty() || query.empty()) ? entries_value : results), max_width, max_visible, selected, scroll_offset);
+        if (del)
+            delete_draw_confirm(del_selected, entries_id[selected].c_str());
+        else
+            draw_search_box(query, entries_id, ((results.empty() || query.empty()) ? entries_value : results), max_width,
+                            max_visible, selected, scroll_offset);
     }
 
-endwin:
     endwin();
-    if (copied)
-        info("Copied selected content:\n{}", results[selected]);
     return 0;
+}
+
+static bool str_to_bool(const std::string_view str)
+{
+    return (str == "true" || str == "1" || str == "enable");
 }
 
 // clang-format off
@@ -353,20 +385,26 @@ static std::string parse_config_path(int argc, char* argv[], const std::string& 
     return configDir + "/config.toml";
 }
 
-bool parseargs(int argc, char* argv[], Config& config, const std::string_view configFile)
+bool parseargs(int argc, char* argv[], Config& config, const std::string& configFile)
 {
     int opt               = 0;
     int option_index      = 0;
     opterr                = 1;  // re-enable since before we disabled for "invalid option" error
-    const char* optstring = "-Vhisp:C:";
+    const char* optstring = "-Vhisp:C:P::";
 
     // clang-format off
     static const struct option opts[] = {
-        {"path",  required_argument, 0, 'p'},
-        {"input", no_argument,       0, 'i'},
-        {"search",no_argument,       0, 's'},
-        {"config",required_argument, 0, 'C'},
-        {"gen-config",no_argument,   0, 6969},
+        {"version",    no_argument,       0, 'V'},
+        {"help",       no_argument,       0, 'h'},
+        {"input",      no_argument,       0, 'i'},
+        {"search",     no_argument,       0, 's'},
+
+        {"path",       required_argument, 0, 'p'},
+        {"config",     required_argument, 0, 'C'},
+        {"primary",    optional_argument, 0, 'P'},
+        {"wl-seat",    required_argument, 0, 6968},
+        {"gen-config", optional_argument, 0, 6969},
+
         {0,0,0,0}
     };
 
@@ -377,11 +415,22 @@ bool parseargs(int argc, char* argv[], Config& config, const std::string_view co
         switch (opt)
         {
             case 0: break;
+            case '?': help(EXIT_FAILURE); break;
 
-            case 'i': config.terminal_input = true; break;
+            case 'V': version(); break;
+            case 'h': help(); break;
+
             case 'p': config.path = optarg; break;
-            case 's': config.search = true; break;
-            case 'C': // we have already did it in parse_config_path()
+            case 's': config.arg_search = true; break;
+            case 'i': config.arg_terminal_input = true; break;
+            case 6968: config.wl_seat = optarg;
+            case 'C': break;  // we have already did it in parse_config_path()
+
+            case 'P': 
+                if (OPTIONAL_ARGUMENT_IS_PRESENT)
+                    config.primary_clip = str_to_bool(optarg);
+                else
+                    config.primary_clip = true;
                 break;
 
             case 6969:
@@ -389,7 +438,7 @@ bool parseargs(int argc, char* argv[], Config& config, const std::string_view co
                     config.generateConfig(optarg);
                 else
                     config.generateConfig(configFile);
-                exit(EXIT_SUCCESS);
+                std::exit(EXIT_SUCCESS);
 
             default: return false;
         }
@@ -405,7 +454,14 @@ int main(int argc, char* argv[])
     clipboardListener.AddCopyCallback(CopyCallback);
     clipboardListener.AddCopyCallback(CopyEntry);
 #elif PLATFORM_WAYLAND
-    CClipboardListenerWayland clipboardListener;
+    struct wc_options wl_options = {
+        "text/plain;charset=utf-8",
+        config.wl_seat.empty() ? NULL : config.wl_seat.c_str(),
+        false,
+        config.primary_clip
+    };
+
+    CClipboardListenerWayland clipboardListener(wl_options);
     clipboardListener.AddCopyCallback(CopyCallback);
     clipboardListener.AddCopyCallback(CopyEntry);
 #endif
@@ -413,28 +469,30 @@ int main(int argc, char* argv[])
     const std::string& configDir  = getConfigDir();
     const std::string& configFile = parse_config_path(argc, argv, configDir);
 
-    Config config(configFile, configDir);
+    config.Init(configFile, configDir);
     if (!parseargs(argc, argv, config, configFile))
         return 1;
 
     config.loadConfigFile(configFile);
-    g_path = config.path;
 
     CreateInitialCache(config.path);
     setlocale(LC_ALL, "");
 
-    if (config.search)
+    if (config.arg_search && config.arg_terminal_input)
+        die("Please only use either --search or --input");
+
+    if (config.arg_search)
         return search_algo(config);
 
     bool piped = !isatty(STDIN_FILENO);
     debug("piped = {}", piped);
-    if (piped || config.terminal_input || PLATFORM_UNIX)
+    if (piped || PLATFORM_UNIX || config.arg_terminal_input)
     {
         CClipboardListenerUnix clipboardListenerUnix;
         clipboardListenerUnix.AddCopyCallback(CopyEntry);
 
         if (!piped)
-            info("Type or Paste the text to copy, then press CTRL+D to save and exit");
+            info("Type or Paste the text to copy, then press enter and CTRL+D to save and exit");
 
         clipboardListenerUnix.PollClipboard();
         return EXIT_SUCCESS;

@@ -4,7 +4,6 @@
 #include <istream>
 #include <string>
 
-
 void ctrl_d_handler(const std::istream& cin)
 {
     if (cin.eof())

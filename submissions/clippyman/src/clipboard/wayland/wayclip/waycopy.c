@@ -39,7 +39,7 @@ static const struct zwlr_data_control_source_v1_listener data_source_listener = 
 const char *const tempname = "/waycopy-buffer-XXXXXX";
 
 int
-main_waycopy(struct wl_display *display, struct options options)
+main_waycopy(struct wl_display *display, struct wc_options options)
 {
 	char path[PATH_MAX] = {0};
 	char *ptr = getenv("TMPDIR");

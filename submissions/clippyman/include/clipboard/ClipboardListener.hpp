@@ -2,7 +2,6 @@
 #define CLIPBOARD_LISTENER_HPP_
 
 #include <functional>
-#include <vector>
 
 #include "EventData.hpp"
 

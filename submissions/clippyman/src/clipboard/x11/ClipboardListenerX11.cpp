@@ -7,6 +7,7 @@
 
 #include <string>
 
+#include "config.hpp"
 #include "EventData.hpp"
 #include "util.hpp"
 
@@ -40,7 +41,7 @@ CClipboardListenerX11::CClipboardListenerX11()
                       XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, 0, NULL);
     xcb_flush(m_XCBConnection);
 
-    m_Clipboard         = getAtom(m_XCBConnection, "CLIPBOARD");
+    m_Clipboard         = getAtom(m_XCBConnection, config.primary_clip ? "PRIMARY" : "CLIPBOARD");
     m_UTF8String        = getAtom(m_XCBConnection, "UTF8_STRING");
     m_ClipboardProperty = getAtom(m_XCBConnection, "XCB_CLIPBOARD");
 }
@@ -67,7 +68,7 @@ void CClipboardListenerX11::PollClipboard()
     xcb_flush(m_XCBConnection);
 
     xcb_generic_event_t* event;
-    if ((event = xcb_wait_for_event(m_XCBConnection)))
+    if ((event = xcb_wait_for_event(m_XCBConnection)) != NULL)
     {
         xcb_get_property_cookie_t propertyCookie =
             xcb_get_property(m_XCBConnection, 0, m_Window, m_ClipboardProperty, XCB_GET_PROPERTY_TYPE_ANY, 0, 1024);

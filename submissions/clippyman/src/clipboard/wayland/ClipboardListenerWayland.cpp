@@ -17,7 +17,8 @@
 
 const char* const tempname = "/clippyman-buffer-XXXXXX";
 
-CClipboardListenerWayland::CClipboardListenerWayland()
+CClipboardListenerWayland::CClipboardListenerWayland(const wc_options& options)
+    : m_options(options)
 {
     m_display = wl_display_connect(NULL);
     if (!m_display)
