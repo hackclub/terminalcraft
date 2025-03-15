@@ -1,0 +1,10 @@
+-I./include
+-Wall
+-Wextra
+-Wpedantic
+-DPLATFORM_WAYLAND=1
+-DPLATFORM_XORG=1
+-DPLATFORM_UNIX=1
+-DVERSION="0.0.1"
+-DBRANCH="main"
+-DDEBUG=1
