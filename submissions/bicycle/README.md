@@ -17,7 +17,7 @@ bicycle [OPTION]...
 * `-n, --no-shuffle` Deal cards without shuffling
 * `-h, --help` Displays this help message
 
-The row size, hand size, number of decks and seed all must be at least 1.
+The row size, hand size, and number of decks all must be at least 1.
 
 # Installation
 ## Binaries
@@ -28,8 +28,8 @@ For ease of access, add the file to your `PATH` environment variable to be usabl
 ## Build from source
 ```bash
 git clone https://github.com/youkononame/bicycle
-cd bicycle/
-cmake -S . -B build
+cd bicycle/submissions/bicycle/
+cmake -S ./ -B build/
 cd build/
 cmake --build ./
 ```

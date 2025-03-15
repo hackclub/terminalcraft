@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <cstdint>
 
 typedef enum Suit : uint8_t {
     CLUBS = 1,
