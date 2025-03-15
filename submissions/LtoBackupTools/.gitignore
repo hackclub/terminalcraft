@@ -1,0 +1,46 @@
+# Build artifacts
+Build/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE specific files
+.vscode/
+.idea/
+
+# Dependency directories
+node_modules/
+
+# Compiled binaries
+*.o
+*.out
+*.exe
+
+# Backup files
+*~
+*.bak
+
+# Debian package files
+*.deb
+*.changes
+*.buildinfo
+Build
+
+# Configuration files that may contain sensitive information
+*.conf
+
+# Temporary directories used by the scripts
+/var/tmp/ltotartools/
+/var/ltotartools/
+
+# User-specific files
+*.swp
+*.swo
