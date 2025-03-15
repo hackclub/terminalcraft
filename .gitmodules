@@ -1,0 +1,3 @@
+[submodule "submissions/tkforge"]
+	path = submissions/tkforge
+	url = https://github.com/Axorax/tkforge.git
