@@ -7,6 +7,7 @@ t = Terminal()
 print(t.clear())
 drawCheck = False
 reverseCheck = False
+skipCheck = False
 
 def shuffleDeck(deck):
 	# takes in a json object of a deck and shuffles it
@@ -49,7 +50,7 @@ def getPlayerCount():
 		logo()
 		print("Please enter a number")
 		logo()
-		getPlayerCount()
+		return getPlayerCount()
 
 def startGame(deck):
 	discard = []
@@ -162,6 +163,7 @@ def machineType(input):
 
 def showPlayerCards(currentPlayer, gameDeck, discard):
 	global drawCheck
+	global skipCheck
 	# print(drawCheck)
 	print(t.clear)
 	logo()
@@ -190,6 +192,7 @@ def showPlayerCards(currentPlayer, gameDeck, discard):
 		print("\n")
 
 		validPlay = False
+		action = False
 		for each in typeM:
 			if each == machineType(discard[-1][1:]): validPlay = True
 			if each == 14 | 15: validPlay = True
@@ -197,20 +200,27 @@ def showPlayerCards(currentPlayer, gameDeck, discard):
 				if each == findColor(discard[-1][0]): validPlay = True
 				if each == "K": validPlay = True
 
-		if machineType(discard[-1][1:]) == 11: 
-			validPlay = False 
+		if machineType(discard[-1][1:]) == 11 and skipCheck == True: 
+			validPlay = False
+			action = True
 			print("Your turn has been skipped!")
+			input("Press enter to acknowledge\a")
+			skipCheck = False
 		if machineType(discard[-1][1:]) == 13 and drawCheck == True: 
 			validPlay = False
+			action = True
 			print("Draw 2 in place")
 			print("Drawing two cards!")
+			input("Press enter to acknowledge\a")
 			currentPlayer["hand"].append(gameDeck.pop())
 			currentPlayer["hand"].append(gameDeck.pop())
 			drawCheck = False
 		if machineType(discard[-1][1:]) == 15 and drawCheck == True: 
 			validPlay = False
+			action = True
 			print("Draw 4 in place")
 			print("Drawing four cards!")
+			input("Press enter to acknowledge\a")
 			currentPlayer["hand"].append(gameDeck.pop())
 			currentPlayer["hand"].append(gameDeck.pop())
 			currentPlayer["hand"].append(gameDeck.pop())
@@ -221,15 +231,17 @@ def showPlayerCards(currentPlayer, gameDeck, discard):
 			choice, wild = playCard(currentPlayer["hand"], discard)
 			# print(wild)
 			if (wild != None):
-				currentPlayer["hand"][choice-1][0] = wild
+				currentPlayer["hand"][choice-1] = wild + currentPlayer["hand"][choice-1][1:]
 
 			lenBefore = len(currentPlayer["hand"])
 			discard.append(currentPlayer["hand"].pop(choice-1))
 			lenAfter = len(currentPlayer["hand"])
 		else: 
-			print("No playable cards!") 
-			print("Drawing one card!")
-			currentPlayer["hand"].append(gameDeck.pop())
+			if action == False:
+				print("No playable cards!") 
+				print("Drawing one card!")
+				input("Press enter to acknowledge")
+				currentPlayer["hand"].append(gameDeck.pop())
 
 
 		if len(currentPlayer["hand"]) <= 0: 
@@ -240,6 +252,7 @@ def showPlayerCards(currentPlayer, gameDeck, discard):
 def playCard(hand, discard):
 	global drawCheck
 	global reverseCheck
+	global skipCheck
 	logo()
 	colorD = findColor(discard[-1][0])
 	typeD = machineType(discard[-1][1:])
@@ -259,10 +272,13 @@ def playCard(hand, discard):
 			return choice, wild
 		elif type == 15:
 			drawCheck = True
-			wild = chooseWild
+			wild = chooseWild()
 			return choice, wild
 		elif type == 12:
 			reverseCheck = not reverseCheck
+			return choice, wild
+		elif type == 11:
+			skipCheck = True
 			return choice, wild
 		elif color != colorD and type!=typeD:
 			raise ValueError
@@ -277,7 +293,7 @@ def chooseWild():
 	try:
 		print(t.bold("Hint: Use the first letter of the color"))
 		wild = input("What color do you want: ")[0].upper()
-		if wild != "R" or wild != "B" or wild != "G" or wild != "Y": raise ValueError
+		if wild != "R" and wild != "B" and wild != "G" and wild != "Y": raise ValueError
 		else: return wild
 	except ValueError:
 		print("Not a valid color")
@@ -286,12 +302,13 @@ def chooseWild():
 def printCard(discard):
 	color = findColor(discard[-1][0]).lower()
 	text = jsonType(discard[-1][1:])
-	with t.location(int(t.width/2), int(t.height/2)):
-		if color == "red": print(t.red(text))
-		elif color == "blue": print(t.blue(text))
-		elif color == "green": print(t.green(text))
-		elif color == "yellow": print(t.yellow(text))
-		elif color == "wild": print(text)
+	for each in range(len(text)):
+		with t.location(int(t.width/2), int(t.height/2) + each):
+			if color == "red": print(t.red(text[each]))
+			elif color == "blue": print(t.blue(text[each]))
+			elif color == "green": print(t.green(text[each]))
+			elif color == "yellow": print(t.yellow(text[each]))
+			elif color == "wild": print(text)
 		
 
 
@@ -326,17 +343,28 @@ def main():
 						canRun = False
 					if canRun == True:
 						playerMatch += 1
+						if playerMatch > players[-1]["number"]: playerMatch = 1
 						handSize, players[each] = showPlayerCards(players[each], gameDeck, discard)
+						if reverseCheck is True: 
+							print("The order has been reversed!\a")
+							input("Press enter to acknowledge")
+							break
 						if handSize is False:
 							playerWin = players[each]
 							break
 			while reverseCheck is True:
 				for each in reversed(range(len(players))):
+					canRun = True
 					if playerMatch != players[each]["number"]: 
 						canRun = False
 					if canRun == True:
 						playerMatch -= 1
+						if playerMatch < players[1]["number"]: playerMatch = players[-1]["number"]
 						handSize, players[each] = showPlayerCards(players[each], gameDeck, discard)
+						if reverseCheck is False: 
+							print("The order has been reversed!\a")
+							input("Press enter to acknowledge")
+							break
 						if handSize is False:
 							playerWin = players[each]
 							break
