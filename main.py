@@ -4,7 +4,6 @@ import time
 from blessings import Terminal
 
 t = Terminal()
-print(t.clear())
 drawCheck = False
 reverseCheck = False
 skipCheck = False
@@ -176,7 +175,7 @@ def showPlayerCards(currentPlayer, gameDeck, discard):
 		type = []
 		typeM = []
 		handSize = True
-		print("Showing the cards of " + t.bold(currentPlayer["name"]))
+		print("Showing the cards of " + t.on_bright_white(t.bold(t.black(" " + currentPlayer["name"] + " "))))
 		# print(discard)
 		printCard(discard)
 		logo()
@@ -186,7 +185,12 @@ def showPlayerCards(currentPlayer, gameDeck, discard):
 			typeM.append(machineType(card[1:]))
 			hand.append(findColor(card[0]) + " " + findType(card[1:]))
 		for each in range(len(hand)):
-			print(str(each + 1) + ". " + hand[each])
+			if color[each].lower() == "red": print(t.red(str(each + 1) + ". " + t.bold(color[each] + " " + type[each][:-4])))
+			elif color[each].lower() == "blue": print(t.blue(str(each + 1) + ". " + t.bold(color[each] + " " + type[each][:-4])))
+			elif color[each].lower() == "green": print(t.green(str(each + 1) + ". " + t.bold(color[each] + " " + type[each][:-4])))
+			elif color[each].lower() == "yellow": print(t.yellow(str(each + 1) + ". " + t.bold(color[each] + " " + type[each][:-4])))
+			elif color[each].lower() == "wild": print(str(each + 1) + ". " + t.bold(color[each] + " " + type[each][:-4]))
+			else: print(str(each + 1) + ". " + hand[each])
 			logo()
 		logo()
 		print("\n")
