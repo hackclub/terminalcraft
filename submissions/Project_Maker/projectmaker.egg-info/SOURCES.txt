@@ -1,0 +1,15 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.py
+projectmaker/__init__.py
+projectmaker/commands.py
+projectmaker/config.py
+projectmaker/config.yaml
+projectmaker/main.py
+projectmaker.egg-info/PKG-INFO
+projectmaker.egg-info/SOURCES.txt
+projectmaker.egg-info/dependency_links.txt
+projectmaker.egg-info/entry_points.txt
+projectmaker.egg-info/requires.txt
+projectmaker.egg-info/top_level.txt

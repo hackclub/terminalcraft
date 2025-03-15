@@ -1,0 +1,24 @@
+project_templates:
+  godot:
+    folders: [scenes, scripts, assets]
+    files:
+      - project.godot
+      - .gitattributes
+      - .gitignore
+      - README.md
+  
+  web:
+    files:
+      - index.html
+      - script.js
+      - style.css
+      - README.md
+  
+  unity:
+    folders: ["Assets", "Scripts", "ProjectSettings"]
+    files:
+      - .gitignore
+      - README.md
+  
+  node:
+    files: ["index.js"]
