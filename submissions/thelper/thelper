@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import argparse
 from google import genai
 from google.genai import types
@@ -10,6 +9,7 @@ import pyperclip
 import inquirer
 import json
 import sys
+import time 
 
 
 def validate_non_empty(answers, current):
@@ -32,8 +32,6 @@ def get_user_input():
 
     answers = inquirer.prompt(questions)
     return answers
-
-
 
 # Get the parent directory of the current script
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,10 +57,9 @@ if not os.path.exists(settings_path):
 with open(settings_path) as f:
     settings = json.load(f)
 
-
 client = genai.Client(api_key=settings["api_key"])
 
-#Model settings
+# Model settings
 chat = client.chats.create(
     model=settings["model"],
     config=types.GenerateContentConfig(
@@ -71,25 +68,37 @@ chat = client.chats.create(
     )
 )
 
-#Query function for sending text to the model
-def query(text):
-    response = chat.send_message_stream(text)
+def print_boxed_text(text):
+    lines = text.split('\n')
+    max_length = max(len(line) for line in lines)
+    print("\n+" + "-" * (max_length + 2) + "+")
+    print("| " + " " * max_length + " |")  # Add an empty line at the top
+    for line in lines:
+        print("| " + line.ljust(max_length) + " |")
+    print("+" + "-" * (max_length + 2) + "+")
+    print()  # Add an extra empty line after the box
+
+def query(input_text, copy_to_clipboard=False):
+    response = chat.send_message_stream(input_text)
+    response_text = ""
     for chunk in response:
-        print(chunk.text, end="")
-
-
+        response_text += chunk.text
+    print_boxed_text(response_text)
+    if copy_to_clipboard:
+        pyperclip.copy(response_text)
+        print("Response copied to clipboard.")
 
 def main():
     parser = argparse.ArgumentParser(description="A CLI tool that uses Google's Gemini API to help with terminal commands")
     parser.add_argument('text', type=str, nargs='*', help='Sends query to the model')
-    parser.add_argument('-i','--init', action='store_true', help='Initialize setup')
-    parser.add_argument('-s','--settings', action='store_true', help='Print settings information')
-    parser.add_argument('-e','--error', action='store_true', help='Sends the error message to the model')
+    parser.add_argument('-i', '--init', action='store_true', help='Initialize setup')
+    parser.add_argument('-s', '--settings', action='store_true', help='Print settings information')
+    parser.add_argument('-e', '--error', action='store_true', help='Sends the error message to the model')
+    parser.add_argument('-c', '--clipboard', action='store_true', help='Copies the command output to the clipboard')
     args = parser.parse_args()
 
     if args.init:
         os.system('python setup.py')
-        
 
     if args.settings:
         print(f"API Key: {settings['api_key']}")
@@ -100,12 +109,15 @@ def main():
 
     if args.error:
         clipboard_content = pyperclip.paste()
-        query(f"Help i got this error: {clipboard_content}")
+        query(f"Help i got this error: {clipboard_content}", copy_to_clipboard=args.clipboard)
 
+    if args.clipboard:
+        input_text = 'Respond with only the specific command required to solve the issue. DO NOT GIVE ANY EXTRA INFORMATION, JUST WRITE THE COMMAND'.join(args.text)
+        query(input_text, copy_to_clipboard=True)
 
-    input_text = ' '.join(args.text)
-    query(input_text)
-
+    else:
+        input_text = ' '.join(args.text)
+        query(input_text, copy_to_clipboard=False)
 
 if __name__ == "__main__":
     main()

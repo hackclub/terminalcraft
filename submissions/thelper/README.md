@@ -58,4 +58,5 @@ thelper <your question> #Ask AI about your problem
 thelper -i #Initlize setup again
 thelper -s #Prints current settings
 thelper -e #uses the copied error message and sends it to the Ai
+thelper -c #copies the outputted command to your clipboard
 ```
