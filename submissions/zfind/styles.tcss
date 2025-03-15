@@ -1,0 +1,57 @@
+Screen {
+    layout: vertical;
+    align: center middle;
+    background: #1e1e2e;
+    color: #cdd6f4;
+}
+
+.header {
+    text-align: center;
+    padding: 1 0;
+    color: #f38ba8;
+    background: #313244;
+    width: 100%;
+}
+
+.header-shortcuts {
+    text-align: center;
+    color: #89b4fa;
+    background: #313244;
+    width: 100%;
+}
+
+.input {
+    width: 80%;
+    margin: 1 10;
+    border: solid #f5c2e7;
+    background: #45475a;
+    color: #cdd6f4;
+}
+
+#command_list {
+    height: auto;
+    max-height: 30;
+}
+
+Button {
+    width: 100%;
+    margin: 1 0 1 0;
+    background: #585b70;
+    color: #cdd6f4;
+    border: solid transparent;
+}
+
+Button:hover {
+    background: #f38ba8;
+    color: #1e1e2e;
+    border: solid #f5c2e7;
+}
+
+.status {
+    width: 80%;
+    padding: 1;
+    text-align: center;
+    background: #313244;
+    color: #f38ba8;
+    margin: 1;
+}

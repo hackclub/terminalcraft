@@ -1,0 +1,4 @@
+pyperclip
+textual
+rich
+
