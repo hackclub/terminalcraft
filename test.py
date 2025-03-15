@@ -7,6 +7,8 @@ for each in j:
 	print("\n")
 
 	
+print("")
+
 	
 
 

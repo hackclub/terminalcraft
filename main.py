@@ -5,6 +5,9 @@ from blessings import Terminal
 
 t = Terminal()
 print(t.clear())
+drawCheck = False
+reverseCheck = False
+
 def shuffleDeck(deck):
 	# takes in a json object of a deck and shuffles it
 	red = deck["standard"]["color"]["red"]
@@ -62,17 +65,18 @@ def logo():
 def findColor(input):
 	match input:
 		case "R":
-			return "red"
+			return "Red"
 		case "G":
-			return "green"
+			return "Green"
 		case "B":
-			return "blue"
+			return "Blue"
 		case "Y":
-			return "yellow"
+			return "Yellow"
 		case "K":
-			return "wild"
+			return "Wild"
 
 def findType(input):
+		# j = json.load(open("cardFont.json"))
 		match input:
 			case "0":
 				return "Zero Card"
@@ -105,11 +109,190 @@ def findType(input):
 			case "wild_draw4":
 				return "Wild Draw 4 Card"
 
-def showPlayerCards(currentPlayer):
-	for card in currentPlayer["hand"]:
-		color = findColor(card[0])
-		type = findType(card[1:])
+def jsonType(input):
+		j = json.load(open("cardFont.json"))
+		match input:
+			case "0":
+				return j["0"]
+			case "1":
+				return j["1"]
+			case "2":
+				return j["2"]
+			case "3":
+				return j["3"]
+			case "4":
+				return j["4"]
+			case "5":
+				return j["5"]
+			case "6":
+				return j["6"]
+			case "7":
+				return j["7"]
+			case "8":
+				return j["8"]
+			case "9":
+				return j["9"]
+			case "skip":
+				return j["skip"]
+			case "reverse":
+				return j["reverse"]
+			case "draw2":
+				return j["draw"]
+			case "wild":
+				return j["wild"]
+			case "wild_draw4":
+				return j["draw"]
 
+
+
+def machineType(input):
+	match input:
+			case "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9":
+				return int(input)
+			case "skip":
+				return 11
+			case "reverse":
+				return 12
+			case "draw2":
+				return 13
+			case "wild":
+				return 14
+			case "wild_draw4":
+				return 15
+
+def showPlayerCards(currentPlayer, gameDeck, discard):
+	global drawCheck
+	# print(drawCheck)
+	print(t.clear)
+	logo()
+	with t.location(0, t.height - 1):
+		input("Waiting for " + t.bold(currentPlayer["name"]) + " to hit Enter!")
+	print(t.clear)
+	with t.location(0, t.height -1):
+		hand = []
+		color = []
+		type = []
+		typeM = []
+		handSize = True
+		print("Showing the cards of " + t.bold(currentPlayer["name"]))
+		# print(discard)
+		printCard(discard)
+		logo()
+		for card in currentPlayer["hand"]:
+			color.append(findColor(card[0]))
+			type.append(findType(card[1:]))
+			typeM.append(machineType(card[1:]))
+			hand.append(findColor(card[0]) + " " + findType(card[1:]))
+		for each in range(len(hand)):
+			print(str(each + 1) + ". " + hand[each])
+			logo()
+		logo()
+		print("\n")
+
+		validPlay = False
+		for each in typeM:
+			if each == machineType(discard[-1][1:]): validPlay = True
+			if each == 14 | 15: validPlay = True
+		for each in color:
+				if each == findColor(discard[-1][0]): validPlay = True
+				if each == "K": validPlay = True
+
+		if machineType(discard[-1][1:]) == 11: 
+			validPlay = False 
+			print("Your turn has been skipped!")
+		if machineType(discard[-1][1:]) == 13 and drawCheck == True: 
+			validPlay = False
+			print("Draw 2 in place")
+			print("Drawing two cards!")
+			currentPlayer["hand"].append(gameDeck.pop())
+			currentPlayer["hand"].append(gameDeck.pop())
+			drawCheck = False
+		if machineType(discard[-1][1:]) == 15 and drawCheck == True: 
+			validPlay = False
+			print("Draw 4 in place")
+			print("Drawing four cards!")
+			currentPlayer["hand"].append(gameDeck.pop())
+			currentPlayer["hand"].append(gameDeck.pop())
+			currentPlayer["hand"].append(gameDeck.pop())
+			currentPlayer["hand"].append(gameDeck.pop())
+			drawCheck = False
+
+		if validPlay == True: 
+			choice, wild = playCard(currentPlayer["hand"], discard)
+			# print(wild)
+			if (wild != None):
+				currentPlayer["hand"][choice-1][0] = wild
+
+			lenBefore = len(currentPlayer["hand"])
+			discard.append(currentPlayer["hand"].pop(choice-1))
+			lenAfter = len(currentPlayer["hand"])
+		else: 
+			print("No playable cards!") 
+			print("Drawing one card!")
+			currentPlayer["hand"].append(gameDeck.pop())
+
+
+		if len(currentPlayer["hand"]) <= 0: 
+			handSize = False
+
+		return handSize, currentPlayer
+
+def playCard(hand, discard):
+	global drawCheck
+	global reverseCheck
+	logo()
+	colorD = findColor(discard[-1][0])
+	typeD = machineType(discard[-1][1:])
+	wild = None
+	try:
+		choice = int(input("Choose a card to play: "))
+		color = findColor(hand[choice-1][0])
+		type = machineType(hand[choice-1][1:])
+		# choice = 1
+		if choice > len(hand) or choice < 1:
+			raise ValueError
+		elif type == 13:
+			drawCheck = True
+			return choice, wild
+		elif type == 14:
+			wild = chooseWild()
+			return choice, wild
+		elif type == 15:
+			drawCheck = True
+			wild = chooseWild
+			return choice, wild
+		elif type == 12:
+			reverseCheck = not reverseCheck
+			return choice, wild
+		elif color != colorD and type!=typeD:
+			raise ValueError
+		else:
+			return choice, wild
+	except ValueError:
+		print("Not a valid choice")
+		choice, wild = playCard(hand, discard)
+		return choice, wild
+
+def chooseWild():
+	try:
+		print(t.bold("Hint: Use the first letter of the color"))
+		wild = input("What color do you want: ")[0].upper()
+		if wild != "R" or wild != "B" or wild != "G" or wild != "Y": raise ValueError
+		else: return wild
+	except ValueError:
+		print("Not a valid color")
+		return chooseWild()
+
+def printCard(discard):
+	color = findColor(discard[-1][0]).lower()
+	text = jsonType(discard[-1][1:])
+	with t.location(int(t.width/2), int(t.height/2)):
+		if color == "red": print(t.red(text))
+		elif color == "blue": print(t.blue(text))
+		elif color == "green": print(t.green(text))
+		elif color == "yellow": print(t.yellow(text))
+		elif color == "wild": print(text)
+		
 
 
 def main():
@@ -128,10 +311,39 @@ def main():
 	print(t.clear)
 	logo()
 	
-	with t.location(0, t.height - 1):
-		for each in players:
-			showPlayerCards(each)
+	handSize = True
+	playerWin = []
+	playerMatch = 1
 
+	# print(discard)
+	# time.sleep(5)
+	with t.location(0, t.height - 1):
+		while handSize is True:
+			while reverseCheck is False:
+				for each in range(len(players)):
+					canRun = True
+					if playerMatch != players[each]["number"]: 
+						canRun = False
+					if canRun == True:
+						playerMatch += 1
+						handSize, players[each] = showPlayerCards(players[each], gameDeck, discard)
+						if handSize is False:
+							playerWin = players[each]
+							break
+			while reverseCheck is True:
+				for each in reversed(range(len(players))):
+					if playerMatch != players[each]["number"]: 
+						canRun = False
+					if canRun == True:
+						playerMatch -= 1
+						handSize, players[each] = showPlayerCards(players[each], gameDeck, discard)
+						if handSize is False:
+							playerWin = players[each]
+							break
+					logo()
+				# input("Blah")
+	print(str(playerWin["name"]) + " won the game!!!")
+	time.sleep(.5)
 
 
 
