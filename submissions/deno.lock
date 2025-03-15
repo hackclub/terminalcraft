@@ -1,0 +1,114 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@std/assert@1": "1.0.11",
+    "jsr:@std/internal@^1.0.5": "1.0.5",
+    "npm:chess.js@^1.1.0": "1.1.0",
+    "npm:readline@^1.3.0": "1.3.0"
+  },
+  "jsr": {
+    "@std/assert@1.0.11": {
+      "integrity": "2461ef3c368fe88bc60e186e7744a93112f16fd110022e113a0849e94d1c83c1",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/internal@1.0.5": {
+      "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
+    }
+  },
+  "npm": {
+    "chess.js@1.1.0": {
+      "integrity": "sha512-IfdeaJnpdU1LddIenp36O7Fz19nIxk3x4cznwo2Qf25T1XSeP85XRBrjWUsSpk1RpDeXdijraoLxXt3PCaudVg=="
+    },
+    "readline@1.3.0": {
+      "integrity": "sha512-k2d6ACCkiNYz222Fs/iNze30rRJ1iIicW7JuX/7/cozvih6YCkFZH+J6mAFDVgv0dRBaAyr4jDqC95R2y4IADg=="
+    }
+  },
+  "remote": {
+    "https://cdn.jsdelivr.net/npm/chess.js@1.0.0/+esm": "550037ed108df8cb4cadb4a2dbda82c99e39c0ff5fe2d06f82461a81e43cc861",
+    "https://cdn.skypack.dev/-/chess.js@v1.1.0-VARTsJJm6H2CL7hwitvZ/dist=es2019,mode=imports/optimized/chessjs.js": "45ae90f57cf2b067d59ba591e4d7f9334a92215a4f9b8421a5a9abe26fbae9b0",
+    "https://cdn.skypack.dev/chess.js": "d9a32665b2e988c591d7fb82fa50cbe769a0a13b1950dfc41d0bf9c266f633b8",
+    "https://deno.land/std@0.170.0/_util/asserts.ts": "d0844e9b62510f89ce1f9878b046f6a57bf88f208a10304aab50efcb48365272",
+    "https://deno.land/std@0.170.0/_util/os.ts": "8a33345f74990e627b9dfe2de9b040004b08ea5146c7c9e8fe9a29070d193934",
+    "https://deno.land/std@0.170.0/encoding/base64.ts": "8605e018e49211efc767686f6f687827d7f5fd5217163e981d8d693105640d7a",
+    "https://deno.land/std@0.170.0/fmt/colors.ts": "03ad95e543d2808bc43c17a3dd29d25b43d0f16287fe562a0be89bf632454a12",
+    "https://deno.land/std@0.170.0/path/_constants.ts": "df1db3ffa6dd6d1252cc9617e5d72165cd2483df90e93833e13580687b6083c3",
+    "https://deno.land/std@0.170.0/path/_interface.ts": "ee3b431a336b80cf445441109d089b70d87d5e248f4f90ff906820889ecf8d09",
+    "https://deno.land/std@0.170.0/path/_util.ts": "d16be2a16e1204b65f9d0dfc54a9bc472cafe5f4a190b3c8471ec2016ccd1677",
+    "https://deno.land/std@0.170.0/path/common.ts": "bee563630abd2d97f99d83c96c2fa0cca7cee103e8cb4e7699ec4d5db7bd2633",
+    "https://deno.land/std@0.170.0/path/glob.ts": "81cc6c72be002cd546c7a22d1f263f82f63f37fe0035d9726aa96fc8f6e4afa1",
+    "https://deno.land/std@0.170.0/path/mod.ts": "cf7cec7ac11b7048bb66af8ae03513e66595c279c65cfa12bfc07d9599608b78",
+    "https://deno.land/std@0.170.0/path/posix.ts": "b859684bc4d80edfd4cad0a82371b50c716330bed51143d6dcdbe59e6278b30c",
+    "https://deno.land/std@0.170.0/path/separator.ts": "fe1816cb765a8068afb3e8f13ad272351c85cbc739af56dacfc7d93d710fe0f9",
+    "https://deno.land/std@0.170.0/path/win32.ts": "7cebd2bda6657371adc00061a1d23fdd87bcdf64b4843bb148b0b24c11b40f69",
+    "https://deno.land/x/chess@0.6.0/mod.ts": "a5cc7d66f5742c4913e7f822e69ad712e1f001cc84a614c7ccd33927333ee21c",
+    "https://deno.land/x/chess@0.6.0/src/autoplayers/BeginnerAI.ts": "f0f1ad2f0e9704a7f9681352121e10b294cfdad0e9d5f655d1562dbd59aa46d6",
+    "https://deno.land/x/chess@0.6.0/src/autoplayers/utils/evaluation/ScoreSettings.ts": "c3f8f98354215329cf05e11c8443fd732c330a2934ab6b7ed9b929b22df9fd2b",
+    "https://deno.land/x/chess@0.6.0/src/autoplayers/utils/evaluation/listOrderedMoves.ts": "3371c6cf8ba66faca6644cd4adc8a668ae9c9ce233d219956df225222ecf6612",
+    "https://deno.land/x/chess@0.6.0/src/autoplayers/utils/evaluation/scoreBoard.ts": "14a5b952365dc048fa1307edd29371e6b18eeff72acc87aa9fec61ec24034dc5",
+    "https://deno.land/x/chess@0.6.0/src/autoplayers/utils/gameScore.ts": "78bed4a68f3712bc73910c5fc8c4c6774adcb05a5b7b040276dd2a6607b225d2",
+    "https://deno.land/x/chess@0.6.0/src/autoplayers/utils/miniMax.ts": "58255e2001bef68ef25056df7d4053bceaeae6cc6a742e6030bb8e9487c39d87",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/Board.ts": "f1f5dee16e70d5d49488d66280be61b125a8cf26787eeb19998ce8768453d41a",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/CastleMap.ts": "c2690ee7f204ba2a2cbc34204a1d9e084b94cae2aedc82bf4853f83a2b057091",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/ChessError.ts": "5ccd52613fc862c22e551add04e152824d6bb73d2a58ed49d6a5d6df64c53219",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/Color.ts": "735478a6593ba7e10102750c6e67cb2e5f16314ddd030d292bed64cf1a820859",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/Coord.ts": "3308a2c5ff6389e463698d7b0cef9cc4d5de0fe7c542e4b4a74ba3b3cddf0d7e",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/GameStatus.ts": "7e8db0037fe71d6d2eea107900ab96edc6e457cfe6e3280dbffa63d7b0302a51",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/Move.ts": "437585fe5f962ba9b18c18dd8170181e0b6120c07e947455989048ec2788071e",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/PieceType.ts": "ee5a2a040fbe48c54bf210cef09364765c2e7cc6385d0649a7a94e0e82ba5bb3",
+    "https://deno.land/x/chess@0.6.0/src/core/datatypes/Space.ts": "f3086d595f3883dae7c51210ebf95e932e301996c23f24017d840b77415a8a15",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/FEN/boardFromFEN.ts": "c0376aeecc5e3531b1df5722138a77fb379c9e262cd894d7e76919acfb0cb026",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/FEN/boardToFEN.ts": "2b80f169ce3933357957ee4fabaa58092ed2faa25354e3371c1ab3f4f5f260d3",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/PGN/gameFromPGN.ts": "d6932cf6f4901cd05dcc7c64f02e6206271e52eea8c38a7a902a491b1e8d7dc8",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/PGN/gameToPGN.ts": "795076e0bd0ac5049765ed2252079517531b3e7dbda4db1a046adb710b5a1ac8",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/PGN/pgnUtils.ts": "967902536bd5a6a33a25abe362d3a878a52edddef7296a07b0a182f972b9a6eb",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/assert.ts": "79490e3141d89d768a939798f8c64dfd808396be30c9739d9619f8743002f70e",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/attackMap.ts": "fa7497b2c0400f7b4d677e1bc8a78e45b2d8a3df668173e2b1c3a2f0ba63a0f7",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/boardLacksMaterial.ts": "d7595a6f362cb04f001e1255621fa6ac1e53bbd855978bc60b06302fee345d33",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/boardLayouts/buildStandardBoard.ts": "49db694fb5748ae020dba01f5c1773d06218b1a6b72e788029e11d73a33a2bad",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/boardRenderASCII.ts": "afea129e8198fa1c43186e733a32c681905d5d216afa58951d6f3ae75dbf144b",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/findMoveBySAN.ts": "cdee3d21e30b87ed0723afddc3967f7962932dfbb0bf3585ae60944082e4b7a0",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/hashBoard.ts": "f2ee59bb5997bffdd01d2a5432ceeb55432768ee476796021ee9389b3f9ba5e7",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/kingInDanger.ts": "03fbe107fa661f0efb7b7f59af912e9c5628dcbe94f1ec015558b8450ae9e32d",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/listValidMoves.ts": "1fd895c8fc9ebefaf46c34b122c3c6f6cfa785e54104a9d20ec0f40d01f03a23",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/moveFormats/moveToSAN.ts": "c5000943eabcf0b58a798bd98b7be8985e50ce7b783d5ef3606884a77c6ef29d",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/moveResults.ts": "9f3626aaa5dab2b2167758e50c60737876434b32e1365fb9f2b2ab3897296205",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/performMove.ts": "07977c2cae16db468779fb187785a4d43990106d4deba9a9e3ec3c9ba4b44f7d",
+    "https://deno.land/x/chess@0.6.0/src/core/logic/revertMove.ts": "cbfaf9ea730dbe097d6e63893fe2b12e53bc284a506f62ab0f1247e2c294bd59",
+    "https://deno.land/x/chess@0.6.0/src/public/ChessGame.ts": "790d1b193dac063331af1be3a15f64af7dc04b0455b21e5fd50933c72c3ac901",
+    "https://deno.land/x/chess@0.6.0/src/public/GameMove.ts": "3e54747cfa1150c1a92a0b4af107fec9110db1f0e5ea02f358cbd021f6e0e3bd",
+    "https://deno.land/x/chess@0.6.0/src/public/doGameMove.ts": "d70db3c0c853ec850ef054f18e97dd20005d787fa957a8c82b819d5a3c6f38be",
+    "https://deno.land/x/cliffy@v0.25.7/_utils/distance.ts": "02af166952c7c358ac83beae397aa2fbca4ad630aecfcd38d92edb1ea429f004",
+    "https://deno.land/x/cliffy@v0.25.7/ansi/ansi_escapes.ts": "885f61f343223f27b8ec69cc138a54bea30542924eacd0f290cd84edcf691387",
+    "https://deno.land/x/cliffy@v0.25.7/ansi/cursor_position.ts": "d537491e31d9c254b208277448eff92ff7f55978c4928dea363df92c0df0813f",
+    "https://deno.land/x/cliffy@v0.25.7/ansi/deps.ts": "0f35cb7e91868ce81561f6a77426ea8bc55dc15e13f84c7352f211023af79053",
+    "https://deno.land/x/cliffy@v0.25.7/ansi/tty.ts": "8fb064c17ead6cdf00c2d3bc87a9fd17b1167f2daa575c42b516f38bdb604673",
+    "https://deno.land/x/cliffy@v0.25.7/keycode/key_code.ts": "c4ab0ffd102c2534962b765ded6d8d254631821bf568143d9352c1cdcf7a24be",
+    "https://deno.land/x/cliffy@v0.25.7/keycode/key_codes.ts": "917f0a2da0dbace08cf29bcfdaaa2257da9fe7e705fff8867d86ed69dfb08cfe",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/_generic_input.ts": "737cff2de02c8ce35250f5dd79c67b5fc176423191a2abd1f471a90dd725659e",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/_generic_list.ts": "79b301bf09eb19f0d070d897f613f78d4e9f93100d7e9a26349ef0bfaa7408d2",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/_generic_prompt.ts": "8630ce89a66d83e695922df41721cada52900b515385d86def597dea35971bb2",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/_generic_suggestions.ts": "2a8b619f91e8f9a270811eff557f10f1343a444a527b5fc22c94de832939920c",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/_utils.ts": "676cca30762656ed1a9bcb21a7254244278a23ffc591750e98a501644b6d2df3",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/checkbox.ts": "e5a5a9adbb86835dffa2afbd23c6f7a8fe25a9d166485388ef25aba5dc3fbf9e",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/confirm.ts": "94c8e55de3bbcd53732804420935c432eab29945497d1c47c357d236a89cb5f6",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/deps.ts": "4c38ab18e55a792c9a136c1c29b2b6e21ea4820c45de7ef4cf517ce94012c57d",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/figures.ts": "26af0fbfe21497220e4b887bb550fab997498cde14703b98e78faf370fbb4b94",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/input.ts": "ee45532e0a30c2463e436e08ae291d79d1c2c40872e17364c96d2b97c279bf4d",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/list.ts": "6780427ff2a932a48c9b882d173c64802081d6cdce9ff618d66ba6504b6abc50",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts": "195aed14d10d279914eaa28c696dec404d576ca424c097a5bc2b4a7a13b66c89",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/number.ts": "015305a76b50138234dde4fd50eb886c6c7c0baa1b314caf811484644acdc2cf",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/prompt.ts": "0e7f6a1d43475ee33fb25f7d50749b2f07fc0bcddd9579f3f9af12d05b4a4412",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/secret.ts": "58745f5231fb2c44294c4acf2511f8c5bfddfa1e12f259580ff90dedea2703d6",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/select.ts": "1e982eae85718e4e15a3ee10a5ae2233e532d7977d55888f3a309e8e3982b784",
+    "https://deno.land/x/cliffy@v0.25.7/prompt/toggle.ts": "842c3754a40732f2e80bcd4670098713e402e64bd930e6cab2b787f7ad4d931a"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@std/assert@1",
+      "npm:chess.js@^1.1.0",
+      "npm:readline@^1.3.0"
+    ]
+  }
+}
