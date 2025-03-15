@@ -1,0 +1,54 @@
+#!/bin/bash
+
+conf_dir=$1
+dev_path=${2:-"/dev/sg2"}
+
+if [ ! -r $conf_dir/.tapes_to_use ] ; then
+  echo "Error: Cannot read $conf_dir/.tapes_to_use"
+  exit 1
+fi
+
+tape_list=(`cat $conf_dir/.tapes_to_use`)
+first_tape=${tape_list[0]}
+tape_count=${#tape_list[*]}
+let "tape_count -= 1"
+last_tape=${tape_list[$tape_count]}
+
+echo "Tapes to use: ${tape_list[@]}"
+echo "First tape: $first_tape"
+echo "Last tape: $last_tape"
+echo "Number of tapes: $tape_count"
+
+if [ -r $conf_dir/.current_tape ] ; then
+  curr_tape=`cat $conf_dir/.current_tape`
+  echo "Current tape: $curr_tape"
+  if [ $curr_tape -eq $last_tape ] ; then
+    tape_to_write=$first_tape
+  else
+    tape_to_write=$curr_tape
+    let "tape_to_write += 1"
+  fi
+else
+  tape_to_write=$first_tape
+fi
+
+echo "Tape to write: $tape_to_write"
+
+/usr/sbin/mtx -f $dev_path unload
+if [ $? -ne 0 ] ; then
+  echo "Error: Failed to unload current tape from $dev_path"
+  exit 2
+fi
+
+/usr/sbin/mtx -f $dev_path load $tape_to_write
+if [ $? -ne 0 ] ; then
+  echo "Error: Failed to load tape $tape_to_write into $dev_path"
+  exit 2
+fi
+
+echo $tape_to_write > $conf_dir/.current_tape
+echo $tape_to_write >> $conf_dir/.used_tapes
+
+# Success
+echo "Successfully loaded tape $tape_to_write"
+exit 0

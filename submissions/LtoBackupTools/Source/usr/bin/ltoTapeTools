@@ -1,0 +1,175 @@
+#!/bin/bash
+
+TAPE_DEV="/dev/st0"
+DIR=""
+OP=""
+CONF_DIR="/var/tmp/ltotapetools/"
+LOG_DIR="/var/ltotapetools/"
+CHANGER_DEV="/dev/sg2"
+USE_SERIALS="false"
+TAPE_SERIALS=""
+
+usage() {
+  echo "Usage: $0 -o {extract|write} -d <directory> [-s <tape_slots>] [-z <tape_serials>] [-t <tape_device>] [-c <changer_device>]"
+  echo "Note: Either -s (slots) or -z (serials) must be specified, but not both."
+  exit 1
+}
+
+cleanup() {
+  echo -e "\nCleaning up temporary files..."
+  rm -f $CONF_DIR/.current_tape
+  rm -f $CONF_DIR/.used_tapes
+  rm -f $CONF_DIR/.tapes_to_use
+  rm -f $CONF_DIR/.checkpoint_size
+  echo "Cleanup completed."
+  
+  if [ -f "$CONF_DIR/.current_tape" ]; then
+    echo "Unloading tape..."
+    /usr/sbin/mtx -f $CHANGER_DEV unload
+    echo "Tape unloaded."
+  fi
+}
+
+process_checkpoint() {
+  local chkpt_file="$CONF_DIR/.checkpoint_size"
+  local chkpt_num=$1
+  local blk_size=512
+  
+  local size_bytes=$((chkpt_num * blk_size))
+  local size_gb=$(echo "scale=2; $size_bytes / 1073741824" | bc)
+  
+  local adj_size_gb=$(echo "scale=2; $size_gb / 2" | bc)
+  
+  echo "$adj_size_gb" > "$chkpt_file"
+  echo -ne "Processed: ${adj_size_gb} GB\r"
+}
+
+echo '#!/bin/bash
+chkpt_num=$1
+CONF_DIR="'$CONF_DIR'"
+
+blk_size=512
+chkpt_size=2048
+size_bytes=$((chkpt_num * chkpt_size * blk_size))
+size_gb=$(echo "scale=2; $size_bytes / 1073741824" | bc)
+
+adj_size_gb=$(echo "scale=2; $size_gb / 2" | bc)
+
+echo "$adj_size_gb" > "$CONF_DIR/.checkpoint_size"
+echo -ne "Processed: ${adj_size_gb} GB\r"
+' > "$CONF_DIR/checkpoint_handler.sh"
+chmod +x "$CONF_DIR/checkpoint_handler.sh"
+
+trap cleanup SIGINT SIGTERM EXIT
+
+while getopts ":o:d:t:s:c:z:" opt; do
+  case $opt in
+    o) OP="$OPTARG" ;;
+    d) DIR="$OPTARG" ;;
+    t) TAPE_DEV="$OPTARG" ;;
+    s) TAPE_SLOTS=$(echo "$OPTARG" | tr ',' ' ') ;;
+    c) CHANGER_DEV="$OPTARG" ;;
+    z) TAPE_SERIALS=$(echo "$OPTARG" | tr ',' ' '); USE_SERIALS="true" ;;
+    \?) usage ;;
+  esac
+done
+
+if [ -z "$OP" ] || [ -z "$DIR" ] || { [ -z "$TAPE_SLOTS" ] && [ -z "$TAPE_SERIALS" ]; }; then
+  usage
+fi
+
+if [ -n "$TAPE_SLOTS" ] && [ -n "$TAPE_SERIALS" ]; then
+  echo "Error: Cannot specify both tape slots (-s) and tape serials (-z)"
+  usage
+fi
+
+map_serials_to_slots() {
+  local serials=$1
+  local slots=""
+  
+  local mtx_status=$(/usr/sbin/mtx -f $CHANGER_DEV status)
+  
+  for serial in $serials; do
+    local slot=$(echo "$mtx_status" | grep -i "VolumeTag=$serial" | sed -E 's/.*Storage Element ([0-9]+).*/\1/')
+    
+    if [ -z "$slot" ]; then
+      echo "Warning: Serial $serial not found in tape library"
+    else
+      slots="$slots $slot"
+    fi
+  done
+  
+  slots=$(echo "$slots" | sed 's/^ *//')
+  
+  echo "$slots"
+}
+
+mkdir -p $CONF_DIR
+mkdir -p $LOG_DIR
+[ ! -f $CONF_DIR/.current_tape ] && touch $CONF_DIR/.current_tape
+[ ! -f $CONF_DIR/.used_tapes ] && touch $CONF_DIR/.used_tapes
+[ ! -f $CONF_DIR/.tapes_to_use ] && touch $CONF_DIR/.tapes_to_use
+[ ! -f $CONF_DIR/.checkpoint_size ] && echo "0" > $CONF_DIR/.checkpoint_size
+
+if [ "$USE_SERIALS" = "true" ]; then
+  echo "Unloading any existing tape from the drive..."
+  /usr/sbin/mtx -f $CHANGER_DEV unload
+  
+  echo "Mapping tape serials to slots..."
+  TAPE_SLOTS=$(map_serials_to_slots "$TAPE_SERIALS")
+  
+  if [ -z "$TAPE_SLOTS" ]; then
+    echo "Error: None of the specified tape serials were found in the library"
+    exit 1
+  fi
+  
+  echo "Using tape slots: $TAPE_SLOTS"
+fi
+
+echo "$TAPE_SLOTS" > $CONF_DIR/.tapes_to_use
+
+curr_tape=$(cat $CONF_DIR/.current_tape 2>/dev/null)
+
+if [ "$curr_tape" ]; then
+  echo "A tape is already loaded: $curr_tape"
+else
+  /usr/sbin/mtx -f $CHANGER_DEV unload
+  first_tape=$(echo $TAPE_SLOTS | awk '{print $1}')
+  /usr/sbin/mtx -f $CHANGER_DEV load $first_tape
+  
+  echo $first_tape > $CONF_DIR/.current_tape
+  echo $first_tape >> $CONF_DIR/.used_tapes
+fi
+
+start_time=$(date +%s)
+export TAR_START_TIME=$start_time
+
+case "$OP" in
+  write)
+    echo "Starting backup to tape device $TAPE_DEV..."
+
+    tar --create --blocking-factor=1024 -F "/usr/local/bin/ltochanger $CONF_DIR $CHANGER_DEV" \
+      --checkpoint=2048 --checkpoint-action=exec="$CONF_DIR/checkpoint_handler.sh \$TAR_CHECKPOINT" \
+      --multi-volume --file="$TAPE_DEV" -v -- "$DIR"
+
+    echo -e "\nBackup completed."
+    echo "Total data processed: $(cat $CONF_DIR/.checkpoint_size) GB"
+    ;;
+    
+  extract)
+    echo "Starting extraction from tape device $TAPE_DEV..."
+    
+    tar --extract --blocking-factor=1024 -F "/usr/local/bin/ltochanger $CONF_DIR $CHANGER_DEV" \
+      --checkpoint=2048 --checkpoint-action=exec="$CONF_DIR/checkpoint_handler.sh \$TAR_CHECKPOINT" \
+      --multi-volume --file="$TAPE_DEV" -v -C "$DIR"
+
+    echo -e "\nExtraction completed."
+    echo "Total data processed: $(cat $CONF_DIR/.checkpoint_size) GB"
+    ;;
+  *)
+    echo "Invalid operation: $OP"
+    usage
+    ;;
+esac
+
+echo "Operation completed successfully."
