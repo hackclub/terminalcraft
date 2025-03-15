@@ -47,15 +47,14 @@ def play_human(stdscr):
             return
         
         # check for a draw
-        active_mini_board = big_board[big_row][big_col]
-        if not has_valid_moves(active_mini_board):
-            free_move = True
-            if all(not has_valid_moves(board) for row in big_board for board in row):
-                win_text = "Game is a draw!"
-                stdscr.addstr(h-1, w//2 - len(win_text)//2, win_text)
-                stdscr.refresh()
+        if all(board != " " for board in win_board):
+            win_text = "Game is a draw!"
+            stdscr.addstr(h-1, w//2 - len(win_text)//2, win_text)
+            stdscr.refresh()
+            while True:
                 stdscr.getch()
-                return
+                if key == ord('q'):
+                    return
         
         if free_move:
             current_pos = move_cursor(key, free_move, current_board, current_pos)

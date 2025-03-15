@@ -50,17 +50,21 @@ def play_computer(stdscr, player_letter, easy):
         if key == ord('q'):
             return
         
-        active_mini_board = big_board[big_row][big_col]
-        if not has_valid_moves(active_mini_board):
-            free_move = True
-            if all(not has_valid_moves(board) for row in big_board for board in row):
-                win_text = "Game is a draw!"
-                stdscr.addstr(h-1, w//2 - len(win_text)//2, win_text)
-                stdscr.refresh()
+        if all(board != " " for board in win_board):
+            win_text = "Game is a draw!"
+            stdscr.addstr(h-1, w//2 - len(win_text)//2, win_text)
+            stdscr.refresh()
+            while True:
                 stdscr.getch()
-                return
+                if key == ord('q'):
+                    return
         
         if player == player_letter:
+            # Had to get the computer moves to test draw because it kept beating me :(
+            # move = get_computer_move(big_board, win_board, current_board, computer_letter, player_letter)
+            # big_row, big_col, mini_row, mini_col = move
+            # stdscr.addstr(h-1, 0, f"Computer chose: Board {big_row * 3 + big_col}, Position {mini_row * 3 + mini_col}")
+
             if free_move:
                 current_pos = move_cursor(key, free_move, current_board, current_pos)
                 current_board = big_row * 3 + big_col
