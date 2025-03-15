@@ -8,6 +8,8 @@ WELL YOU GOT THIS!
 Download the release for your specific Operating System.
 Execute it with shell or bash or whatever you use.
 
+You can also build it yourself but remember I used deno and not node/npm, so clone the repo initialize with deno install the required packages and run it (the main.js) file.
+
 Choose your favorite engine!
 We support a random player engine (easy), SamannoyB Engine (intermediate), Stockfish (Hard)
 
