@@ -1,0 +1,3 @@
+[submodule "submissions/asnitch"]
+	path = submissions/asnitch
+	url = https://github.com/ingotgg/asnitch
