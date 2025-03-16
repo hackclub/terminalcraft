@@ -1,7 +1,7 @@
 import json
 import random
 import time
-from blessings import Terminal
+from blessed import Terminal
 
 t = Terminal()
 print(t.clear)
@@ -32,10 +32,11 @@ def setupGame(players, count, deck): # takes in a list of players and the count 
 def getPlayerCount():
 	players = []
 	try:
-		print("Hint: Must be less than 15 players!")
+		print("Hint: Must be more than 1 player and less than 15 players!")
 		logo()
 		numPlayers = int(input("Enter the number of players: "))
 		if numPlayers > 14: raise ValueError
+		if numPlayers <= 1: raise ValueError
 		logo()
 		print("\n")
 		logo()

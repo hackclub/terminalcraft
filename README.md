@@ -34,6 +34,7 @@ This project is built in Python! Running it should be relatively simple.
 1. Clone the repository
 ```sh
 git clone "https://github.com/HammerPot/SingularCard"
+git clone "https://github.com/HammerPot/SingularCard"
 ```
 2. Navigate to the directory the repository was cloned into
 ```sh
