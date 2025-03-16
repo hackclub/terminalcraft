@@ -19,7 +19,7 @@ A small [hackertyper](https://hackertyper.net/) knockoff written in Python.
   ```
   .env/bin/activate
   ```  
-- Install necesarry libraries using
+- Install necessary libraries using
   ```
   pip install -r requirements.txt
   ```
