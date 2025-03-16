@@ -33,6 +33,7 @@ def getPlayerCount():
 	players = []
 	try:
 		print("Hint: Must be less than 15 players!")
+		logo()
 		numPlayers = int(input("Enter the number of players: "))
 		if numPlayers > 14: raise ValueError
 		logo()
@@ -359,7 +360,7 @@ def main():
 
 
 		players = getPlayerCount()
-		hands, gameDeck = setupGame(players, 3, newDeck) # sets up the game and assigns the modified deck
+		hands, gameDeck = setupGame(players, 7, newDeck) # sets up the game and assigns the modified deck
 
 		gameDeck, discard = startGame(gameDeck)
 	print(t.clear)
