@@ -1,0 +1,6 @@
+flightdeck/__pycache__/
+flightdeck/files/__pycache__/
+flightdeck/timer/__pycache__/
+dist/
+build/
+flightdeck.egg-info/
