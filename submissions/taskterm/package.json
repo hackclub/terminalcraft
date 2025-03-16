@@ -1,0 +1,50 @@
+{
+  "name": "taskterm",
+  "version": "0.1.2",
+  "description": "taskterm is a terminal-based manager app that allows you to manage your tasks directly from the command line. it provides a simple, efficient, and fast way to manage your tasks.",
+  "main": "dist/taskManager.js",
+  "bin": {
+    "taskterm": "dist/taskManager.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && echo '#!/usr/bin/env node' | cat - dist/taskManager.js > temp && mv temp dist/taskManager.js && chmod +x dist/taskManager.js",
+    "start": "ts-node src/taskManager.ts",
+    "prepublishOnly": "npm run build && npm run patch",
+    "patch": "npm version patch"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "keywords": [
+    "terminal",
+    "tasks",
+    "todo-list"
+  ],
+  "author": "frérot ntwali - <frerot.dev>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamfrerot/taskterm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iamfrerot/taskterm/issues"
+  },
+  "homepage": "https://github.com/iamfrerot/taskterm#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@types/blessed": "^0.1.25",
+    "blessed": "^0.1.81"
+  }
+}
