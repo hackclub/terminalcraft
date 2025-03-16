@@ -4,7 +4,7 @@
 
 CXX		?= g++
 CXX_INCLUDES 	= -I../../include
-CXX_FLAGS 	= -O3 -DNDEBUG -fvisibility=hidden -fvisibility-inlines-hidden
+CXX_FLAGS 	= -std=$(CXXSTD) -O3 -DNDEBUG -fvisibility=hidden -fvisibility-inlines-hidden
 
 all: fmt
 

@@ -1,11 +1,12 @@
 #ifndef PLATFORM_UNIX
-# define PLATFORM_UNIX 0
+#define PLATFORM_UNIX 0
 #endif
 
 #include <getopt.h>
 #include <ncurses.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -39,7 +40,7 @@
 #elif PLATFORM_WAYLAND
 #include "clipboard/wayland/ClipboardListenerWayland.hpp"
 extern "C" {
-    #include "clipboard/wayland/wayclip/common.h"
+#include "clipboard/wayland/wayclip/common.h"
 }
 #endif
 
@@ -55,8 +56,9 @@ extern "C" {
 
 Config config;
 // src/box.cpp
-void draw_search_box(const std::string& query, const std::vector<std::string>& entries_id, const std::vector<std::string>& results, const size_t max_width,
-                            const size_t max_visible, const size_t selected, const size_t scroll_offset);
+void draw_search_box(const std::string& query, const std::vector<std::string>& entries_id,
+                     const std::vector<std::string>& results, const size_t max_width, const size_t max_visible,
+                     const size_t selected, const size_t scroll_offset, const size_t cursor_x, bool is_search_tab);
 void delete_draw_confirm(int seloption, const char* id);
 
 
@@ -118,7 +120,7 @@ void CopyEntry(const CopyEvent& event)
     rapidjson::Value                  value_content(event.content.c_str(), allocator);
     doc["entries"].AddMember(id_ref, value_content, allocator);
 
-    size_t i = 0;
+    unsigned int i = 0;
     for (const char* ptr = event.content.c_str(); *ptr; ++i)
     {
         char utf8_char[5] = { 0 };  // UTF-8 characters are max 4 bytes + null terminator
@@ -172,7 +174,10 @@ R"({
     "index": {}
 })";
 
-    std::filesystem::create_directories(path.substr(0, path.rfind('/')));
+    const size_t pos = path.rfind('/');
+    if (pos != path.npos)
+        std::filesystem::create_directories(path.substr(0, pos));
+
     auto f = fmt::output_file(path, fmt::file::CREATE | fmt::file::RDWR | fmt::file::TRUNC);
     f.print("{}", json);
     f.close();
@@ -180,6 +185,7 @@ R"({
 
 int search_algo(const Config& config)
 {
+restart:
     FILE*                     file = fopen(config.path.c_str(), "r+");
     rapidjson::Document       doc;
     char                      buf[UINT16_MAX] = { 0 };
@@ -197,150 +203,199 @@ int search_algo(const Config& config)
     cbreak();              // Enable immediate character input
     keypad(stdscr, TRUE);  // Enable arrow keys
 
-    std::vector<std::string> entries_id, entries_value;
+    std::vector<std::string> entries_id, entries_value, results, results_id;
     for (auto it = doc["entries"].MemberBegin(); it != doc["entries"].MemberEnd(); ++it)
     {
         entries_id.push_back(it->name.GetString());
         entries_value.push_back(it->value.GetString());
+        results_id.push_back(it->name.GetString());
+        results.push_back(it->value.GetString());
     }
 
-    std::string              query;
-    int                      ch            = 0;
-    size_t                   selected      = 0;
-    size_t                   scroll_offset = 0;
-    std::vector<std::string> results{ entries_value };  // Start with full list
+    std::string query;
+    int         ch            = 0;
+    size_t      selected      = 0;
+    size_t      scroll_offset = 0;
+    size_t      cursor_x      = 2 + 8;  // 2 for box border, 8 for "Search: "
+    bool        is_search_tab = true;
 
     const int max_width   = getmaxx(stdscr) - 5;
     const int max_visible = ((getmaxy(stdscr) - 3) / 2) * 0.75;
-    draw_search_box(query, entries_id, results, max_width, max_visible, selected, scroll_offset);
+    draw_search_box(query, results_id, results, max_width, max_visible, selected, scroll_offset, cursor_x, is_search_tab);
+    move(1, cursor_x);
 
     size_t i            = 0;
     bool   del          = false;
     bool   del_selected = false;
     while ((ch = getch()) != ERR)
     {
-        if (ch == (del ? 'q':27)) // ESC
+        if (!del && ch == 27)  // ESC
             break;
 
-        MEVENT event;
-        if (ch == KEY_MOUSE && getmouse(&event) == OK)
+        if (ch == '\t')
         {
-            const int row = event.y - 3;
-            if (row >= 0 && row < max_visible && (scroll_offset + row) < results.size())
-                selected = scroll_offset + row;
+            is_search_tab = !is_search_tab;
         }
-        else if (ch == KEY_BACKSPACE || ch == 127)
+        else if (is_search_tab)
         {
-            if (!query.empty())
-            {
-                query.pop_back();
-                i = 0;
-            }
-        }
-        else if (ch == KEY_DOWN || ch == KEY_RIGHT)
-        {
-            if (del)
-                del_selected = false;
-
-            else
-            if (selected < results.size() - 1)
-            {
-                ++selected;
-                if (selected >= scroll_offset + max_visible)
-                    ++scroll_offset;
-            }
-        }
-        else if (ch == KEY_UP || ch == KEY_LEFT)
-        {
-            if (del)
-                del_selected = true;
-
-            else
-            if (selected > 0)
-            {
-                --selected;
-                if (selected < scroll_offset)
-                    --scroll_offset;
-            }
-        }
-        else if (ch == 'd' && !del)
-        {
-            del = true;
-            curs_set(0);
-        }
-        else if (del && ch == '\n' && del_selected)
-        {
+            curs_set(1);
             del = false;
-            results.erase(results.begin()+selected);
-            entries_value.erase(entries_value.begin()+selected);
-            doc["entries"].EraseMember(entries_id[selected].c_str());
-            // {"index":{"c":{"0": [1,3,7]}}}
-            for (auto it = doc["index"].MemberBegin(); it != doc["index"].MemberEnd(); ++it)
-                doc["index"][it->name.GetString()].EraseMember(entries_id[selected].c_str());
-
-            entries_id.erase(entries_id.begin()+selected);
-
-            selected = 0;
-            scroll_offset = 0;
-            fseek(file, 0, SEEK_SET);
-
-            char                                                writeBuffer[UINT16_MAX] = { 0 };
-            rapidjson::FileWriteStream                          writeStream(file, writeBuffer, sizeof(writeBuffer));
-            rapidjson::PrettyWriter<rapidjson::FileWriteStream> fileWriter(writeStream);
-            fileWriter.SetFormatOptions(rapidjson::kFormatSingleLineArray);  // Disable newlines between array elements
-            doc.Accept(fileWriter);
-            fflush(file);
-            ftruncate(fileno(file), ftell(file));
-        }
-        else if (del && !del_selected)
-        {
-            del = false;
-        }
-        else if (ch == '\n' && selected < std::string::npos - 1 && !results.empty())
-        {
-            endwin();
-            info("Copied selected content:\n{}", results[selected]);
-            return 0;
-        }
-        else if (isprint(ch))
-        {
-            query += ch;
-            selected      = 0;
-            scroll_offset = 0;
-
-            results.clear();
-            rapidjson::GenericStringRef<char> ch_ref(&query.back());
-            // {"index":{"c":{"0": [1,3,7]}}}
-            if (doc["index"].HasMember(ch_ref))
+            bool erased = false;
+            if (ch == KEY_BACKSPACE || ch == 127)
             {
-                // {"0": [1,3,7]}
-                for (auto it = doc["index"][ch_ref.s].MemberBegin(); it != doc["index"][ch_ref.s].MemberEnd(); ++it)
+                if (!query.empty())
                 {
-                    if (!it->value.IsArray())
-                        continue;
-                    // [1,3,7]
-                    for (auto it2 = it->value.GetArray().Begin(); it2 != it->value.GetArray().End(); ++it2)
-                    {
-                        unsigned int n_i = it2->GetUint();
-                        if (n_i <= i && n_i == i)
-                        {
-                            results.push_back(doc["entries"][it->name.GetString()].GetString());
-                            break;
-                        }
+                    // decrease then pass
+                    if (cursor_x > 2 + 8)
+                        query.erase(--cursor_x - 2 - 8, 1);
+                    i = 0;
+
+                    if (!query.empty()) {
+                        ch = query.back();
+                        erased = true;
                     }
                 }
             }
-            ++i;
+            else if (ch == KEY_LEFT)
+            {
+                if (cursor_x > 2 + 8)
+                    --cursor_x;
+            }
+            else if (ch == KEY_RIGHT)
+            {
+                if (cursor_x < 2 + 8 + query.size())
+                    ++cursor_x;
+            }
+            
+            if (isprint(ch))
+            {
+                if (i == 0)
+                {
+                    results.clear();
+                    results_id.clear();
+                }
+                if (!erased)
+                    // pass then increase
+                    query.insert(cursor_x++ - 2 - 8, 1, ch);
 
-            if (selected >= results.size())
-                selected = results.empty() ? -1 : 0;  // Keep selection valid
+                selected      = 0;
+                scroll_offset = 0;
+
+                if (i > 0)
+                {
+                    results.erase(std::remove_if(results.begin(), results.end(),[&](const std::string& s){return s[i] != ch;}),
+                                  results.end());
+                }
+                else
+                {
+                    rapidjson::GenericStringRef<char> ch_ref(&query.back());
+
+                    // {"index":{"c":{"0": [1,3,7]}}}
+                    if (doc["index"].HasMember(ch_ref))
+                    {
+                        // {"0": [1,3,7]}
+                        for (auto it_id = doc["index"][ch_ref.s].MemberBegin();
+                             it_id != doc["index"][ch_ref.s].MemberEnd(); ++it_id)
+                        {
+                            if (!it_id->value.IsArray())
+                                continue;
+                            // [1,3,7]
+                            for (auto it_arr = it_id->value.GetArray().Begin(); it_arr != it_id->value.GetArray().End();
+                                 ++it_arr)
+                            {
+                                unsigned int n_i = it_arr->GetUint();
+                                if (n_i <= i && n_i == i)
+                                {
+                                    results_id.push_back(it_id->name.GetString());
+                                    results.push_back(doc["entries"][it_id->name.GetString()].GetString());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                ++i;
+
+                if (selected >= results.size())
+                    selected = results.empty() ? -1 : 0;  // Keep selection valid
+            }
+        }
+        else
+        {
+            curs_set(0);
+            if (ch == KEY_DOWN || ch == KEY_RIGHT)
+            {
+                if (del)
+                    del_selected = false;
+
+                else if (selected < results.size() - 1)
+                {
+                    ++selected;
+                    if (selected >= scroll_offset + max_visible)
+                        ++scroll_offset;
+                }
+            }
+            else if (ch == KEY_UP || ch == KEY_LEFT)
+            {
+                if (del)
+                    del_selected = true;
+
+                else if (selected > 0)
+                {
+                    --selected;
+                    if (selected < scroll_offset)
+                        --scroll_offset;
+                }
+            }
+            else if (ch == 'd' && !del)
+            {
+                del = true;
+            }
+            else if (del && ch == '\n' && del_selected)
+            {
+                del          = false;
+                del_selected = false;
+                results.clear();
+                entries_id.clear();
+                entries_value.clear();
+
+                doc["entries"].EraseMember(results_id[selected].c_str());
+                // {"c":{"0": [1,3,7]}}
+                for (auto it = doc["index"].MemberBegin(); it != doc["index"].MemberEnd(); ++it)
+                    doc["index"][it->name.GetString()].EraseMember(results_id[selected].c_str());
+                results_id.clear();
+
+                selected      = 0;
+                scroll_offset = 0;
+                fseek(file, 0, SEEK_SET);
+
+                char                                                writeBuffer[UINT16_MAX] = { 0 };
+                rapidjson::FileWriteStream                          writeStream(file, writeBuffer, sizeof(writeBuffer));
+                rapidjson::PrettyWriter<rapidjson::FileWriteStream> fileWriter(writeStream);
+                fileWriter.SetFormatOptions(rapidjson::kFormatSingleLineArray);  // Disable newlines between array elements
+                doc.Accept(fileWriter);
+                fflush(file);
+                ftruncate(fileno(file), ftell(file));
+                goto restart;  // yes... let's just restart everything for now
+            }
+            else if (del && (!del_selected || ch == 'q'))
+            {
+                del = false;
+            }
+            else if (ch == '\n' && selected < std::string::npos - 1 && !results.empty())
+            {
+                endwin();
+                info("Copied selected content:\n{}", results[selected]);
+                return 0;
+            }
         }
 
         if (del)
-            delete_draw_confirm(del_selected, entries_id[selected].c_str());
+            delete_draw_confirm(del_selected, results_id[selected].c_str());
         else
-            draw_search_box(query, entries_id, ((results.empty() || query.empty()) ? entries_value : results), max_width,
-                            max_visible, selected, scroll_offset);
+            draw_search_box(query, ((results_id.empty() || query.empty()) ? entries_id : results_id),
+                            ((results.empty() || query.empty()) ? entries_value : results), max_width, max_visible,
+                            selected, scroll_offset, cursor_x, is_search_tab);
     }
 
     endwin();
@@ -414,19 +469,19 @@ bool parseargs(int argc, char* argv[], Config& config, const std::string& config
     {
         switch (opt)
         {
-            case 0: break;
+            case 0:   break;
             case '?': help(EXIT_FAILURE); break;
 
             case 'V': version(); break;
             case 'h': help(); break;
 
-            case 'p': config.path = optarg; break;
-            case 's': config.arg_search = true; break;
-            case 'i': config.arg_terminal_input = true; break;
+            case 'p':  config.path = optarg; break;
+            case 's':  config.arg_search = true; break;
+            case 'i':  config.arg_terminal_input = true; break;
             case 6968: config.wl_seat = optarg;
-            case 'C': break;  // we have already did it in parse_config_path()
+            case 'C':  break;  // we have already did it in parse_config_path()
 
-            case 'P': 
+            case 'P':
                 if (OPTIONAL_ARGUMENT_IS_PRESENT)
                     config.primary_clip = str_to_bool(optarg);
                 else
@@ -470,10 +525,9 @@ int main(int argc, char* argv[])
     const std::string& configFile = parse_config_path(argc, argv, configDir);
 
     config.Init(configFile, configDir);
+    config.loadConfigFile(configFile);
     if (!parseargs(argc, argv, config, configFile))
         return 1;
-
-    config.loadConfigFile(configFile);
 
     CreateInitialCache(config.path);
     setlocale(LC_ALL, "");
@@ -485,7 +539,7 @@ int main(int argc, char* argv[])
         return search_algo(config);
 
     bool piped = !isatty(STDIN_FILENO);
-    debug("piped = {}", piped);
+    // debug("piped = {}", piped);
     if (piped || PLATFORM_UNIX || config.arg_terminal_input)
     {
         CClipboardListenerUnix clipboardListenerUnix;

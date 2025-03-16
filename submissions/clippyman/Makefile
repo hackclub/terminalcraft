@@ -6,6 +6,7 @@ VARS  	  	?=
 
 DEBUG 		?= 1
 PLATFORM	?= unix
+CXXSTD		?= c++17
 
 # https://stackoverflow.com/a/1079861
 # WAY easier way to build debug and release builds
@@ -35,7 +36,7 @@ SRC 	   	= $(wildcard src/*.cpp src/clipboard/x11/*.cpp src/clipboard/wayland/*.
 OBJ 	   	= $(SRC:.cpp=.o)
 LDFLAGS   	+= -L./$(BUILDDIR)/fmt -lfmt -lncurses
 CXXFLAGS  	?= -mtune=generic -march=native
-CXXFLAGS        += -Wno-unused-parameter -fvisibility=hidden -Iinclude -std=c++17 $(VARS) -DVERSION=\"$(VERSION)\" -DBRANCH=\"$(BRANCH)\"
+CXXFLAGS        += -Wno-unused-parameter -fvisibility=hidden -Iinclude -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\" -DBRANCH=\"$(BRANCH)\"
 
 ifeq ($(PLATFORM),xorg)
 	LDFLAGS  += -lxcb -lxcb-xfixes
@@ -58,13 +59,13 @@ all: fmt toml wayclip $(TARGET)
 fmt:
 ifeq ($(wildcard $(BUILDDIR)/fmt/libfmt.a),)
 	mkdir -p $(BUILDDIR)/fmt
-	make -C src/fmt BUILDDIR=$(BUILDDIR)/fmt
+	make -C src/fmt BUILDDIR=$(BUILDDIR)/fmt CXXSTD=$(CXXSTD)
 endif
 
 toml:
 ifeq ($(wildcard $(BUILDDIR)/toml++/toml.o),)
 	mkdir -p $(BUILDDIR)/toml++
-	make -C src/toml++ BUILDDIR=$(BUILDDIR)/toml++
+	make -C src/toml++ BUILDDIR=$(BUILDDIR)/toml++ CXXSTD=$(CXXSTD)
 endif
 
 wayclip:

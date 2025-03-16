@@ -80,7 +80,7 @@ void delete_draw_confirm(int seloption, const char* id)
 {
     nccreate(6, 60, "Confirm delete");
 
-    ncprint(1, 2, "Are you sure you want to delete id %s?", id);
+    ncprint(1, 2, "Are you sure you want to delete id #%s?", id);
 
     if (seloption == 1)
         attron(A_REVERSE);
@@ -98,10 +98,11 @@ void delete_draw_confirm(int seloption, const char* id)
         case 1: ncmove(4, 34); break;
     }
 }
-// End
+// End: some code taken from https://github.com/rofl0r/ncdu in src/delete.c and src/util.c
 
+// omfg too many args
 void draw_search_box(const std::string& query, const std::vector<std::string>& entries_id, const std::vector<std::string>& results, const size_t max_width,
-                            const size_t max_visible, const size_t selected, const size_t scroll_offset)
+                            const size_t max_visible, const size_t selected, const size_t scroll_offset, const size_t cursor_x, bool is_search_tab)
 {
     clear();
     box(stdscr, 0, 0);  // Draw the root box
@@ -122,21 +123,24 @@ void draw_search_box(const std::string& query, const std::vector<std::string>& e
 
         for (const std::string& line : wrap_text(results[i], max_width - 6))
         {
-            if (is_selected)
+            if (is_selected && !is_search_tab)
                 attron(A_REVERSE);  // Apply highlight before printing
 
             // Print the line with padding (4 spaces)
-            mvprintw(row++, 6, "%s. %s", entries_id[i].c_str(), line.c_str());  // 6 for padding (2 + 4 spaces)
+            mvprintw(row++, 6, "#%s: %s", entries_id[i].c_str(), line.c_str());  // 6 for padding (2 + 4 spaces)
 
-            if (is_selected)
+            if (is_selected && !is_search_tab)
                 attroff(A_REVERSE);  // Remove highlight after printing
         }
 
         items_displayed++;
     }
 
-    // Move the cursor near the search query
-    const int cursor_x = 2 + 8 + query.length();  // 2 for box border, 8 for "Search: ", query.length() for the query
-    move(1, cursor_x);
+    // Move the cursor depending on the active tab
+    if (is_search_tab)
+        move(1, cursor_x);
+    else
+        move(3 + selected - scroll_offset, 6);  // Move to the selected result
+    
     refresh();
 }
