@@ -17,7 +17,7 @@ from .files import handler
 from colorama import Fore, Style
 import colorama
 import flightdeck.file_path as file_path
-from .timer import pomodoro
+from . import pomodoro
 import requests
 try:
     import flightdeck.vault as vault
@@ -26,15 +26,15 @@ except:
     print("FlightDeck will try to restore a working copy of it.")
     print("If you do not allow it into your anti-virus, it will automatically be deleted again by it.")
     agreed = input("Have you allowed vault.py in your anti-virus? (y/n) ")
-    if agreed.lower == "y":
+    if agreed.upper() == "Y":
         print("Starting FlightDeck Secure-Vault restoration...")
         file_url = "https://hc-cdn.hel1.your-objectstorage.com/s/v3/55a071ae3d661e98b74a59dd86a165149f225851_vault.py"
-        filename = file_url.split("/")[-1]
+        filename = "vault.py"
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
         filepath = os.path.join(current_dir, filename)
 
-        response = requests.get(url, stream=True)
+        response = requests.get(file_url, stream=True)
         if response.status_code == 200:
             with open(filepath, "wb") as file:
                 for chunk in response.iter_content(1024):
@@ -57,7 +57,7 @@ import flightdeck.apikey as apikey
 
 WORDS = ["apple", "tiger", "ocean", "planet", "rocket", "guitar", "silver", "forest", "sunset", "mountain"]
 
-help = """flightdeck v1.0-testing {}
+help = """flightdeck v1.10.20 {}
 ✈ usage: flightdeck [commands] [options | file (if command requires)] ...
 
 flightdeck is a versatile utility that allows you to do many things. it adds
@@ -119,7 +119,6 @@ def main_loop():
 
         # Solstice
         elif command == "solstice":
-            print("Opening Solstice...")
             try:
                 if len(sys.argv) == 3:
                     if sys.argv[2].isdigit():
@@ -130,7 +129,8 @@ def main_loop():
                     pomodoro.start_timer(work_time=int(sys.argv[2]), break_time=int(sys.argv[3]))
                 elif len(sys.argv) == 2:
                     pomodoro.start_timer()
-            except:
+            except Exception as e:
+                print(e)
                 print(Fore.RED + "Error: Failed to launch Solstice" + Style.RESET_ALL)
                 print("Usage: flightdeck solstice [work_time] [break_time]")
                 if sys.platform == "win32":
@@ -175,5 +175,5 @@ def main_loop():
             print("Check flightdeck help for more info")
 
     else:
-        print("FlightDeck v1.0.0")
+        print("FlightDeck v10.10.20")
         print("Please add a command to test")

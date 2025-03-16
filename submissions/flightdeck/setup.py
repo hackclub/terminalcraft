@@ -1,23 +1,15 @@
 from setuptools import setup, find_packages
-import sys
-
-if sys.platform == "win32":
-    windows_deps = ['windows-curses']
-else:
-    windows_deps = []
-
-print(windows_deps)
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name='flightdeck',
-    version='10.10.10',
+    version='10.10.23',
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'flightdeck = flightdeck.main:main_loop', 
+            'flightdeck = flightdeck.main:main_loop',
         ],
     },
     install_requires=[
@@ -39,4 +31,6 @@ setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.7',
+    include_package_data=True,  # Important: Include non-code files
+    package_data={'flightdeck': ['background.jpg']},  # Include background.jpg
 )

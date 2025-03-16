@@ -85,13 +85,16 @@ def welcome():
 def main_loop():
     global first_entry, unlocked, vault_entry
 
-    try:
-        with open("data.pkl", "rb") as f:
-            first_entry = pickle.load(f)
-    except:
-        first_entry = True
-
     colorama.init(autoreset=True)
+
+    path = Path(vault_location(platform.system()))
+
+    if path.exists() and path.is_dir():
+        print(f"Vault found at {path}")
+        first_entry = False
+    else:
+        print("Vault not found. Please create a new one.")
+        first_entry = False
 
 
     if not first_entry:

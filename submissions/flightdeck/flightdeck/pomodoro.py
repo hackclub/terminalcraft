@@ -139,21 +139,25 @@ def pomodoro_timer(stdscr, work_time=25, break_time=5, image_path="background.jp
             if key == ord('p') or key == ord('P'):
                 toggle_pause()
             elif key == ord('e') or key == ord('E'):
-                exit_flag = True #set exit flag
-                exit(0)
+                exit_flag = True
+                break
             elif countdown_thread and not countdown_thread.is_alive() and not pause_flag:
                 play_sound(phase)
                 phase = "Break" if phase == "Work" else "Work"
                 remaining_seconds = 0
                 start_countdown()
 
-    except KeyboardInterrupt:
-        pass
+    except Exception as e:
+        print(f"Error: {e}")
+        print("If you recieve this, contact @advaitconty on Hack Club Slack so they can fix this")
     finally:
+        curses.curs_set(1)        
         exit(0)
-        curses.curs_set(1)
 
 def start_timer(work_time=25, break_time=5, image_path="background.jpg"):
     import pathlib
     current = pathlib.Path(__file__).parent.resolve()
-    curses.wrapper(lambda stdscr: pomodoro_timer(stdscr, work_time, break_time, str(current) + "\\background.jpg"))
+    curses.wrapper(lambda stdscr: print("Starting Solstice...") or pomodoro_timer(stdscr, work_time, break_time, str(current) + "/" + str(image_path)))   
+
+if __name__ == "__main__":
+    start_timer()
