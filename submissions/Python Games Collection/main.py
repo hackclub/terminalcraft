@@ -42,7 +42,6 @@ def main():
             input("Press Enter to continue...")
             continue
 
-        # After game ends, wait for user input before showing menu again
         print("\nGame ended.")
         input("Press Enter to return to main menu...")
 
