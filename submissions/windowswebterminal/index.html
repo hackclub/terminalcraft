@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Web Terminal By Stevens Antony For Terminal Craft</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: monospace;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #terminal-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border: 2px solid gray;
+            max-width: 100%;
+        }
+        #terminal {
+            flex: 2;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #0C0C0C;
+        }
+        .command-line {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1E1E1E;
+            padding: 5px;
+        }
+        .prompt {
+            color: lightgreen;
+            display: flex;
+            align-items: center;
+        }
+        .input-container {
+            display: flex;
+            position: relative;
+        }
+        .cursor {
+            position: absolute;
+            width: 10px;
+            height: 18px;
+            background-color: lightgreen;
+            animation: blink 0.7s infinite step-end;
+        }
+        #commandInput {
+            background: none;
+            border: none;
+            color: transparent;
+            outline: none;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            caret-color: transparent;
+            padding-left: 2px;
+        }
+        #typed-text {
+            color: white;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            white-space: pre;
+            margin-left: 5px;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .success { color: lightgreen; }
+        .error { color: red; }
+        .fade-out {
+            animation: fadeOut 6s forwards;
+        }
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal-container">
+        <div id="terminal">Type 'help' to get a list of commands.</div>
+    </div>
+    <div class="command-line">
+        <div class="input-container">
+            <div class="prompt">C:\User\> <span id="typed-text"></span><span class="cursor"></span></div>
+            <input id="commandInput" type="text" autofocus>
+        </div>
+    </div>
+    
+    <script>
+        const terminal = document.getElementById("terminal");
+        const input = document.getElementById("commandInput");
+        const typedText = document.getElementById("typed-text");
+        const cursor = document.querySelector(".cursor");
+
+        let inGame = false;
+        let currency = 100; 
+        let animalsCaught = [];
+        let gameCommandQueue = [];
+        let crates = [];
+        let waitingForBet = false;
+        let currentGame = "";
+        
+        function updateCursorPosition() {
+            typedText.textContent = input.value;
+            const textWidth = typedText.getBoundingClientRect().width;
+            cursor.style.left = (typedText.offsetLeft + textWidth + 5) + "px";
+        }
+        
+        input.addEventListener("focus", () => {
+            cursor.style.display = "inline-block";
+        });
+        
+        input.addEventListener("blur", () => {
+            cursor.style.display = "none";
+        });
+        
+
+        input.addEventListener("input", updateCursorPosition);
+        
+        updateCursorPosition();
+
+        function executeCommand(command) {
+            if (inGame) {
+                handleGameCommand(command);
+                return;
+            }
+
+            let output = "";
+            let outputClass = "success";
+            switch (command.toLowerCase()) {
+                case "help":
+                    output = `<div>Available commands:</div>
+                              <div class='success'>help - Shows all the list of commands</div>
+                              <div class='success'>clear - Clears the terminal</div>
+                              <div class='success'>owo - Starts the OwO game</div>
+                              <div class='success'>exit - Closes the tab</div>
+                              <div class='success'>Note: Commands are not case-sensitive!</div>`;
+                    break;
+                case "clear":
+                    terminal.innerHTML = "";
+                    return;
+                case "owo":
+                    startGame();
+                    return;
+                case "exit":
+                    exitAnimation();
+                    return;
+                default:
+                    output = `Command not found: ${command}`;
+                    outputClass = "error";
+            }
+            terminal.innerHTML += `<div>C:\\User\\> ${command}</div>`;
+            terminal.innerHTML += `<div class='${outputClass}'>${output}</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function startGame() {
+            inGame = true;
+            currency = 100;
+            animalsCaught = [];
+            terminal.innerHTML += `<div class='success'>Welcome to the OwO Game!</div>`;
+            terminal.innerHTML += `<div>Type 'hunt' to catch animals, 'sell' to sell them, 'balance' to check your coins, 'crates' to find crates, 'blackjack', 'slots' or 'coinflip' to gamble. Type 'stop' to quit.</div>`;
+        }
+
+        function handleGameCommand(command) {
+            if (waitingForBet) {
+                handleBetInput(command);
+                return;
+            }
+
+            let output = "";
+            let outputClass = "success";
+            switch (command.toLowerCase()) {
+                case "hunt":
+                    let animal = "Cute Animal " + (animalsCaught.length + 1);
+                    animalsCaught.push(animal);
+                    output = `You caught a ${animal}!`;
+                    break;
+                case "sell":
+                    if (animalsCaught.length > 0) {
+                        let animal = animalsCaught.pop();
+                        currency += 10;
+                        output = `You sold ${animal} for 10 coins. Balance: ${currency} coins.`;
+                    } else {
+                        output = "No animals to sell!";
+                        outputClass = "error";
+                    }
+                    break;
+                case "balance":
+                    output = `Your current balance: ${currency} coins.`;
+                    break;
+                case "crates":
+                    findCrate();
+                    return;
+                case "blackjack":
+                    currentGame = "blackjack";
+                    waitingForBet = true;
+                    output = `Enter your bet for Blackjack:`;
+                    break;
+                case "slots":
+                    currentGame = "slots";
+                    waitingForBet = true;
+                    output = `Enter your bet for Slots:`;
+                    break;
+                case "coinflip":
+                    currentGame = "coinflip";
+                    waitingForBet = true;
+                    output = `Choose 'heads' or 'tails' followed by your bet amount (e.g., "heads 10"):`;
+                    break;
+                case "stop":
+                    output = "You left the OwO game.";
+                    inGame = false;
+                    break;
+                default:
+                    output = "Invalid action!";
+                    outputClass = "error";
+            }
+            terminal.innerHTML += `<div>Game> ${command}</div>`;
+            terminal.innerHTML += `<div class='${outputClass}'>${output}</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function handleBetInput(input) {
+            terminal.innerHTML += `<div>Bet> ${input}</div>`;
+            
+            if (currentGame === "blackjack" || currentGame === "slots") {
+                let bet = parseInt(input);
+                if (isNaN(bet) || bet <= 0 || bet > currency) {
+                    terminal.innerHTML += `<div class='error'>Invalid bet amount. Please enter a number between 1 and ${currency}.</div>`;
+                } else {
+                    if (currentGame === "blackjack") {
+                        startBlackjack(bet);
+                    } else if (currentGame === "slots") {
+                        startSlots(bet);
+                    }
+                    waitingForBet = false;
+                }
+            } else if (currentGame === "coinflip") {
+                let parts = input.split(" ");
+                if (parts.length !== 2) {
+                    terminal.innerHTML += `<div class='error'>Invalid input. Please use format: 'heads 10' or 'tails 20'</div>`;
+                    return;
+                }
+                
+                let choice = parts[0].toLowerCase();
+                let bet = parseInt(parts[1]);
+                
+                if (!["heads", "tails"].includes(choice)) {
+                    terminal.innerHTML += `<div class='error'>Invalid choice. Please use 'heads' or 'tails'.</div>`;
+                } else if (isNaN(bet) || bet <= 0 || bet > currency) {
+                    terminal.innerHTML += `<div class='error'>Invalid bet amount. Please enter a number between 1 and ${currency}.</div>`;
+                } else {
+                    startCoinflip(choice, bet);
+                    waitingForBet = false;
+                }
+            }
+            
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function findCrate() {
+            const crateItems = ["coin", "gem", "boost"];
+            const itemFound = crateItems[Math.floor(Math.random() * crateItems.length)];
+            let output = "";
+            switch(itemFound) {
+                case "coin":
+                    currency += 20;
+                    output = "You found a crate with coins! You gained 20 coins.";
+                    break;
+                case "gem":
+                    currency += 50;
+                    output = "You found a crate with a gem! It's worth 50 coins!";
+                    break;
+                case "boost":
+                    output = "You found a crate with a boost! Your next game will be lucky!";
+                    break;
+            }
+            terminal.innerHTML += `<div class='success'>${output} Balance: ${currency} coins.</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function startBlackjack(bet) {
+
+            const playerCard1 = Math.floor(Math.random() * 10) + 1;
+            const playerCard2 = Math.floor(Math.random() * 10) + 1;
+            const dealerCard = Math.floor(Math.random() * 10) + 1;
+            
+            const playerTotal = playerCard1 + playerCard2;
+            const dealerTotal = dealerCard + Math.floor(Math.random() * 10) + 1;
+            
+            let output = `Your cards: ${playerCard1} and ${playerCard2} (Total: ${playerTotal})<br>`;
+            output += `Dealer shows: ${dealerCard}<br>`;
+            
+            if (playerTotal > dealerTotal || dealerTotal > 21) {
+                currency += bet;
+                output += `<span class="success">You win ${bet} coins!</span>`;
+            } else {
+                currency -= bet;
+                output += `<span class="error">You lose ${bet} coins!</span>`;
+            }
+            output += `<br>Balance: ${currency} coins.`;
+            
+            terminal.innerHTML += `<div>${output}</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function startSlots(bet) {
+            const symbols = ["🗿", "🪦", "💵", "☠️", "💩", "😂"];
+            const slot1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const slot2 = symbols[Math.floor(Math.random() * symbols.length)];
+            const slot3 = symbols[Math.floor(Math.random() * symbols.length)];
+            
+            let output = `<div style="font-size: 20px; text-align: center;">[${slot1}] [${slot2}] [${slot3}]</div>`;
+            
+            if (slot1 === slot2 && slot2 === slot3) {
+
+                const winnings = bet * 5;
+                currency += winnings;
+                output += `<span class="success">JACKPOT! You win ${winnings} coins!</span>`;
+            } else if (slot1 === slot2 || slot2 === slot3 || slot1 === slot3) {
+
+                const winnings = bet * 2;
+                currency += winnings;
+                output += `<span class="success">Two matching symbols! You win ${winnings} coins!</span>`;
+            } else {
+
+                currency -= bet;
+                output += `<span class="error">No matches! You lose ${bet} coins.</span>`;
+            }
+            output += `<br>Balance: ${currency} coins.`;
+            
+            terminal.innerHTML += `<div>${output}</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function startCoinflip(choice, bet) {
+            const result = Math.random() < 0.5 ? "heads" : "tails";
+            
+            let output = `Coin flip result: ${result.toUpperCase()}<br>`;
+            
+            if (choice === result) {
+                currency += bet;
+                output += `<span class="success">You chose ${choice.toUpperCase()}. You win ${bet} coins!</span>`;
+            } else {
+                currency -= bet;
+                output += `<span class="error">You chose ${choice.toUpperCase()}. You lose ${bet} coins.</span>`;
+            }
+            output += `<br>Balance: ${currency} coins.`;
+            
+            terminal.innerHTML += `<div>${output}</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function exitAnimation() {
+            terminal.innerHTML = "";
+            terminal.innerHTML += `<div class='success'>Logging out... *totally not sending your search history to the FBI* 👀</div>
+                                   <div class='success'>Just kidding!... Or am I? 🤡</div>`;
+            
+            document.body.classList.add('fade-out');
+            
+            setTimeout(() => {
+                window.close();
+            }, 5000);
+        }
+
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                let command = input.value.trim();
+                input.value = "";
+                typedText.textContent = "";
+                updateCursorPosition();
+                
+                if (command) {
+                    if (inGame) {
+                        handleGameCommand(command);
+                    } else {
+                        executeCommand(command);
+                    }
+                }
+                
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        });
+         
+        input.focus();
+        
+        document.addEventListener('click', () => {
+            input.focus();
+        });
+    </script>
+</body>
+</html>
