@@ -100,7 +100,7 @@ messageHistory.append(
 
 model = data.get("model")
 maxTokens: int = data.get("maxTokens", 1024)
-repeatition = data.get("repeatRequest", False)
+repeatition = data.get("repeatRequest")
 todo_list = data.get("todo_list", [])
 availProviders = ["openai", "openrouter", "ollama"]
 
@@ -111,6 +111,11 @@ if model == None:
     model = input("Enter model to use: ")
     data["model"] = model
 
+if repeatition == None:
+    response = input("Should RepeatRequest be enabled? (recommended) (y/n): ")
+    if response != "y" and response != "n":
+        raise Exception("Response wasn't \"y\" or \"n\"")
+    repeatition = True if response == "y" else False
 
 def aiPrompt(user_input: str):
     match provider:
