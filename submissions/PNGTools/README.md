@@ -30,6 +30,7 @@ cd PNGTools
 curl -Lo PNGTools.zip "https://github.com/YeetTheAnson/PNGTools/releases/download/new/PNGTools.zip"
 tar -xf PNGTools.zip
 del PNGTools.zip
+cd ..
 pip install ./PNGTools
 
 ```
