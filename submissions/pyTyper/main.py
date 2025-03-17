@@ -89,10 +89,10 @@ def printBox(lenv:int,*sentences:str):
         if len(i) > length:
             length = len(i)
 
-    print(f"┌{"─"*length}┐")
+    print(f"┌{'─' * length}┐")
     for r in lines:
         print(f"│{r.center(length)}│")
-    print(f"└{"─"*length}┘")
+    print(f"└{'─' * length}┘")
 
 def clearterminal(header:bool,typed:bool,returnlines:int=0): #compatibility, am i right
     if returnlines == 0:
