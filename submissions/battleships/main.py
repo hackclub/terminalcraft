@@ -2,8 +2,6 @@ import random
 import os
 import time
 
-# cd Stuff\Documents\Informatik\Python\Hackclub\Terminalcraft
-
 GRID_SIZE = 10
 SHIP_SIZES = [5, 4, 3, 3, 2]
 
