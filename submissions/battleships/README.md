@@ -12,7 +12,7 @@ Download the main.py file from this repository.
 
 ### Running the program
 
-Navigate to the directory in the terminal.
+Navigate to the correct directory in the terminal.
 
 Run the command 'py main.py'.
 
