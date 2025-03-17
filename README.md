@@ -1,9 +1,5 @@
 # Space Trader
 
-A command-line interface (CLI) space trading simulation game built in Python.
-
-## Description
-
 Space Trader puts you in the role of an interstellar merchant navigating a universe of 10 unique planets. Your goal is to build your fortune through strategic trading, resource management, and completing special missions within a 100-day time limit.
 
 Starting with a modest ship and limited credits, you'll make your way through a universe where prices fluctuate, pirates lurk in the darkness of space, and economic conditions change without warning.
