@@ -1,0 +1,15 @@
+{
+  "name": "stegoaes",
+  "version": "2.0.0",
+  "description": "Steganography with AES encryption",
+  "main": "index.js",
+  "bin": "./index.js",
+  "dependencies": {
+    "commander": "^13.1.0",
+    "pngjs": "^7.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GizziXZ/stegoAES.git"
+  }
+}
