@@ -1,0 +1,5 @@
+This is a sample text file created for testing the Word Counter CLI.
+
+It contains multiple lines and paragraphs so we can demonstrate the counting functionality.
+
+This paragraph has several sentences. It should demonstrate the paragraph counting feature. The CLI should count this as a single paragraph despite having multiple sentences.

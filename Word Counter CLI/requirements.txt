@@ -1,0 +1,5 @@
+tqdm>=4.62.0
+textual>=0.40.0
+rich>=13.3.5
+typer>=0.9.0
+textual-web>=0.3.0
