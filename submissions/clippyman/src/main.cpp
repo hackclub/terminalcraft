@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cctype>
 #include <filesystem>
 #include <string>
 #include <string_view>
@@ -56,11 +57,9 @@ extern "C" {
 
 Config config;
 // src/box.cpp
-void draw_search_box(const std::string& query, const std::vector<std::string>& entries_id,
-                     const std::vector<std::string>& results, const size_t max_width, const size_t max_visible,
+void draw_search_box(const std::string& query, const std::vector<std::string>& results, const size_t max_width, const size_t max_visible,
                      const size_t selected, const size_t scroll_offset, const size_t cursor_x, bool is_search_tab);
-void delete_draw_confirm(int seloption, const char* id);
-
+void delete_draw_confirm(const int seloption);
 
 static void version()
 {
@@ -74,9 +73,11 @@ static void help(bool invalid_opt = false)
 R"(Usage: clippyman [OPTIONS]...
     -i, --input                 Enter in terminal input mode
     -p, --path <path>           Path to where we'll search/save the clipboard history
-    -s, --search		Delete/Search history (d for delete, enter for output selected text)
     -P, --primary [<bool>]      Use the primary clipboard instead
     --wl-seat <name>            The seat for using in wayland (just leave it empty if you don't know what's this)
+    -s, --search                Delete/Search clipboard history. At the moment is not possible to search UTF-8 characters
+                                Press TAB to switch beetwen search bar and clipboard history.
+                                In clipboard history: press 'd' for delete, press enter for output selected text
 
     -C, --config <path>         Path to the config file to use
     --gen-config [<path>]       Generate default config file to config folder (if path, it will generate to the path)
@@ -183,6 +184,7 @@ R"({
     f.close();
 }
 
+#define SEARCH_TITLE_LEN (2 + 8) // 2 for box border, 8 for "Search: "
 int search_algo(const Config& config)
 {
 restart:
@@ -216,15 +218,14 @@ restart:
     int         ch            = 0;
     size_t      selected      = 0;
     size_t      scroll_offset = 0;
-    size_t      cursor_x      = 2 + 8;  // 2 for box border, 8 for "Search: "
+    size_t      cursor_x      = SEARCH_TITLE_LEN;
     bool        is_search_tab = true;
 
     const int max_width   = getmaxx(stdscr) - 5;
     const int max_visible = ((getmaxy(stdscr) - 3) / 2) * 0.75;
-    draw_search_box(query, results_id, results, max_width, max_visible, selected, scroll_offset, cursor_x, is_search_tab);
+    draw_search_box(query, results, max_width, max_visible, selected, scroll_offset, cursor_x, is_search_tab);
     move(1, cursor_x);
 
-    size_t i            = 0;
     bool   del          = false;
     bool   del_selected = false;
     while ((ch = getch()) != ERR)
@@ -235,10 +236,10 @@ restart:
         if (ch == '\t')
         {
             is_search_tab = !is_search_tab;
+            curs_set(is_search_tab);
         }
         else if (is_search_tab)
         {
-            curs_set(1);
             del = false;
             bool erased = false;
             if (ch == KEY_BACKSPACE || ch == 127)
@@ -246,75 +247,36 @@ restart:
                 if (!query.empty())
                 {
                     // decrease then pass
-                    if (cursor_x > 2 + 8)
-                        query.erase(--cursor_x - 2 - 8, 1);
-                    i = 0;
+                    if (cursor_x > SEARCH_TITLE_LEN)
+                        query.erase(--cursor_x - SEARCH_TITLE_LEN, 1);
 
-                    if (!query.empty()) {
-                        ch = query.back();
-                        erased = true;
-                    }
+                    erased = true;
+                    results = entries_value;
+                    results.erase(std::remove_if(results.begin(), results.end(), [&](const std::string& s){return !hasStart(s, query);}), results.end());
                 }
             }
             else if (ch == KEY_LEFT)
             {
-                if (cursor_x > 2 + 8)
+                if (cursor_x > SEARCH_TITLE_LEN)
                     --cursor_x;
             }
             else if (ch == KEY_RIGHT)
             {
-                if (cursor_x < 2 + 8 + query.size())
+                if (cursor_x < SEARCH_TITLE_LEN + query.size())
                     ++cursor_x;
             }
-            
-            if (isprint(ch))
+            else
             {
-                if (i == 0)
-                {
-                    results.clear();
-                    results_id.clear();
-                }
+                // pass then increase
                 if (!erased)
-                    // pass then increase
-                    query.insert(cursor_x++ - 2 - 8, 1, ch);
+                    query.insert(cursor_x++ - SEARCH_TITLE_LEN, 1, ch);
+                erased = false;
 
                 selected      = 0;
                 scroll_offset = 0;
 
-                if (i > 0)
-                {
-                    results.erase(std::remove_if(results.begin(), results.end(),[&](const std::string& s){return s[i] != ch;}),
-                                  results.end());
-                }
-                else
-                {
-                    rapidjson::GenericStringRef<char> ch_ref(&query.back());
-
-                    // {"index":{"c":{"0": [1,3,7]}}}
-                    if (doc["index"].HasMember(ch_ref))
-                    {
-                        // {"0": [1,3,7]}
-                        for (auto it_id = doc["index"][ch_ref.s].MemberBegin();
-                             it_id != doc["index"][ch_ref.s].MemberEnd(); ++it_id)
-                        {
-                            if (!it_id->value.IsArray())
-                                continue;
-                            // [1,3,7]
-                            for (auto it_arr = it_id->value.GetArray().Begin(); it_arr != it_id->value.GetArray().End();
-                                 ++it_arr)
-                            {
-                                unsigned int n_i = it_arr->GetUint();
-                                if (n_i <= i && n_i == i)
-                                {
-                                    results_id.push_back(it_id->name.GetString());
-                                    results.push_back(doc["entries"][it_id->name.GetString()].GetString());
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                ++i;
+                results = entries_value;
+                results.erase(std::remove_if(results.begin(), results.end(), [&](const std::string& s){return !hasStart(s, query);}), results.end());
 
                 if (selected >= results.size())
                     selected = results.empty() ? -1 : 0;  // Keep selection valid
@@ -322,7 +284,6 @@ restart:
         }
         else
         {
-            curs_set(0);
             if (ch == KEY_DOWN || ch == KEY_RIGHT)
             {
                 if (del)
@@ -391,10 +352,9 @@ restart:
         }
 
         if (del)
-            delete_draw_confirm(del_selected, results_id[selected].c_str());
+            delete_draw_confirm(del_selected);
         else
-            draw_search_box(query, ((results_id.empty() || query.empty()) ? entries_id : results_id),
-                            ((results.empty() || query.empty()) ? entries_value : results), max_width, max_visible,
+            draw_search_box(query, ((results.empty() || query.empty()) ? entries_value : results), max_width, max_visible,
                             selected, scroll_offset, cursor_x, is_search_tab);
     }
 

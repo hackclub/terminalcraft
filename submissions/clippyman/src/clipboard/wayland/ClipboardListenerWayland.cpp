@@ -85,31 +85,27 @@ void CClipboardListenerWayland::PollClipboard()
     if (!f.is_open())
         die("temp file was deleted????");
 
-    std::string clipboardContent;
+    CopyEvent copyEvent;
     std::string line;
     while (std::getline(f, line))
     {
-        clipboardContent += line;
-        clipboardContent += "\n";
+        copyEvent.content += line;
+        copyEvent.content += "\n";
     }
 
-    if (!clipboardContent.empty() && clipboardContent.back() == '\n')
-        clipboardContent.pop_back();
+    if (!copyEvent.content.empty() && copyEvent.content.back() == '\n')
+        copyEvent.content.pop_back();
 
     /* Simple but fine approach */
-    if (clipboardContent == m_LastClipboardContent)
+    if (copyEvent.content == m_LastClipboardContent)
         return;
 
-    CopyEvent copyEvent{};
-    copyEvent.content = clipboardContent;
-    size_t pos = clipboardContent.find_first_not_of(' ');
-    if (pos == clipboardContent.npos)
+    if (copyEvent.content.find_first_not_of(' ') == std::string::npos)
         return;
 
+    m_LastClipboardContent = copyEvent.content;
     for (const auto& callback : m_CopyEventCallbacks)
         callback(copyEvent);
-
-    m_LastClipboardContent = clipboardContent;
 
     truncate(m_path.c_str(), 0);
 }

@@ -4,6 +4,13 @@
 #include <istream>
 #include <string>
 
+bool hasStart(const std::string_view fullString, const std::string_view start)
+{
+    if (start.length() > fullString.length())
+        return false;
+    return (fullString.substr(0, start.size()) == start);
+}
+
 void ctrl_d_handler(const std::istream& cin)
 {
     if (cin.eof())

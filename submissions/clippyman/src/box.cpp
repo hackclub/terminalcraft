@@ -76,11 +76,11 @@ static void ncprint(int r, int c, const char* fmt, ...)
     va_end(arg);
 }
 
-void delete_draw_confirm(int seloption, const char* id)
+void delete_draw_confirm(const int seloption)
 {
     nccreate(6, 60, "Confirm delete");
 
-    ncprint(1, 2, "Are you sure you want to delete id #%s?", id);
+    ncprint(1, 2, "Are you sure you want to delete this content?");
 
     if (seloption == 1)
         attron(A_REVERSE);
@@ -101,7 +101,7 @@ void delete_draw_confirm(int seloption, const char* id)
 // End: some code taken from https://github.com/rofl0r/ncdu in src/delete.c and src/util.c
 
 // omfg too many args
-void draw_search_box(const std::string& query, const std::vector<std::string>& entries_id, const std::vector<std::string>& results, const size_t max_width,
+void draw_search_box(const std::string& query, const std::vector<std::string>& results, const size_t max_width,
                             const size_t max_visible, const size_t selected, const size_t scroll_offset, const size_t cursor_x, bool is_search_tab)
 {
     clear();
@@ -127,7 +127,7 @@ void draw_search_box(const std::string& query, const std::vector<std::string>& e
                 attron(A_REVERSE);  // Apply highlight before printing
 
             // Print the line with padding (4 spaces)
-            mvprintw(row++, 6, "#%s: %s", entries_id[i].c_str(), line.c_str());  // 6 for padding (2 + 4 spaces)
+            mvprintw(row++, 6, "%s", line.c_str());  // 6 for padding (2 + 4 spaces)
 
             if (is_selected && !is_search_tab)
                 attroff(A_REVERSE);  // Remove highlight after printing

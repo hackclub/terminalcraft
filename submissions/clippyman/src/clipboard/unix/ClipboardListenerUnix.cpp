@@ -36,18 +36,14 @@ void CClipboardListenerUnix::AddCopyCallback(const std::function<void(const Copy
 
 void CClipboardListenerUnix::PollClipboard()
 {
-    std::string clipboardContent{in()};
-    if (clipboardContent == m_LastClipboardContent)
+    CopyEvent copyEvent{in()};
+    if (copyEvent.content == m_LastClipboardContent)
         return;
 
-    CopyEvent copyEvent{};
-    copyEvent.content = clipboardContent;
-    size_t pos = clipboardContent.find_first_not_of(' ');
-    if (pos == clipboardContent.npos)
+    if (copyEvent.content.find_first_not_of(' ') == std::string::npos)
         return;
 
+    m_LastClipboardContent = copyEvent.content;
     for (const auto& callback : m_CopyEventCallbacks)
         callback(copyEvent);
-
-    m_LastClipboardContent = clipboardContent;
 }

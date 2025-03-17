@@ -8,9 +8,9 @@ struct CopyEvent
     std::string content;
 };
 
-struct PasteEvent
+/*struct PasteEvent
 {
     std::string content;
-};
+};*/
 
 #endif
