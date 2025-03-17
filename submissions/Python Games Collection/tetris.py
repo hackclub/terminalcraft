@@ -2,10 +2,8 @@ import pygame
 import random
 from pygame import Rect
 
-# Initialize Pygame
 pygame.init()
 
-# Constants
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 700
 GRID_SIZE = 30
@@ -13,11 +11,9 @@ GRID_WIDTH = 10
 GRID_HEIGHT = 20
 SIDEBAR_WIDTH = 200
 
-# Calculate play area position
 PLAY_AREA_LEFT = (SCREEN_WIDTH - SIDEBAR_WIDTH - GRID_WIDTH * GRID_SIZE) // 2
 PLAY_AREA_TOP = (SCREEN_HEIGHT - GRID_HEIGHT * GRID_SIZE) // 2
 
-# Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
@@ -29,7 +25,6 @@ GREEN = (0, 255, 0)        # S piece
 PURPLE = (128, 0, 128)     # T piece
 RED = (255, 0, 0)          # Z piece
 
-# Tetrimino shapes (represented as relative coordinates)
 SHAPES = [
     [[0, 0], [0, 1], [1, 0], [1, 1]],      # O
     [[0, 0], [0, 1], [0, 2], [0, 3]],      # I
@@ -51,14 +46,14 @@ class Tetrimino:
         self.rotation = 0
 
     def rotate(self):
-        # Create a rotated version of the shape
+        
         positions = self.get_positions()
         center_x = sum(pos[0] for pos in positions) / len(positions)
         center_y = sum(pos[1] for pos in positions) / len(positions)
         
         rotated = []
         for pos in self.shape:
-            # Translate to origin, rotate, translate back
+            
             x = pos[1]
             y = -pos[0]
             rotated.append([x, y])
@@ -90,12 +85,12 @@ class TetrisGame:
         self.lines_cleared = 0
         self.fall_speed = 0.5
         self.fall_time = 0
-        self.fall_delay = 0.5  # seconds before piece falls
+        self.fall_delay = 0.5
 
     def new_piece(self):
-        # Choose a random shape
+        
         shape = random.choice(SHAPES)
-        # Start from the middle top of the grid
+        
         return Tetrimino(GRID_WIDTH // 2 - 1, 0, shape)
 
     def valid_move(self, piece, x_offset=0, y_offset=0, rotated_shape=None):
@@ -121,8 +116,7 @@ class TetrisGame:
         self.clear_lines()
         self.current_piece = self.next_piece
         self.next_piece = self.new_piece()
-        
-        # Check for game over
+
         if not self.valid_move(self.current_piece):
             self.game_over = True
 
@@ -133,32 +127,29 @@ class TetrisGame:
                 lines_to_clear.append(y)
         
         for line in lines_to_clear:
-            # Remove the completed line
+            
             self.grid.pop(line)
-            # Add a new empty line at the top
+            
             self.grid.insert(0, [0 for _ in range(GRID_WIDTH)])
-        
-        # Update score
+
         if lines_to_clear:
             self.lines_cleared += len(lines_to_clear)
-            self.score += (100 * len(lines_to_clear)) * len(lines_to_clear)  # More points for clearing multiple lines at once
-            
-            # Update level and speed
+            self.score += (100 * len(lines_to_clear)) * len(lines_to_clear)
+        
             self.level = self.lines_cleared // 10 + 1
             self.fall_delay = max(0.1, 0.5 - (self.level - 1) * 0.05)
 
     def draw_grid(self):
         for y in range(GRID_HEIGHT):
             for x in range(GRID_WIDTH):
-                # Draw grid cell
+              
                 rect = Rect(
                     PLAY_AREA_LEFT + x * GRID_SIZE,
                     PLAY_AREA_TOP + y * GRID_SIZE,
                     GRID_SIZE, GRID_SIZE
                 )
                 pygame.draw.rect(self.screen, GRAY, rect, 1)
-                
-                # Fill occupied cells
+          
                 if self.grid[y][x] != 0:
                     pygame.draw.rect(self.screen, self.grid[y][x], rect)
                     pygame.draw.rect(self.screen, WHITE, rect, 1)
@@ -167,7 +158,7 @@ class TetrisGame:
         for pos in self.current_piece.shape:
             x = self.current_piece.x + pos[0]
             y = self.current_piece.y + pos[1]
-            if y >= 0:  # Only draw if it's on the screen
+            if y >= 0:  
                 rect = Rect(
                     PLAY_AREA_LEFT + x * GRID_SIZE,
                     PLAY_AREA_TOP + y * GRID_SIZE,
@@ -177,11 +168,10 @@ class TetrisGame:
                 pygame.draw.rect(self.screen, WHITE, rect, 1)
 
     def draw_next_piece(self):
-        # Draw the "Next Piece" label
+        
         next_label = self.font.render("Next Piece:", True, WHITE)
         self.screen.blit(next_label, (SCREEN_WIDTH - SIDEBAR_WIDTH + 20, PLAY_AREA_TOP + 20))
         
-        # Draw the next piece
         for pos in self.next_piece.shape:
             x = pos[0]
             y = pos[1]
@@ -204,7 +194,7 @@ class TetrisGame:
 
     def draw_game_over(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 128))  # Semi-transparent black
+        overlay.fill((0, 0, 0, 128))  
         self.screen.blit(overlay, (0, 0))
         
         font = pygame.font.SysFont('Arial', 50)
@@ -216,7 +206,7 @@ class TetrisGame:
 
     def draw_pause(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 128))  # Semi-transparent black
+        overlay.fill((0, 0, 0, 128))  
         self.screen.blit(overlay, (0, 0))
         
         font = pygame.font.SysFont('Arial', 50)
