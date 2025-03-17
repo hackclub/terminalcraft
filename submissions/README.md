@@ -1,14 +1,15 @@
 # Terminal Buddy
-
+## Requirements
+- The latest version of Python (older versions may work but untested)
 ## How to run
-- Make sure you have python installed
-- Download the files
-- Extract if its zip
-- run `pip install -r requirements.txt` on the terminal to install the required libraries
----
+
+- Download and extract the files
+- Open the terminal/cmd in the directory with the extracted files
+- run `pip install -r requirements.txt` to install the required packages
+
 ### If you want to have api configuration saved
-- Make a config.json file
-- save this in it:
+- Make a config.json file in the directory with the extracted files
+- Change it's contents to:
 ```
 {
   "provider": "",
@@ -16,16 +17,17 @@
   "api_key": "",
 }
 ```
-- Update to what you need it to be.
+- Change the provider field to `openrouter`, `openai` or `ollama`
+- Add the APIKey (ignore if it's ollama)
+- Choose the model based on the provider's format.
 
-> If you want to stop schema error from happening when using OpenAI or OpenRouter add `"repeatRequest": true` into config.json
+> If you want to stop schema error from happening when using OpenAI or OpenRouter add `"repeatRequest": true` into config.json <br>
+
 > recommended model: `liquid/lfm-3b` on openrouter. It's incredibly cheap and runs well.
 
 - Run the file with `python main.py`
----
 ### If you don't want config saved
-- Just run the file with `python main.py`
----
+- Run the file with `python main.py`
 ## Credits
 
 - OpenWeatherMap API - <https://openweathermap.org/>
