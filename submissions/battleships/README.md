@@ -1,9 +1,19 @@
-# This is a terminal-based version of the game battleships!
+# TerminalCraft - Battleships
 
-It is written in Python, so to run it:
+Hello! This is a terminal-based version of the game battleships.
 
-- Download the file
-- Make sure you have a Python interpreter
-- Navigate to it in the terminal
-- Run the command 'py main.py'
-- Enjoy!
+## Instructions
+
+### Setup
+
+Make sure you have Python installed.
+
+Download the main.py file from this repository.
+
+### Running the program
+
+Navigate to the directory in the terminal.
+
+Run the command 'py main.py'.
+
+Voilà! That should allow you to play battleships from your terminal. Enjoy!
