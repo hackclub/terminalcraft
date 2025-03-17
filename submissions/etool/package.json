@@ -1,0 +1,10 @@
+{
+  "name": "etool",
+  "description": "Encrypts files using AES",
+  "version": "1.0.0",
+  "main": "index.js",
+  "bin": "./index.js",
+  "dependencies": {
+    "commander": "^13.1.0"
+  }
+}
