@@ -46,7 +46,7 @@ the selected option would be copied to clipboard
 
 4. Run the application:
     ```sh
-    python main.py
+    python zfind.py
     ```
 
 
