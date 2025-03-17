@@ -61,3 +61,8 @@ shelfit delete 1
 ```bash
 shelfit export /path/to/export.json
 ```
+
+### Copy a note to clipboard
+```bash
+shelfit copy 1
+```
