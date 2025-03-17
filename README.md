@@ -34,15 +34,14 @@ This project is built in Python! Running it should be relatively simple.
 1. Clone the repository
 ```sh
 git clone "https://github.com/HammerPot/SingularCard"
-git clone "https://github.com/HammerPot/SingularCard"
 ```
 2. Navigate to the directory the repository was cloned into
 ```sh
 cd SingularCard
 ```
-3. Install the `Blessings` package
+3. Install the required packages via pip
 ```sh
-pip install Blessings
+pip install -r requirements.txt
 ```
 > Note this may vary depending on the operating system and environment you are using. Many Linux distros require you to use the system package manager to install Python packages and different versions of Python may have different ways the pip command is named or utilized. Check with your system's documentation to learn best practices with installing Python packages.
 4. Run `main.py` from within the repository's directory

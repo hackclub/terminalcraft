@@ -1,6 +1,5 @@
 import json
 import random
-import time
 from blessed import Terminal
 
 t = Terminal()
