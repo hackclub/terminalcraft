@@ -13,13 +13,25 @@ A comprehensive command line utility for PNG image manipulation.
 
 ## Installation
 
-### Windows
+### Windows (With Git)
 ```bash
 # Clone the repository
 git clone https://github.com/YeetTheAnson/PNGTools
 
 # Install 
 pip install ./PNGTools
+
+```
+
+### Windows (Without Git)
+```bash
+mkdir PNGTools
+cd PNGTools
+curl -Lo PNGTools.zip "https://github.com/YeetTheAnson/PNGTools/releases/download/new/PNGTools.zip"
+tar -xf PNGTools.zip
+del PNGTools.zip
+pip install ./PNGTools
+
 ```
 
 ### Linux
@@ -29,6 +41,7 @@ sudo git clone https://github.com/YeetTheAnson/PNGTools
 
 # Install 
 sudo pip install ./PNGTools --break-system-packages
+
 ```
 
 ## Usage
@@ -554,4 +567,5 @@ pngtools -i step4.png -o final.png -p compress --level 30
 Base | Step 1 | Step 2 | Step 3 | Step 4 | Final
 :---:|:------:|:------:|:------:|:------:|:-----:
 ![Base Image](assets/base.png) | ![Step 1](assets/step1.png) | ![Step 2](assets/step2.png) | ![Step 3](assets/step3.png) | ![Step 4](assets/step4.png) | ![Final Result](assets/final.png)
+
 
