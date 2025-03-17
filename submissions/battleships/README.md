@@ -16,4 +16,4 @@ Navigate to the correct directory in the terminal.
 
 Run the command 'py main.py'.
 
-Voilà! That should allow you to play battleships from your terminal. Enjoy!
+### Voilà! That should allow you to play battleships from your terminal. Enjoy!
