@@ -1,6 +1,6 @@
 # AirPods Head Tracking Visualizer
 
-This implements head tracking with AirPods by gathering sensor data over l2cap, processing orientation and acceleration values, and detecting head gestures. The codebase is split into the following components:
+This implements head tracking with AirPods by gathering sensor data over l2cap, processing orientation and acceleration values, and detecting head gestures.
 
 # How to use
 
@@ -15,6 +15,7 @@ Alternatively, you can directly run the `gestures.py` to just detect gestures.
 ```bash
 python gestures.py
 ```
+The codebase is split into the following components:
 
 - **Connection and Data Collection**  
   The project uses a custom ConnectionManager (imported in multiple files) to connect via Bluetooth to AirPods. Once connected, sensor packets are received in raw hex format. An AirPodsTracker class (in `plot.py`) handles the start/stop of tracking, logging of raw data, and parsing of packets into useful fields.
@@ -22,8 +23,7 @@ python gestures.py
 - **Orientation Calculation and Visualization**  
   The `HeadOrientation` class (in `head_orientation.py`) is responsible for:
   - **Calibration:**  
-    A set number of samples (default 10) are collected to calculate the neutral (baseline) values for the sensors. For example:  
-    `o1_neutral = np.mean(samples[:, 0])`
+    A set number of samples (default 10) are collected to calculate the neutral (baseline) values for the sensors.
   - **Calculating Angles:**  
     For each new packet, the raw orientation values are normalized by subtracting the neutral baseline. Then:
     - **Pitch** is computed as:
