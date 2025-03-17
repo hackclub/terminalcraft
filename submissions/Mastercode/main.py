@@ -16,7 +16,9 @@ key_file = 'data/key.key'
 master_password_file = 'data/master_password.key'
 settings_file = 'data/settings.json'
 diary_file = 'data/diary.json'
-
+# Ensure the data directory exists, Credits to josias for talking about the issue.
+if not os.path.exists("data"):
+    os.makedirs("data")
 def load_diary():
     if os.path.exists(diary_file):
         with open(diary_file, 'r') as f:
