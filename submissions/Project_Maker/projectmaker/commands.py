@@ -25,8 +25,6 @@ def create(project_name, type, directory):
         click.echo(f"Unknown type: {type}")
 
 @click.command()
-@click.argument("project_name")
-@click.option("--directory", "-d", default=".", help="Directory where the project will be created")
 def create_web(project_name, directory):
     """Creates a basic Web Project"""
 
@@ -75,8 +73,6 @@ def create_web(project_name, directory):
 
 
 @click.command()
-@click.argument("project_name")
-@click.option("--directory", "-d", default=".", help="Directory where the project will be created")
 def create_godot(project_name, directory):
     """Creates a Godot 4.4 Project"""
 
@@ -130,8 +126,6 @@ renderer/rendering_method="forward_plus"
     click.echo(f"Godot project '{project_name}' created successfully.")
 
 @click.command()
-@click.argument("project_name")
-@click.option("--directory", "-d", default=".", help="Directory where the project will be created")
 def create_unity(project_name, directory):
     """Creates a Unity Project"""
 
@@ -179,8 +173,6 @@ UserSettings/
 
 
 @click.command()
-@click.argument("project_name")
-@click.option("--directory", "-d", default=".", help="Directory where the project will be created")
 def create_nodejs(project_name, directory):
     """Creates a Node.js Project"""
 
