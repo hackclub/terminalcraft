@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#include <errno.h> // For errno
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -132,17 +133,65 @@ char *getString(const char *prompt)
     return buffer;
 }
 
-char *processPath(const char *path)
+/**
+ * @brief Processes a given file path and performs various checks and transformations based on the operating system.
+ *
+ * @param path The input file path to be processed. It can be a relative or absolute path.
+ * @param mustExist A boolean flag indicating whether the path must exist. If true, the function will check if the path exists.
+ *                  If false, the function will check if the parent directory exists, allowing for new file creation.
+ *                  In general, input files should exist, while output files may not.
+ *
+ * @return A newly allocated string containing the processed path, or NULL if an error occurs. The caller is responsible for freeing the returned string.
+ *
+ * The function performs the following operations:
+ * - Checks if the path is NULL or empty and returns NULL if it is.
+ * - On Windows:
+ *   - Replaces forward slashes with backslashes.
+ *   - Removes enclosing quotes if present.
+ *   - Resolves the path to an absolute path.
+ *   - If mustExist=true: Checks if the path exists and returns NULL if it doesn't.
+ *   - If mustExist=false: Checks if the parent directory exists (for file creation) and returns NULL if it doesn't.
+ *   - Retrieves file attributes if the path exists.
+ * - On Linux:
+ *   - Removes enclosing quotes if present.
+ *   - Resolves the path to an absolute path if it exists or mustExist is true.
+ *   - If mustExist=true: Checks if the path exists and returns NULL if it doesn't.
+ *   - If mustExist=false: Checks if the parent directory exists (for file creation) and returns NULL if it doesn't.
+ *   - Retrieves file attributes if the path exists.
+ *
+ * Error messages are printed to the standard output in case of failures.
+ */
+char *processPath(const char *path, bool mustExist)
 {
-#ifdef _WIN32
-    // Windows path processing
-    // Replace forward slashes with backslashes
+    // If the path is NULL or empty, return NULL
+    if (path == NULL || strlen(path) == 0)
+    {
+        printf("Error: Path is NULL or empty\n");
+        return NULL;
+    }
+
+    // Allocate a buffer for the path
     char *buffer = (char *)malloc(strlen(path) + 1);
     if (buffer == NULL)
     {
+        printf("Error: Memory allocation failed\n");
         return NULL;
     }
+
+    // Copy the path to the buffer
     strcpy(buffer, path);
+
+    // Check if the path is enclosed in quotes and remove them if present
+    if (buffer[0] == '\"' && buffer[strlen(buffer) - 1] == '\"')
+    {
+        buffer[strlen(buffer) - 1] = '\0';
+        memmove(buffer, buffer + 1, strlen(buffer));
+    }
+
+#ifdef _WIN32
+    // Windows path processing
+
+    // Replace forward slashes with backslashes
     for (int i = 0; buffer[i]; i++)
     {
         if (buffer[i] == '/')
@@ -151,97 +200,174 @@ char *processPath(const char *path)
         }
     }
 
-    // Check if the path is enclosed in quotes
-    if (buffer[0] == '\"' && buffer[strlen(buffer) - 1] == '\"')
-    {
-        // Remove quotes
-        buffer[strlen(buffer) - 1] = '\0';
-        memmove(buffer, buffer + 1, strlen(buffer));
-    }
-
-    // Check if the path is relative using realpath()
+    // Convert to absolute path
     char *resolvedPath = _fullpath(NULL, buffer, 0);
     if (resolvedPath == NULL)
     {
+        printf("Error: Failed to resolve path\n");
         free(buffer);
         return NULL;
     }
 
-    // Reallocate buffer with enough space for resolved path
-    free(buffer); // Free the original buffer
+    // Free the original buffer and allocate a new one for the resolved path
+    free(buffer);
     buffer = (char *)malloc(strlen(resolvedPath) + 1);
     if (buffer == NULL)
     {
+        printf("Error: Memory allocation failed\n");
         free(resolvedPath);
         return NULL;
     }
-
-    // Copy resolved path to buffer
     strcpy(buffer, resolvedPath);
     free(resolvedPath);
 
-    if (buffer == path)
-    {
-        printf("Path: %s\n", path);
-    }
-    else
-    {
-        printf("Given path: %s\n", path);
-        printf("Processed path: %s\n", buffer);
-    }
+    /* printf("Given path: %s\n", path);
+    printf("Processed path: %s\n", buffer); */
 
-    // Check if the path exists
-    if (_access(buffer, 0) == -1)
+    // Check if the path exists - only required if mustExist is true
+    if (mustExist && _access(buffer, 0) == -1)
     {
-        free(buffer);
-        printf("Path does not exist\n");
-        return NULL;
-    }
-
-    // Check if the path is a directory
-    DWORD attributes = GetFileAttributesA(buffer);
-    if (attributes == INVALID_FILE_ATTRIBUTES)
-    {
+        printf("Path does not exist: %s\n", buffer);
         free(buffer);
         return NULL;
     }
 
-    return buffer;
+    // If creating a new file, check if the directory exists
+    if (!mustExist)
+    {
+        char *lastSlash = strrchr(buffer, '\\');
+        if (lastSlash != NULL)
+        {
+            // Temporarily cut the string at the last backslash
+            char lastChar = *lastSlash;
+            *lastSlash = '\0';
+
+            // Check if the directory exists
+            if (_access(buffer, 0) == -1)
+            {
+                printf("Directory does not exist: %s\n", buffer);
+                free(buffer);
+                return NULL;
+            }
+
+            // Restore the string
+            *lastSlash = lastChar;
+        }
+    }
+
+    // Check attributes only if the path exists
+    if (_access(buffer, 0) != -1)
+    {
+        DWORD attributes = GetFileAttributesA(buffer);
+        if (attributes == INVALID_FILE_ATTRIBUTES)
+        {
+            printf("Error: Failed to get file attributes\n");
+            free(buffer);
+            return NULL;
+        }
+    }
 
 #elif __linux__
     // Linux path processing
-    // Check if the path is enclosed in quotes
-    if (path[0] == '\"' && path[strlen(path) - 1] == '\"')
+
+    // For existing paths or when mustExist is true
+    if (mustExist || access(buffer, F_OK) != -1)
     {
-        // Remove quotes
-        char *buffer = (char *)malloc(strlen(path) + 1);
-        if (buffer == NULL)
+        char *resolvedPath = realpath(buffer, NULL);
+        if (resolvedPath == NULL)
         {
+            printf("Error: Failed to resolve path\n");
+            free(buffer);
             return NULL;
         }
-        strcpy(buffer, path);
-        buffer[strlen(buffer) - 1] = '\0';
-        memmove(buffer, buffer + 1, strlen(buffer));
-        return buffer;
-    }
 
-    // Check if the path is relative
-    char *resolvedPath = realpath(path, NULL);
-    if (resolvedPath == NULL)
+        // Free original buffer and use resolved path
+        free(buffer);
+        buffer = resolvedPath;
+
+        // Check if the path exists (only matters if mustExist is true)
+        if (mustExist && access(buffer, F_OK) == -1)
+        {
+            printf("Path does not exist: %s\n", buffer);
+            free(buffer);
+            return NULL;
+        }
+
+        // Check file attributes if the path exists
+        if (access(buffer, F_OK) != -1)
+        {
+            struct stat pathStat;
+            if (stat(buffer, &pathStat) == -1)
+            {
+                printf("Error: Failed to get file attributes\n");
+                free(buffer);
+                return NULL;
+            }
+        }
+    }
+    else
     {
-        return NULL;
+        // Handle non-existent path (for file creation)
+
+        // Extract directory path
+        char *lastSlash = strrchr(buffer, '/');
+        if (lastSlash != NULL)
+        {
+            // Temporarily cut string at the last slash
+            char lastChar = *lastSlash;
+            *lastSlash = '\0';
+
+            // Empty directory means current directory
+            if (strlen(buffer) == 0)
+            {
+                strcpy(buffer, ".");
+            }
+
+            // Check if directory exists
+            if (access(buffer, F_OK) == -1)
+            {
+                printf("Directory does not exist: %s\n", buffer);
+                free(buffer);
+                return NULL;
+            }
+
+            // Restore the path
+            *lastSlash = lastChar;
+        }
+
+        // Convert to absolute path if it's a relative path
+        if (buffer[0] != '/')
+        {
+            // Get current working directory
+            char *cwd = getcwd(NULL, 0);
+            if (cwd == NULL)
+            {
+                printf("Error: Failed to get current working directory\n");
+                free(buffer);
+                return NULL;
+            }
+
+            // Create absolute path
+            char *absolutePath = malloc(strlen(cwd) + strlen(buffer) + 2);
+            if (absolutePath == NULL)
+            {
+                printf("Error: Memory allocation failed\n");
+                free(buffer);
+                free(cwd);
+                return NULL;
+            }
+            sprintf(absolutePath, "%s/%s", cwd, buffer);
+            free(buffer);
+            free(cwd);
+            buffer = absolutePath;
+        }
     }
 
-    // Check if the path is a directory
-    struct stat pathStat;
-    if (stat(resolvedPath, &pathStat) == -1)
-    {
-        free(resolvedPath);
-        return NULL;
-    }
-
-    return resolvedPath;
+    /* printf("Given path: %s\n", path);
+    printf("Processed path: %s\n", buffer); */
 #endif
+
+    return buffer;
 }
 
 bool fileExists(const char *filename)
@@ -427,4 +553,127 @@ void infoHandler(void)
         printf("Invalid selection.\n");
         break;
     }
+}
+
+void testHandler(void)
+{
+    printf("Test handler\n");
+
+    // Choose the test to run
+    const char *testOptions[] = {
+        "Test 1: File path processing",
+        "Test 2: File existence check",
+        "Test 3: File creation",
+        "Back"};
+
+    int selected = getMenuSelection("Choose a test:", testOptions, sizeof(testOptions) / sizeof(testOptions[0]), true);
+    if (selected == 3)
+    {
+        return; // Back to main menu
+    }
+
+    // Run the selected test
+    switch (selected)
+    {
+    case 0:
+    {
+        // Test file path processing
+        char *testPath = getString("Enter a file path: ");
+        if (testPath == NULL)
+        {
+            printf("Error: Failed to read path\n");
+            return;
+        }
+        printf("Processing path (entering function): %s\n", testPath);
+        char *processedPath = processPath(testPath, false);
+        printf("Processed path, evaluating (after function): %s\n", processedPath);
+        printf("Given path (input): %s\n", testPath);
+        printf("Processed path (output): %s\n", processedPath);
+        if (processedPath != NULL)
+        {
+            if (!fileExists(processedPath))
+            {
+                printf("File does not exist.\n");
+            }
+
+            free(processedPath);
+        }
+        else
+        {
+            printf("Test function failed.\n");
+        }
+    }
+    break;
+    case 1:
+    {
+        // Test file existence check
+        char *testFile = getString("Enter a file name to check: ");
+        if (testFile == NULL)
+        {
+            printf("Error: Failed to read file name\n");
+            return;
+        }
+        // Check if the file exists
+        if (fileExists(testFile))
+        {
+            printf("File exists: %s\n", testFile);
+        }
+        else
+        {
+            printf("File does not exist: %s\n", testFile);
+        }
+    }
+    break;
+    case 2:
+    {
+        // Test file creation
+        char *testFile = getString("Enter a file name to create: ");
+        if (testFile == NULL)
+        {
+            printf("Error: Failed to read file name\n");
+            return;
+        }
+        // Create the file
+        bool success = createFile(testFile);
+        // Check if the file was created successfully
+        if (fileExists(testFile))
+        {
+            printf("File created successfully: %s\n", testFile);
+        }
+        else
+        {
+            printf("Failed to create file: %s\n", testFile);
+        }
+    }
+    break;
+    default:
+        printf("Invalid selection.\n");
+        break;
+    }
+
+    // Repeat the test menu
+    testHandler();
+}
+
+bool createFile(const char *filename)
+{
+    FILE *file = fopen(filename, "w");
+    if (file == NULL)
+    {
+        printf("Error: Failed to create file: %s\n", filename);
+        // Get error code
+        int errorCode = errno;
+        // Print error message
+        printf("Error code: %d\n", errorCode);
+        return false;
+    }
+    fclose(file);
+    // Check if the file was created successfully
+    if (!fileExists(filename))
+    {
+        printf("Error: File was not created successfully: %s\n", filename);
+        return false;
+    }
+    /* printf("File created successfully: %s\n", filename); */
+    return true;
 }

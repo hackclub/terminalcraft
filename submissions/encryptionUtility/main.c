@@ -26,8 +26,9 @@
 #endif
 
 void init();
-void loop();
-enum Action askForAction(bool invalid);
+void loop(int argc, char *argv[]);
+enum Action askForAction(bool invalid, int argc, char *argv[]);
+void testHandler();
 
 enum Action
 {
@@ -36,12 +37,13 @@ enum Action
     GenerateKey,
     Hash,
     Info,
+    Test,
     Exit
 };
 
 int width;
 
-int main()
+int main(int argc, char *argv[])
 {
     /* Encryption tool */
     init();
@@ -49,7 +51,7 @@ int main()
     while (1)
     {
         // main loop
-        loop();
+        loop(argc, argv);
     }
 
     return 0;
@@ -89,9 +91,9 @@ The program will then perform the action and display the result, or save it to a
 
 */
 
-void loop()
+void loop(int argc, char *argv[])
 {
-    enum Action action = askForAction(false);
+    enum Action action = askForAction(false, argc, argv);
     printTitle();
 
     // Display current working directory
@@ -123,6 +125,9 @@ void loop()
     case Info:
         infoHandler();
         break;
+    case Test:
+        testHandler();
+        break;
     case Exit:
         printf("Exiting...\n");
         exit(0);
@@ -147,7 +152,7 @@ void loop()
 }
 
 // Now refactor askForAction to use this new function
-enum Action askForAction(bool invalid)
+enum Action askForAction(bool invalid, int argc, char *argv[])
 {
     if (invalid)
     {
@@ -166,29 +171,63 @@ enum Action askForAction(bool invalid)
         printf("Error: Unable to get current working directory\n");
     }
 
-    const char *options[] = {
-        "Encrypt",
-        "Decrypt",
-        "Generate key",
-        "Hash",
-        "Info",
-        "Exit"};
+    // Check if one of the command line arguments is "test"
+    // If so, display the test option
+    bool testOption = false;
+    if (argc > 1)
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            if (strcmp(argv[i], "--test") == 0)
+            {
+                printf("Test option selected\n");
+                testOption = true;
+                break;
+            }
+        }
+    }
+    
+    // Define options based on whether testOption is enabled
+    const char *options[7]; // Maximum 7 options
+    int optionCount = 0;
+    
+    // Always include these options
+    options[optionCount++] = "Encrypt";
+    options[optionCount++] = "Decrypt";
+    options[optionCount++] = "Generate key";
+    options[optionCount++] = "Hash";
+    options[optionCount++] = "Info";
+    
+    // Only include Test option if testOption is true
+    if (testOption) {
+        options[optionCount++] = "Test";
+    }
+    
+    // Always include Exit as the last option
+    options[optionCount++] = "Exit";
 
     const char *title = "Choose an action:";
-    int selected = getMenuSelection(title, options, sizeof(options) / sizeof(options[0]), true);
+    int selected = getMenuSelection(title, options, optionCount, true);
 
     // Convert selection to enum
-    if (selected >= 0 && selected < 6)
-    {
-        return (enum Action)selected;
-    }
-    else if (selected == -1)
-    { // ESC key
+    if (selected >= 0 && selected < optionCount) {
+        // Map selection to enum value
+        if (selected < 5) {
+            // First 5 options (0-4) map directly
+            return (enum Action)selected;
+        } else if (selected == optionCount - 1) {
+            // Last option is always Exit
+            return Exit;
+        } else if (testOption && selected == 5) {
+            // If testOption is true and we selected position 5, it's Test
+            return Test;
+        }
+    } else if (selected == -1) { // ESC key
         return Exit;
     }
 
     // This should never happen with our implementation
-    return askForAction(true);
+    return askForAction(true, argc, argv);
 }
 
 void init()

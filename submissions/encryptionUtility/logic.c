@@ -23,7 +23,7 @@ char *getKeyContent(int keySource, const char *defaultFilename, const char *prom
 
     if (keySource == 1)
     { // From text
-                char tempPrompt[256];
+        char tempPrompt[256];
         sprintf(tempPrompt, "%s: ", promptMsg);
         keyContent = getString(tempPrompt);
         if (keyContent == NULL || strlen(keyContent) == 0)
@@ -58,7 +58,12 @@ char *getKeyContent(int keySource, const char *defaultFilename, const char *prom
         }
 
         // Process filename
-        filename = processPath(filename);
+        filename = processPath(filename, true);
+        if (filename == NULL)
+        {
+            printf("Error: Failed to process filename\n");
+            return NULL;
+        }
 
         // Check if file exists
         if (!fileExists(filename))
@@ -91,19 +96,23 @@ bool handleFileOutput(const char *content, size_t contentLength, bool isBinary)
         return false;
 
     // Process filename
-    filename = processPath(filename);
+    filename = processPath(filename, false);
+    if (filename == NULL)
+    {
+        printf("Error: Failed to process filename\n");
+        return false;
+    }
 
-    // If file does not exist, create it
+    // Create or verify the file exists
     if (!fileExists(filename))
     {
-        FILE *file = fopen(filename, "w");
-        if (file == NULL)
+        if (!createFile(filename))
         {
             printf("Error: Failed to create output file\n");
             free(filename);
             return false;
         }
-        fclose(file);
+        printf("Output file created: %s\n", filename);
     }
 
     printf("Output path: %s\n", filename);
@@ -186,7 +195,12 @@ void encryptHandler()
             return;
 
         // Process filename
-        filename = processPath(filename);
+        filename = processPath(filename, true);
+        if (filename == NULL)
+        {
+            printf("Error: Failed to process filename\n");
+            return;
+        }
 
         // Check if file exists
         if (!fileExists(filename))
@@ -673,6 +687,9 @@ void decryptHandler()
     if (keySource == 2)
         return;
 
+    // Flush stdin
+    fflush(stdin);
+
     char *content = NULL; // Will hold either file content or user text
     size_t contentLength = 0;
 
@@ -683,7 +700,12 @@ void decryptHandler()
             return;
 
         // Process filename
-        filename = processPath(filename);
+        filename = processPath(filename, true);
+        if (filename == NULL)
+        {
+            printf("Error: Failed to process filename\n");
+            return;
+        }
 
         // Check if file exists
         if (!fileExists(filename))
@@ -765,12 +787,12 @@ void decryptHandler()
     if (decryptionMethod == 0) // Public-private key
     {
         publicPrivateKeyDecryption(content, contentLength, &decryptedOutput, &decryptedOutputLength,
-                                  keyContent, keyContentLength, isBase64Input);
+                                   keyContent, keyContentLength, isBase64Input);
     }
     else if (decryptionMethod == 1) // Symmetric key
     {
         symmetricKeyDecryption(content, contentLength, &decryptedOutput, &decryptedOutputLength,
-                              keyContent, keyContentLength, isBase64Input);
+                               keyContent, keyContentLength, isBase64Input);
     }
 
     // Clean up key content when done
@@ -1102,6 +1124,8 @@ void generateKeyHandler()
     if (privKeyFilename == NULL || strlen(privKeyFilename) == 0)
         privKeyFilename = strdup("privkey.pem");
 
+    printf("Generating RSA key pair...\n");
+
     // Generate RSA key pair using EVP interface
     EVP_PKEY *pkey = NULL;
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
@@ -1144,17 +1168,37 @@ void generateKeyHandler()
     }
 
     // Save public key to file
-    FILE *pubKeyFile = fopen(pubKeyFilename, "wb");
+    char *pubKeyPathname = processPath(pubKeyFilename, false);
+    
+    /* printf("Public key file: %s\n", pubKeyPathname); */
+    
+    // Create or verify the file exists
+    if (!fileExists(pubKeyPathname))
+    {
+        if (!createFile(pubKeyPathname))
+        {
+            printf("Error: Failed to create public key file\n");
+            free(pubKeyPathname);
+            free(pubKeyFilename);
+            free(privKeyFilename);
+            EVP_PKEY_free(pkey);
+            EVP_PKEY_CTX_free(ctx);
+            return;
+        }
+        printf("Public key file created: %s\n", pubKeyPathname);
+    }
+    
+    FILE *pubKeyFile = fopen(pubKeyPathname, "wb");
     if (pubKeyFile == NULL)
     {
         printf("Error: Failed to open public key file for writing\n");
+        free(pubKeyPathname);
         EVP_PKEY_free(pkey);
         EVP_PKEY_CTX_free(ctx);
         free(pubKeyFilename);
         free(privKeyFilename);
         return;
     }
-
     if (PEM_write_PUBKEY(pubKeyFile, pkey) != 1)
     {
         printf("Error: Failed to write public key to file\n");
@@ -1168,17 +1212,35 @@ void generateKeyHandler()
     fclose(pubKeyFile);
 
     // Save private key to file
-    FILE *privKeyFile = fopen(privKeyFilename, "wb");
+    char *privKeyPathname = processPath(privKeyFilename, false);
+    
+    // Create or verify the file exists
+    if (!fileExists(privKeyPathname))
+    {
+        if (!createFile(privKeyPathname))
+        {
+            printf("Error: Failed to create private key file\n");
+            free(privKeyPathname);
+            free(pubKeyFilename);
+            free(privKeyFilename);
+            EVP_PKEY_free(pkey);
+            EVP_PKEY_CTX_free(ctx);
+            return;
+        }
+        printf("Private key file created: %s\n", privKeyPathname);
+    }
+    
+    FILE *privKeyFile = fopen(privKeyPathname, "wb");
     if (privKeyFile == NULL)
     {
         printf("Error: Failed to open private key file for writing\n");
+        free(privKeyPathname);
         EVP_PKEY_free(pkey);
         EVP_PKEY_CTX_free(ctx);
         free(pubKeyFilename);
         free(privKeyFilename);
         return;
     }
-
     if (PEM_write_PrivateKey(privKeyFile, pkey, NULL, NULL, 0, NULL, NULL) != 1)
     {
         printf("Error: Failed to write private key to file\n");
@@ -1195,6 +1257,14 @@ void generateKeyHandler()
     EVP_PKEY_free(pkey);
     EVP_PKEY_CTX_free(ctx);
     printf("RSA key pair generated and saved to %s and %s\n", pubKeyFilename, privKeyFilename);
+
+    // Print the public and private key file paths in a dark color
+    printf("\033[1;30mPublic key file:  %s\n", pubKeyPathname);
+    printf("Private key file: %s\n\033[0m", privKeyPathname);
+
+    
+    free(pubKeyPathname);
+    free(privKeyPathname);
     free(pubKeyFilename);
     free(privKeyFilename);
 }
@@ -1247,7 +1317,12 @@ void hashHandler()
             return;
 
         // Process filename
-        filename = processPath(filename);
+        filename = processPath(filename, true);
+        if (filename == NULL)
+        {
+            printf("Error: Failed to process filename\n");
+            return;
+        }
 
         // Check if file exists
         if (!fileExists(filename))
@@ -1345,8 +1420,8 @@ void hashHandler()
 
     EVP_MD_CTX_free(mdctx);
     free(content);
-    content = NULL; // Clear content after hashing
-    contentLength = 0; // Clear content length
+    content = NULL;                      // Clear content after hashing
+    contentLength = 0;                   // Clear content length
     hashOutputLength = hash_len * 2 + 1; // Each byte is represented by 2 hex characters + null terminator
     hashOutput = (char *)malloc(hashOutputLength);
     if (hashOutput == NULL)
@@ -1371,24 +1446,22 @@ void hashHandler()
         }
 
         // Process filename
-        filename = processPath(filename);
+        filename = processPath(filename, false);
 
-        // Check if file exists
+        // Create or verify the file exists
         if (!fileExists(filename))
         {
-            FILE *file = fopen(filename, "w");
-            if (file == NULL)
+            if (!createFile(filename))
             {
                 printf("Error: Failed to create output file\n");
                 free(filename);
                 free(hashOutput);
                 return;
             }
-            fclose(file);
+            printf("Output file created: %s\n", filename);
         }
 
-        // Save output to file
-        FILE *file = fopen(filename, "w");
+        FILE *file = fopen(filename, "wb");
         if (file == NULL)
         {
             printf("Error: Failed to open output file for writing\n");
@@ -1411,6 +1484,6 @@ void hashHandler()
         printf("Hash output:\n%s\n", hashOutput);
     }
     free(hashOutput);
-    hashOutput = NULL; // Clear hash output after use
+    hashOutput = NULL;    // Clear hash output after use
     hashOutputLength = 0; // Clear hash output length
 }
