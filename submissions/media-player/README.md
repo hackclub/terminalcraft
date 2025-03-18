@@ -6,6 +6,9 @@ Hi! Thanks for checking out my project!
 
 ### How to run:
 - Install dependencies with `pip install -r requirements.txt`
-- Run `play [file]`. Enjoy!
+- Run the program:
+    - Windows: Run `play [file]`.
+    - Mac/Linux: Run `./play.sh [file]`.
+- Enjoy!
 
 *Use `play --help` for additional options*
