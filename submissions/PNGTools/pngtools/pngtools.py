@@ -790,7 +790,7 @@ class PNGTools:
         if not self.original_image:
             return
         
-        width, height = self.orignal_image.size
+        width, height = self.original_image.size
 
         if topleft and bottomright:
             try:
