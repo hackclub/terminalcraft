@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using ShellTimer.Cli.Support.Cube;
+using ShellTimer.Shared.Support.Cube;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

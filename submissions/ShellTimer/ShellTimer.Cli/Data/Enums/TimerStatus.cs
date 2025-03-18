@@ -1,4 +1,4 @@
-namespace ShellTimer.Cli.Support.Enums;
+namespace ShellTimer.Cli.Data.Enums;
 
 public enum TimerStatus
 {

@@ -11,6 +11,7 @@ My primary motivation for creating this project was to create something actually
 
 ## Features
 
+- [x] **NEW:** Multiplayer duels in real-time (using WebSockets)
 - [x] Support for different cube sizes (2x2, 3x3, 4x4, etc.)
 - [x] Configurable inspection time
 - [x] Scramble generation
@@ -20,7 +21,7 @@ My primary motivation for creating this project was to create something actually
 
 ### Roadmap
 
-- [ ] Add a multiplayer racing mode (using SignalR) - Already in the works!
+- [ ] Add support for taking over a duel (partially implemented on the backend)
 - [ ] Add an option to export the solve history to a file
 - [ ] Add support for multiple sessions
 - [ ] Add an algorithm practice tool
@@ -50,13 +51,34 @@ My primary motivation for creating this project was to create something actually
    cd ShellTimer.Cli && dotnet run
    ```
 
+## Running the backend in development (optional)
+
+```bash
+cd ShellTimer.WebApi && dotnet run
+```
+
+After running the command above, the backend should be accessible at `http://localhost:5212`, set this as your duel service url using the `config` command. 
+
+## Running the backend in production
+
+1. Make sure you have [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) installed:
+   ```bash
+   docker compose
+   ```
+2. Run the docker compose defined at the root of the repository:
+   ```bash
+   docker compose up -d
+   ```
+   
+The backend should now be accessible on `http://0.0.0.0:8080`. I recommend adding a reverse proxy in front of the backend in production.
+
 ## Usage
 
 Run the application without any commands to see the help menu:
 
 ```
 USAGE:
-    ShellTimer.Cli.dll [OPTIONS] <COMMAND>
+    ShellTimer.Cli [OPTIONS] <COMMAND>
 
 OPTIONS:
     -h, --help    Prints help information
@@ -66,6 +88,8 @@ COMMANDS:
     scramble    Generate scrambles for a specific cube size
     solves      Manage solve records
     stats       Show statistics for a specific cube size
+    duel        Duel an other ShellTimer user in real-time
+    config      Configure ShellTimer with application wide settings
 ```
 
 ```

@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using ShellTimer.Cli.Data;
+using ShellTimer.Cli.Data.Enums;
 using ShellTimer.Cli.Data.Models;
-using ShellTimer.Cli.Support.Cube;
-using ShellTimer.Cli.Support.Enums;
+using ShellTimer.Shared.Support.Cube;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

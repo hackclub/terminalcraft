@@ -1,4 +1,4 @@
-namespace ShellTimer.Cli.Support.Cube;
+namespace ShellTimer.Shared.Support.Cube;
 
 // Based on the official WCA approved scramble generator
 public static class ScrambleGenerator

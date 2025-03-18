@@ -29,6 +29,12 @@ app.Configure(config =>
 
     config.AddCommand<StatsCommand>("stats")
         .WithDescription("Show statistics for a specific cube size");
+
+    config.AddCommand<DuelCommand>("duel")
+        .WithDescription("Duel an other ShellTimer user in real-time");
+
+    config.AddCommand<ConfigCommand>("config")
+        .WithDescription("Configure ShellTimer with application wide settings");
 });
 
 return app.Run(args);
