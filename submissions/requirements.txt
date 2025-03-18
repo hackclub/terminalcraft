@@ -1,5 +1,0 @@
-pydantic
-click
-ollama
-openai
-requests
