@@ -60,6 +60,7 @@ class PNGTools:
     
     def color_distance(self, color1, color2):
         return sum((a - b) ** 2 for a, b in zip(color1, color2)) ** 0.5 / 441.6729559300637
+    # 441.6729559300637 is obtained from sqrt(255^2 + 255^2 + 255^2) from the euclidean distance formula for colors
 
     def make_transparent(self, target_color, tolerance):
         if not self.original_image:
@@ -720,6 +721,98 @@ class PNGTools:
         self.processed_image = result
         print(result)
 
+    def resize_image(self, width=None, height=None, maintain_aspect=True):
+        if not self.original_image:
+            print("No image loaded")
+            return
+            
+        original_width, original_height = self.original_image.size
+        if width is None and height is None:
+            print("Error: At least one dimension (width or height) must be specified")
+            return
+            
+        if width is None and height is not None:
+            if maintain_aspect:
+                ratio = height / original_height
+                width = int(original_width * ratio)
+            else:
+                width = original_width
+        elif height is None and width is not None:
+            if maintain_aspect:
+                ratio = width / original_width
+                height = int(original_height * ratio)
+            else:
+                height = original_height
+        
+        elif maintain_aspect:
+            width_ratio = width / original_width
+            height_ratio = height / original_height
+            ratio = min(width_ratio, height_ratio)
+            width = int(original_width * ratio)
+            height = int(original_height * ratio)
+        
+        self.processed_image = self.original_image.resize((width, height), Image.LANCZOS)
+        return self
+        
+    def apply_filter(self, filter_type):
+        if not self.original_image:
+            return
+        
+        img = self.original_image.convert("RGBA")
+        width, height = img.size
+        pixels = img.load()
+
+        for y in range(height):
+            for x in range(width):
+                r, g, b, a = pixels[x, y]
+
+                if filter_type == "grayscale":
+                    gray = int(0.299 * r + 0.587 * g + 0.114 * b)
+                    pixels[x, y] =  (gray, gray, gray, a)
+                elif filter_type == "sepia":
+                    tr = int(0.393 * r + 0.769 * g + 0.189 * b)
+                    tg = int(0.349 * r + 0.686 * g + 0.168 * b)
+                    tb = int(0.272 * r + 0.534 * g + 0.131 * b)
+                    pixels[x, y] = (min(tr, 255), min(tg, 255), min(tb, 255), a)
+                elif filter_type == "negative":
+                    pixels[x, y] = (255 - r, 255 - g, 255 - b, a)
+                elif filter_type == "red":
+                    pixels[x, y] = (r, 0, 0, a)
+                elif filter_type == "green":
+                    pixels[x, y] = (0, g, 0, a)
+                elif filter_type == "blue":
+                    pixels[x, y] = (0, 0, b, a)
+
+        self.processed_image = img
+        return self
+
+    def crop_image(self, left=None, top=None, right=None, bottom=None, topleft=None, bottomright=None):
+        if not self.original_image:
+            return
+        
+        width, height = self.original_image.size
+
+        if topleft and bottomright:
+            try:
+                left, top = map(int, topleft.split(','))
+                right, bottom = map(int, bottomright.split(','))
+            except (ValueError, AttributeError):
+                print("Error: topleft and bottomright must be in format 'x,y'")
+                return
+            
+        elif left is not None and top is not None and right is not None and bottom is not None:
+            pass
+        else:
+            print("Error: Either (left, top, right, bottom) or (topleft, bottomright) coordinates are required")
+            return
+        
+        left = max(0, min(width-1, left))
+        top = max(0, min(height-1, top))
+        right = max(left+1, min(width, right))
+        bottom = max(top+1, min(height, bottom))
+        self.processed_image = self.original_image.crop((left, top, right, bottom))
+        return self
+
 def print_usage():
     usage = """
 Usage: PNGTools.py -i <input.png> -o <output.png> -p <operation> [options]
@@ -813,6 +906,25 @@ Processing Operations:
     hide-text           Hide a secret message inside the PNG
         --message "<string>"    Message to conceal (in quotes)
 
+    resize              Resize the PNG
+        --width <px>            New width in pixels
+        --height <px>           New height in pixels
+        --no-aspect             (Optional) Don't maintain aspect ratio
+
+    filter              Apply color filter to the PNG
+        --filter-type <type>    Filter type (grayscale, sepia, negative, red, green, blue)
+
+    crop                Crop the PNG to specified coordinates
+        (Option 1)
+        --left <px>             Left x coordinate
+        --top <px>              Top y coordinate
+        --right <px>            Right x coordinate
+        --bottom <px>           Bottom y coordinate
+
+        (Option 2)
+        --topleft <x,y>         Top left coordinates
+        --bottomright <x,y>     Top right coordinates
+        
         
 Information Commands (No output file required):
     analyze             Analyze the PNG file (basic metadata)
@@ -871,6 +983,16 @@ def main():
     parser.add_argument('--tr', type=int, help='Top right corner radius')
     parser.add_argument('--bl', type=int, help='Bottom left corner radius')
     parser.add_argument('--br', type=int, help='Bottom right corner radius')
+    parser.add_argument('--width', type=int, help='Width to resize to')
+    parser.add_argument('--height', type=int, help='Height to resize to')
+    parser.add_argument('--no-aspect', action='store_true', help='Do not maintain aspect ratio')
+    parser.add_argument('--filter-type', choices=['grayscale', 'sepia', 'negative', 'red', 'green', 'blue'], help='Type of filter to apply')
+    parser.add_argument('--left', type=int, help='Left x coordinate for cropping')
+    parser.add_argument('--top', type=int, help='Top y coordinate for cropping')
+    parser.add_argument('--right', type=int, help='Right x coordinate for cropping')
+    parser.add_argument('--bottom', type=int, help='Bottom y coordinate for cropping')
+    parser.add_argument('--topleft', help='Top left coordinate for cropping in format "x,y"')
+    parser.add_argument('--bottomright', help='Bottom right coordinate for cropping in format "x,y"')
 
     try:
         args = parser.parse_args()
@@ -1053,6 +1175,36 @@ def main():
 
     elif args.process == 'extract-hidden-text':
         tools.extract_hidden_text()
+
+    elif args.process == 'resize':
+        if args.width is None and args.height is None:
+            print("Error: at least one of --width or --height is required for resize operation")
+            print_usage()
+            sys.exit(1)
+        
+        maintain_aspect = not args.no_aspect
+        result = tools.resize_image(width=args.width, height=args.height, maintain_aspect=maintain_aspect)
+        
+        if not tools.processed_image:
+            print("Error: Resize operation failed")
+            sys.exit(1)
+    
+    elif args.process == 'filter':
+        if not args.filter_type:
+            print("Error: --filter-type is required for filter operation")
+            print_usage()
+            sys.exit(1)
+        tools.apply_filter(args.filter_type)
+
+    elif args.process == 'crop':
+        if args.topleft and args.bottomright:
+            tools.crop_image(topleft=args.topleft, bottomright=args.bottomright)
+        elif args.left is not None and args.top is not None and args.right is not None and args.bottom is not None:
+            tools.crop_image(args.left, args.top, args.right, args.bottom)
+        else:
+            print("Error: Either (--left, --top, --right, --bottom) or (--topleft, --bottomright) are required for crop operation")
+            print_usage()
+            sys.exit(1)
 
     else:
         print(f"Error: Unknown operation '{args.process}'")
