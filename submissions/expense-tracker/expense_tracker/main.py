@@ -8,7 +8,7 @@ class ExpenseTrackerApp(App):
     }
     #left_pane {
         width: 50%;
-        height: 100%;
+        height: auto;
         layout: vertical;
         padding: 1;
     }
@@ -17,13 +17,12 @@ class ExpenseTrackerApp(App):
         height: 100%;
         layout: vertical;
         border: solid green;
-        padding: 1;
     }
     .hidden {
         display: none;
     }
     #expense_form {
-        height: 30%;
+        height: 50%;
         layout: vertical;
     }
     #edit_form {
@@ -50,7 +49,7 @@ class ExpenseTrackerApp(App):
         margin-right: 1;
     }
     #control_buttons {
-        height: 10%;
+        height: auto;
         layout: horizontal;
     }
     """

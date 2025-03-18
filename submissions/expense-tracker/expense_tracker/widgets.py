@@ -11,7 +11,7 @@ class ExpenseForm(Widget):
             yield Select(id="currency", options=[("USD", "USD"), ("INR", "INR")], value="USD", allow_blank=False)
             yield Input(id="description", placeholder="Description")
             yield Select(id="category", options=[(c, c) for c in ExpenseManager().categories], value="Miscellaneous", allow_blank=False)
-            yield Button("Add", id="add_expense")
+            # yield Button("Add", id="add_expense")
 
 class ReportView(Widget):
     def __init__(self, expenses, converter, global_currency):

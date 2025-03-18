@@ -22,6 +22,7 @@ class MainScreen(Screen):
             yield ExpenseForm(id="expense_form")
             with Vertical():
                 with Container(id="control_buttons"):
+                    yield Button("Add Expense", id="add_expense")
                     yield Button("Monthly Report", id="monthly")
                     yield Button("Yearly Report", id="yearly")
             # Edit form (hidden by default)
