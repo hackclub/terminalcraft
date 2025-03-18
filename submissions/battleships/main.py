@@ -135,6 +135,7 @@ def print_boards():
     print_grid(opponent_board_visible)
 
 def clear_screen():
+    os.system('clear')
     os.system('cls' if os.name == 'nt' else 'clear')
 
 player_board = initialize_grid()
@@ -189,5 +190,6 @@ while not game_over:
         game_over = True
         break
 
-    input("\nEnter to continue: ")
+    input("\nHit 'Enter' to continue: ")
     clear_screen()
+
