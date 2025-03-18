@@ -64,7 +64,7 @@ def place_ship(grid, size, manual=False):
             while valid_coords:
                 try:
                     print(f"Placing ship of size {size}.")
-                    start_pos = input("Enter the starting position of your ship: ").strip().upper()
+                    start_pos = input("Enter the starting position of your ship (e.g. A2): ").strip().upper()
                     direction = input("Enter the direction (up, down, left, right): ").strip().lower()
                     clear_screen()
                     col = ord(start_pos[0]) - 65
