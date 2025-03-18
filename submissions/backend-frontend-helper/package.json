@@ -1,0 +1,31 @@
+{
+  "name": "cli",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/object-hash": "^3.0.6",
+    "@types/react": "18"
+  },
+  "peerDependencies": {
+    "typescript": "^5",
+    "react-devtools": "^6.1.1"
+  },
+  "dependencies": {
+    "@inkjs/ui": "^2.0.0",
+    "@inkkit/ink-markdown": "^1.0.0",
+    "git-remote-origin-url": "^4.0.0",
+    "ink": "^5.2.0",
+    "ink-big-text": "^2.0.0",
+    "node-fetch": "^3.3.2",
+    "object-hash": "^3.0.0",
+    "react": "18",
+    "strip-ansi": "^7.1.0",
+    "terminal-size": "^4.0.0"
+  },
+  "scripts": {
+    "start": "bun run index.ts",
+    "build": "bun build --compile --outfile=./build/helper main.tsx"
+  }
+}
