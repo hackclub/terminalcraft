@@ -152,6 +152,25 @@ Processing Operations:
     hide-text           Hide a secret message inside the PNG
         --message "<string>"    Message to conceal (in quotes)
 
+    resize              Resize the PNG
+        --width <px>            New width in pixels
+        --height <px>           New height in pixels
+        --no-aspect             (Optional) Don't maintain aspect ratio
+
+    filter              Apply color filter to the PNG
+        --filter-type <type>    Filter type (grayscale, sepia, negative, red, green, blue)
+
+    crop                Crop the PNG to specified coordinates
+        (Option 1)
+        --left <px>             Left x coordinate
+        --top <px>              Top y coordinate
+        --right <px>            Right x coordinate
+        --bottom <px>           Bottom y coordinate
+
+        (Option 2)
+        --topleft <x,y>         Top left coordinates
+        --bottomright <x,y>     Top right coordinates
+
         
 Information Commands (No output file required):
     analyze             Analyze the PNG file (basic metadata)
@@ -568,5 +587,4 @@ pngtools -i step4.png -o final.png -p compress --level 30
 Base | Step 1 | Step 2 | Step 3 | Step 4 | Final
 :---:|:------:|:------:|:------:|:------:|:-----:
 ![Base Image](assets/base.png) | ![Step 1](assets/step1.png) | ![Step 2](assets/step2.png) | ![Step 3](assets/step3.png) | ![Step 4](assets/step4.png) | ![Final Result](assets/final.png)
-
 
