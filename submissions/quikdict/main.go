@@ -20,7 +20,7 @@ func main() {
 	if args.Host {
 		handleErr(server.Host(8246))
 	} else {
-		tw, _, err := term.GetSize(int(os.Stdin.Fd()))
+		tw, _, err := term.GetSize(int(os.Stdout.Fd()))
 		handleErr(err)
 		handleErr(cli.Print(args, tw))
 	}

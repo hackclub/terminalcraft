@@ -36,6 +36,9 @@ func Parse(args []string) (utils.Params, error) {
 			params.Host = true
 
 		default:
+			if arg[0] == '-' {
+				return utils.Params{}, errors.New("parameter passed does not exist")
+			}
 			params.Word = arg
 		}
 	}
