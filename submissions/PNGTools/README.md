@@ -530,6 +530,39 @@ Large Original | Large with Hidden Text
 
 > **Note:** Images with hidden text will appear identical to their originals. The text is encoded at the pixel level and is not visible to the human eye. Larger images can store more hidden text.
 
+### Image resize
+```bash
+pngtools -i cat.png -o cat_resized.png -p resize --width 500 --height 500
+```
+
+Before | After
+:-------------:|:---------------------:
+![Cat](assets/cat.png) | ![Resized Cat](assets/cat_resized.png)
+
+### Filter
+```bash
+pngtools -i cat_resized.png -o cat_resized_grayscale.png -p filter --filter-type grayscale
+pngtools -i cat_resized.png -o cat_resized_sepia.png -p filter --filter-type sepia
+pngtools -i cat_resized.png -o cat_resized_negative.png -p filter --filter-type negative
+pngtools -i cat_resized.png -o cat_resized_red.png -p filter --filter-type red
+pngtools -i cat_resized.png -o cat_resized_green.png -p filter --filter-type green
+pngtools -i cat_resized.png -o cat_resized_blue.png -p filter --filter-type blue
+```
+
+Before | Grayscale | Sepia | negative | red | green | blue 
+:---:|:------:|:------:|:------:|:------:|:-----:|:-----: 
+![Base image](assets/cat_resized.png) | ![Grayscale](assets/cat_resized_grayscale.png) | ![Sepia](assets/cat_resized_sepia.png) | ![Negative](assets/cat_resized_negative.png) | ![Red](assets/cat_resized_red.png) | ![Green](assets/cat_resized_green.png)| ![Blue](assets/cat_resized_blue.png)
+
+### Crop
+```bash
+pngtools -i cat_resized.png -o cat_resized_cropped.png -p crop --left 50 --right 450 --top 50 --bottom 450
+pngtools -i cat_resized.png -o cat_resized_cropped_alt.png -p crop --topleft 50,50 --bottomright 450,450
+```
+
+Before | 4 Point Crop | 2 Point Crop
+:-------------:|:---------------------:|:---------------------: 
+![Cat](assets/cat_resized.png) | ![4P Cropped Cat](assets/cat_resized_cropped.png) | ![2P Cropped Cat](assets/cat_resized_cropped_alt.png)
+
 ## Edge Cases
 
 ### Operations on Tiny Images
