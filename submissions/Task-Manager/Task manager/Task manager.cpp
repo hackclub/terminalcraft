@@ -4,7 +4,7 @@
 #include <cctype>
 #include <cmath>
 #include <fstream>
-#include <limits> // Add this to include numeric_limits
+#include <limits>
 
 using namespace std;
 
@@ -140,7 +140,7 @@ double Expression(const string& operation) {
 
             op = c;
             num = 0;
-            isDecimal = false;  // Reset decimal flag
+            isDecimal = false;
             decimalPlace = 0.1;
         }
 
