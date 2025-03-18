@@ -1,0 +1,136 @@
+[
+  {
+    "player_x": "Sandesh kadel",
+    "player_o": "Sandesh",
+    "date": "2025-03-12 17:38:58",
+    "result": "Draw",
+    "moves": [
+      "X00",
+      "O11",
+      "X22",
+      "O02",
+      "X20",
+      "O21",
+      "X12",
+      "O10",
+      "X01"
+    ],
+    "duration": "0:00:43.754035"
+  },
+  {
+    "player_x": "Sandesh kadel",
+    "player_o": "AI",
+    "date": "2025-03-12 17:40:12",
+    "result": "Draw",
+    "moves": [
+      "X10",
+      "O11",
+      "X00",
+      "O20",
+      "X02",
+      "O22",
+      "X21",
+      "O01",
+      "X12"
+    ],
+    "duration": "0:00:28.263345"
+  },
+  {
+    "player_x": "Sandesh kadel",
+    "player_o": "Player 2 name is name",
+    "date": "2025-03-12 17:44:47",
+    "result": "Sandesh kadel wins!",
+    "moves": [
+      "X00",
+      "O11",
+      "X22",
+      "O20",
+      "X02",
+      "O12",
+      "X01"
+    ],
+    "duration": "0:00:40.280540"
+  },
+  {
+    "player_x": "Sandesh kadel",
+    "player_o": "AI",
+    "date": "2025-03-13 09:51:53",
+    "result": "Draw",
+    "moves": [
+      "X22",
+      "O11",
+      "X00",
+      "O02",
+      "X20",
+      "O10",
+      "X12",
+      "O21",
+      "X01"
+    ],
+    "duration": "0:00:24.666437"
+  },
+  {
+    "player_x": "Sandesh kadel",
+    "player_o": "AI",
+    "date": "2025-03-13 09:52:15",
+    "result": "Sandesh kadel wins!",
+    "moves": [
+      "X11",
+      "O20",
+      "X00",
+      "O02",
+      "X22"
+    ],
+    "duration": "0:00:18.436890"
+  },
+  {
+    "player_x": "Sandesh kadel",
+    "player_o": "AI",
+    "date": "2025-03-13 09:52:50",
+    "result": "Sandesh kadel wins!",
+    "moves": [
+      "X11",
+      "O00",
+      "X22",
+      "O20",
+      "X10",
+      "O02",
+      "X12"
+    ],
+    "duration": "0:00:29.509690"
+  },
+  {
+    "player_x": "Sandesh kadel",
+    "player_o": "Aayush",
+    "date": "2025-03-15 19:44:25",
+    "result": "Draw",
+    "moves": [
+      "X00",
+      "O11",
+      "X22",
+      "O01",
+      "X21",
+      "O20",
+      "X02",
+      "O12",
+      "X10"
+    ],
+    "duration": "0:01:00.205572"
+  },
+  {
+    "player_x": "Sandesh kadel",
+    "player_o": "Aayush ojha",
+    "date": "2025-03-15 23:58:34",
+    "result": "Sandesh kadel wins!",
+    "moves": [
+      "X00",
+      "O11",
+      "X22",
+      "O20",
+      "X02",
+      "O10",
+      "X01"
+    ],
+    "duration": "0:00:40.534476"
+  }
+]
