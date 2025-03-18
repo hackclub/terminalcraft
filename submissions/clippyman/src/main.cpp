@@ -118,7 +118,7 @@ void CopyEntry(const CopyEvent& event)
         id_str             = fmt::to_string(std::stoi(lastId.GetString()) + 1);
     }
     rapidjson::GenericStringRef<char> id_ref(id_str.c_str());
-    rapidjson::Value                  value_content(event.content.c_str(), allocator);
+    rapidjson::Value                  value_content(event.content.c_str(), event.content.size(), allocator);
     doc["entries"].AddMember(id_ref, value_content, allocator);
 
     unsigned int i = 0;
@@ -346,7 +346,7 @@ restart:
             else if (ch == '\n' && selected < std::string::npos - 1 && !results.empty())
             {
                 endwin();
-                info("Copied selected content:\n{}", results[selected]);
+                info("Selected content:\n{}", results[selected]);
                 return 0;
             }
         }
@@ -354,7 +354,7 @@ restart:
         if (del)
             delete_draw_confirm(del_selected);
         else
-            draw_search_box(query, ((results.empty() || query.empty()) ? entries_value : results), max_width, max_visible,
+            draw_search_box(query, (query.empty() ? entries_value : results), max_width, max_visible,
                             selected, scroll_offset, cursor_x, is_search_tab);
     }
 
@@ -464,23 +464,6 @@ bool parseargs(int argc, char* argv[], Config& config, const std::string& config
 
 int main(int argc, char* argv[])
 {
-#if PLATFORM_XORG
-    CClipboardListenerX11 clipboardListener;
-    clipboardListener.AddCopyCallback(CopyCallback);
-    clipboardListener.AddCopyCallback(CopyEntry);
-#elif PLATFORM_WAYLAND
-    struct wc_options wl_options = {
-        "text/plain;charset=utf-8",
-        config.wl_seat.empty() ? NULL : config.wl_seat.c_str(),
-        false,
-        config.primary_clip
-    };
-
-    CClipboardListenerWayland clipboardListener(wl_options);
-    clipboardListener.AddCopyCallback(CopyCallback);
-    clipboardListener.AddCopyCallback(CopyEntry);
-#endif
-
     const std::string& configDir  = getConfigDir();
     const std::string& configFile = parse_config_path(argc, argv, configDir);
 
@@ -513,6 +496,22 @@ int main(int argc, char* argv[])
     }
 
 #if !PLATFORM_UNIX
+    #if PLATFORM_XORG
+        CClipboardListenerX11 clipboardListener;
+        clipboardListener.AddCopyCallback(CopyCallback);
+        clipboardListener.AddCopyCallback(CopyEntry);
+    #elif PLATFORM_WAYLAND
+        struct wc_options wl_options = {
+            "text/plain;charset=utf-8",
+            config.wl_seat.empty() ? NULL : config.wl_seat.c_str(),
+            false,
+            config.primary_clip
+        };
+        CClipboardListenerWayland clipboardListener(wl_options);
+        clipboardListener.AddCopyCallback(CopyCallback);
+        clipboardListener.AddCopyCallback(CopyEntry);
+    #endif
+ 
     while (true)
     {
         // debug("POLLING");

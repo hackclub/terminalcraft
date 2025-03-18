@@ -103,6 +103,20 @@ void CClipboardListenerWayland::PollClipboard()
     if (copyEvent.content.find_first_not_of(' ') == std::string::npos)
         return;
 
+    if (copyEvent.content[0] == '\0')
+    {
+        for (size_t i = 0; i < copyEvent.content.size(); ++i)
+        {
+            if (copyEvent.content[i] == '\0')
+                 continue;
+
+            copyEvent.content = copyEvent.content.substr(i);
+        }
+
+        if (copyEvent.content == m_LastClipboardContent)
+            return;
+    }
+
     m_LastClipboardContent = copyEvent.content;
     for (const auto& callback : m_CopyEventCallbacks)
         callback(copyEvent);

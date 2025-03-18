@@ -104,12 +104,16 @@ void delete_draw_confirm(const int seloption)
 void draw_search_box(const std::string& query, const std::vector<std::string>& results, const size_t max_width,
                             const size_t max_visible, const size_t selected, const size_t scroll_offset, const size_t cursor_x, bool is_search_tab)
 {
-    clear();
+    erase();
     box(stdscr, 0, 0);  // Draw the root box
 
     attron(A_BOLD);
     mvprintw(1, 2, "Search: %s", query.c_str());
     attroff(A_BOLD);
+    if (results.size() == 1)
+         mvprintw(2, 2, "(1 result)");
+     else
+         mvprintw(2, 2, "(%zu results)", results.size());
 
     size_t row             = 2;  // Start drawing items from row 2
     size_t items_displayed = 0;  // Track the number of items displayed
