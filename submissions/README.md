@@ -1,6 +1,12 @@
 # Essay Assisstant in Terminal
  
 ## Setup
+1. Install node.js
+2. Run "npm i ezessay" in terminal
+3. cd into ezessay folder
+4. run node .
+
+if it says anything about missing packages, just run "npm install" in the ezessay folder and it should work. it's to get node-modules
 
 ## Functionality:
 This program helps you organize essays for college/camp applications. Google Docs kinda works, but this is much more streamlined and its all stored locally
