@@ -135,7 +135,6 @@ def print_boards():
     print_grid(opponent_board_visible)
 
 def clear_screen():
-    os.system('clear')
     os.system('cls' if os.name == 'nt' else 'clear')
 
 player_board = initialize_grid()
