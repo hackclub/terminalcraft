@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +22,7 @@ receive(int cond, struct zwlr_data_control_offer_v1 *offer)
 		zwlr_data_control_offer_v1_receive(offer, options.type, pipes[1]);
 		wl_display_roundtrip(g_display);
 		close(pipes[1]);
+                ftruncate(g_fd, 0);
 
 		copyfd(pipes[0], g_fd);
 		close(pipes[0]);
