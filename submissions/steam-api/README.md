@@ -1,4 +1,4 @@
-#Python Steam user analyzer
+# Python Steam user analyzer
 
 To search for an user
 main.py -u (username)
