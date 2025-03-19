@@ -51,7 +51,7 @@ class BasePrompt:
         self, messages: list[MessageType], double_json=False, reasoning=False
     ):
         req = requests.post(
-            f"{config.getConfig()["openai"]["base_url"]}/chat/completions",
+            f"{config.getConfig()['openai']['base_url']}/chat/completions",
             json={
                 "model": self.model,
                 "messages": messages,
@@ -59,7 +59,7 @@ class BasePrompt:
             },
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {config.getConfig()["openai"]['token']}",
+                "Authorization": f"Bearer {config.getConfig()['openai']['token']}",
             },
         )
 

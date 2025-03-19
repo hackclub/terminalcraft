@@ -33,6 +33,8 @@ wget -O linux_build.zip https://nightly.link/playlogo/GetMeA/workflows/nuitka.ya
 ## Development
 
 ```bash
+# Recommended: Python 3.13
+
 # Install deps
 python -m venv .venv
 source .venv/bin/activate
