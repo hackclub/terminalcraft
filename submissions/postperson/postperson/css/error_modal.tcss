@@ -1,0 +1,12 @@
+ErrorModal {
+  align: center middle;
+}
+
+.error-box {
+  width: auto;
+}
+
+#title, #error {
+  text-align: center;
+}
+

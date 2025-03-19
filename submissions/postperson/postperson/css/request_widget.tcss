@@ -1,0 +1,118 @@
+RequestWidget {
+    height: auto;
+    margin: 1 0;
+}
+
+#request-container {
+    height: auto;
+    border: $secondary tall;
+}
+
+#collapsible {
+    height: auto;
+    overflow: hidden;
+}
+
+#collapsible > * {
+    padding: 0;
+    margin: 0;
+}
+
+#delete {
+    background: $error;
+}
+
+#send {
+    background: $success;
+}
+
+#request-row {
+    height: auto;
+}
+
+#request-row Select {
+    width: 15;
+    dock: left;
+}
+
+#request > Button {
+    dock: right;
+}
+
+#button-col {
+    width: auto;
+    height: auto;
+}
+
+#button-col Button {
+    color: white;
+}
+
+Label {
+    margin: 1 0 0 0;
+}
+
+#response {
+    background: $background;
+    color: white;
+    display: none;
+    height: auto;
+    overflow: hidden;
+    margin: 1 0 0 0;
+}
+
+#scroller {
+    border: $background tall;
+    padding: 0;
+    margin: 0;
+}
+
+#headers {
+  background: $background;
+  height: auto;
+}
+
+#header-inp > Input {
+  width: 50%;
+}
+
+#header-inp Button {
+  dock: right;
+}
+
+.gapped-collapse {
+  margin: 1 1 0 0;
+}
+
+#add-header {
+  margin: 0 1 0 0;
+}
+
+.header-row {
+  margin: 1 0 0 0;
+}
+
+.header-row-first {
+  margin: 0;
+}
+
+HeaderRow {
+  background: $background-darken-1;
+  box-sizing: border-box;
+  min-height: 3;
+  padding: 0 1;
+}
+
+#header-delete {
+  dock: right;
+  background: $error;
+  color: white;
+}
+
+#body {
+  height: 10;
+}
+
+#response-body {
+  overflow: scroll;
+}
