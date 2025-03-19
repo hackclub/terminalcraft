@@ -11,7 +11,7 @@
 
 3. **Briefly describe what your project is. What makes it unique?**
 
-    My project is a CLI that can launch Minecraft Java Edition. It is unique because it provides a terminal-based interface for users who prefer or require a non-GUI method to start the game. It also has support for multiple Minecraft versions and Modpacks.
+    My project is a CLI that can launch Minecraft Java Edition. It is unique because it provides a terminal-based interface for users who prefer or require a non-GUI method to start the game. It will soon have support for multiple Minecraft versions and Modpacks.
 
 4. **How many people have tested your extension?**
    _(We recommend at least 3)_
