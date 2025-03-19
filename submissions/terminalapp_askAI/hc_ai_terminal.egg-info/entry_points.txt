@@ -1,0 +1,2 @@
+[console_scripts]
+ai = ai_terminal.ai:main

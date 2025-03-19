@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: ai-terminal
+Version: 1.0.0
+Requires-Dist: requests
+Requires-Dist: rich
+Requires-Dist: termcolor
