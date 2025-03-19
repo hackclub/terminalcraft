@@ -1,6 +1,6 @@
-# ReconX - OSINT & Reconnaissance Tool
+# OSINT Rizzler - OSINT & Reconnaissance Tool
 
-ReconX is a powerful reconnaissance tool designed to help security professionals and ethical hackers gather information about domains, IP addresses, emails, and websites. This tool provides various OSINT (Open Source Intelligence) techniques to facilitate information gathering.
+OSINT Rizzler is a powerful reconnaissance tool designed to help security professionals and ethical hackers gather information about domains, IP addresses, emails, and websites. This tool provides various OSINT (Open Source Intelligence) techniques to facilitate information gathering.
 
 ## Features
 - **Domain WHOIS Lookup**: Retrieve domain registration details.
