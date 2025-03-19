@@ -1,0 +1,83 @@
+Life Application Documentation
+=============================
+
+Overview
+--------
+Life is a terminal-based productivity application that combines three powerful tools: a Focus Timer, Habit Tracker, and Task Manager. It provides a clean, intuitive interface for managing time, habits, and tasks.
+
+Features
+--------
+1. Focus Timer
+   - Set custom timers for focused work sessions
+   - Start, pause, and reset functionality
+   - Visual countdown display
+
+2. Habit Tracker
+   - Create and track daily habits
+   - Automatic daily reset
+   - Visual completion status
+
+3. Task Manager
+   - Create tasks with due dates
+   - Calendar view for task visualization
+   - Task completion tracking
+
+Installation
+-----------
+1. Ensure Python 3.7+ is installed
+2. Clone the repository
+3. Install required dependencies:
+   pip install -r requirements.txt
+
+Usage
+-----
+1. Run the application:
+   python main.py
+2. Navigate the main menu
+3. Select a feature
+4. Use the Back button to the main menu
+5. Use Quit to exit the application
+
+Interface Elements
+----------------
+Main Menu:
+- Focus Timer Button
+- Habit Tracker Button
+- Task Manager Button
+- Quit Button
+
+Data Storage
+-----------
+All data is stored in the data/ directory:
+- data/tasks.json: Task Manager data
+- data/habits.json: Habit Tracker data
+
+Technical Details
+---------------
+- Built with Textual framework
+- Terminal-based user interface
+- JSON-based data storage
+- Modular design with separate components
+
+Development
+-----------
+The application is structured as follows:
+- main.py: Main application entry point
+- src/
+  - focus_timer.py: Focus Timer implementation
+  - habit_tracker.py: Habit Tracker implementation
+  - task_manager.py: Task Manager implementation
+- data/: Data storage directory
+- docs/: Documentation files
+
+Dependencies
+-----------
+- textual: Terminal user interface framework
+- rich: Terminal formatting and styling
+
+Contributing
+-----------
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
