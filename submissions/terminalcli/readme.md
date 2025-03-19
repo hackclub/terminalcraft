@@ -45,23 +45,18 @@
 - Required Python libraries (install via `pip`)
 
 ### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/osint-rizzler.git
-   cd osint-rizzler
-   ```
 
-2. Install the required dependencies:
+1. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file in the root directory and add your API keys (if applicable):
+2. Create a `.env` file in the root directory and add your API keys (if applicable):
    ```plaintext
    SHODAN_API_KEY=your_shodan_api_key_here
    ```
 
-4. Run the tool:
+3. Run the tool:
    ```bash
    python osint.py
    ```
