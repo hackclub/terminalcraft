@@ -1,0 +1,6 @@
+beautifulsoup4==4.13.3
+fake_useragent==2.1.0
+pyfiglet==1.0.2
+Requests==2.32.3
+rich==13.9.4
+setuptools==72.1.0
