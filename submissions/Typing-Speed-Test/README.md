@@ -64,6 +64,3 @@ A terminal-based typing speed test application implemented in Python using curse
   - Excellent: 60+ WPM with 95%+ accuracy
   - Great: 40+ WPM with 90%+ accuracy
   - Good: 20+ WPM with 80%+ accuracy
-
-## Game Interface
-
