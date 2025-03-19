@@ -1,6 +1,6 @@
 {
   "name": "stegoaes",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Steganography with AES encryption",
   "main": "index.js",
   "bin": "./index.js",

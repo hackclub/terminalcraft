@@ -8,6 +8,7 @@ program
     .option('-f, --file [file]', 'A file argument')
     .option('-p, --password [password]', 'A password argument')
     .option('-o, --output [output]', 'An output argument')
+    .option('-c, --compress', 'Compress the secret before hiding it')
     .argument('<file>', 'A file argument')
 program.parse();
 
@@ -15,6 +16,7 @@ const string = program.opts().string;
 const password = program.opts().password;
 let fileToHide = program.opts().file;
 let output = program.opts().output;
+const compress = program.opts().compress;
 const file = path.resolve(program.args[0]);
 
 if (fileToHide) fileToHide = path.resolve(fileToHide);
@@ -26,11 +28,11 @@ if (string && fileToHide) {
 }
 
 if (fileToHide) {
-    stego.hideSecretFileinFile(fileToHide, file, { password, output });
+    stego.hideSecretFileinFile(fileToHide, file, { password, output, compress });
 }
 
 if (string) {
-    stego.hideSecretInFile(string, file, { password, output });
+    stego.hideSecretInFile(string, file, { password, output, compress });
 }
 
 if (!string && !fileToHide) {

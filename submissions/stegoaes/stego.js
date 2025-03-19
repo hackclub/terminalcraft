@@ -1,11 +1,15 @@
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 const crypto = require('crypto');
 const { PNG } = require('pngjs');
 // TODO - might use a different method of delimiting the secret, at some point
 const delimiter = '1111111100000000'; // delimiter to indicate the end of the secret
 
 function hideSecretInFile(secret, file, options) {
+    if (options.compress) {
+        secret = zlib.deflateSync(secret).toString('hex');
+    }
     let secretBinary = toBinary(secret) + delimiter;
     const fileSize = fs.statSync(file).size; // file size in bytes
     const secretSize = secretBinary.length / 8; // secret size in bytes
@@ -75,10 +79,20 @@ function extractSecretFromFile(file, password) {
                     secret = fromBinary(secret)
                     if (secret.includes('--file--')) {
                         const secretFileName = secret.split('--file--')[0]; // get the file name from the secret
-                        const secretFileContent = secret.split('--file--')[1]; // get the file content from the secret
+                        let secretFileContent = secret.split('--file--')[1]; // get the file content from the secret
+                        try {
+                            secretFileContent = zlib.inflateSync(Buffer.from(secretFileContent, 'hex')); // decompress the file content
+                        } catch (error) {
+                            // If decompression fails, assume it was not compressed
+                        }
                         fs.writeFileSync(secretFileName, Buffer.from(secretFileContent, 'hex')); // write the file content to a file
                         console.log('Secret file extracted from target file');
                     } else {
+                        try {
+                            secret = zlib.inflateSync(Buffer.from(secret, 'hex')).toString();
+                        } catch (error) {
+                            // If decompression fails, assume it was not compressed
+                        }
                         console.log(secret); // convert the binary to text
                     }
                     break;
@@ -94,7 +108,10 @@ function extractSecretFromFile(file, password) {
 }
 
 function hideSecretFileinFile(secretFilePath, file, options) {
-    const secretFileContent = fs.readFileSync(secretFilePath);
+    let secretFileContent = fs.readFileSync(secretFilePath);
+    if (options.compress) {
+        secretFileContent = zlib.deflateSync(secretFileContent).toString('hex');
+    }
     // const secretFileNameBinary = toBinary(path.basename(secretFilePath) + '--file--'); // use path.basename to get the file name and convert to binary with a prefix
     // let secretBinary = toBinary(secretFileContent.toString('hex')) + delimiter;
     let secretBinary = toBinary(path.basename(secretFilePath) + '--file--' + secretFileContent.toString('hex')) + delimiter;
