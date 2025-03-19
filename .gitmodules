@@ -1,0 +1,3 @@
+[submodule "submissions/cpptui"]
+	path = submissions/cpptui
+	url = https://github.com/csboo/cpptui
