@@ -1,0 +1,29 @@
+UnsavedExitConfirmation {
+    align: center middle;
+}
+
+.confirmation-box {
+    padding: 1;
+    height: 7;
+}
+
+#confirmation {
+    width: auto;
+}
+
+#button-row {
+    padding: 1;
+    width: auto;
+}
+
+#button-row Button {
+    color: white;
+}
+
+#yes {
+    background: $success;
+}
+
+#no {
+    background: $error;
+}
