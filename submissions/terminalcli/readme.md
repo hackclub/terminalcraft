@@ -51,12 +51,7 @@
    pip install -r requirements.txt
    ```
 
-2. Create a `.env` file in the root directory and add your API keys (if applicable):
-   ```plaintext
-   SHODAN_API_KEY=your_shodan_api_key_here
-   ```
-
-3. Run the tool:
+2. Run the tool:
    ```bash
    python osint.py
    ```
