@@ -27,5 +27,7 @@
 
 ## Additional Comments
 
-Build and run instructions and requirements can be found on my github, pre built binaries are also posted for all platforms!
+* The snake game (example) is the project, that was made for this tui app submission, the rest of the repo is the custom TUI library itself!
+* Build and run instructions and requirements can be found on my github. 
+* Pre built binaries are also posted for all platforms!
 
