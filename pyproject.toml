@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "comboML"
+dynamic = ["version"]
+description = "A Textual-based application for exploring linear regression models."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.7"
+authors = [
+    { name = "Abdur Rehman Tariq", email = "artariqdev@gmail.com" },
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "textual",
+    "path",
+]
+
+[project.scripts]
+comboML = "comboML.main:main"
+
+[tool.hatch.version]
+path = "comboml/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/comboml",
+]

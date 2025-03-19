@@ -1,0 +1,33 @@
+/* Apply styling to the whole application */
+Screen {
+    background: black;
+    color: white;
+}
+
+/* Style for the header */
+Header {
+    background: blue;
+    color: white;
+    text-align: center;
+}
+
+/* Style for the footer */
+Footer {
+    background: gray;
+    color: black;
+    text-align: center;
+}
+
+/* Style for the list items */
+ListView {
+    border: round gray;
+    padding: 1;
+    height: auto;
+}
+
+/* Selected item styling */
+ListItem.-selected {
+    background: cyan;
+    color: black;
+    text-style: bold;
+}
