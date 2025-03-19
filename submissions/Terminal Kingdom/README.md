@@ -25,5 +25,6 @@ Almost every building in the starting village has an npc. You can gain skills by
 - Use the wasd or arrow keys to navigate.
 - Press **space** or **enter** to interact with tiles.
 - Press **Q** to quit the game.
+- If you have a nerd font make sure to enable nerd fonts in the game settings!
 
 ## Troubleshooting
