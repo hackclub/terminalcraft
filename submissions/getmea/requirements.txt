@@ -1,0 +1,6 @@
+aiohttp
+crawl4ai
+Brotli
+duckduckgo-search
+toml
+nuitka
