@@ -45,7 +45,7 @@ import sys
 from argparse import ArgumentParser, FileType as OriginalFileType
 
 
-DEFAULT_ZSH_HIST_FILE = "/path/no/exists" # os.path.join(os.environ["HOME"], ".zsh_history")
+DEFAULT_ZSH_HIST_FILE = os.path.join(os.environ["HOME"], ".zsh_history")
 
 
 class FileType(OriginalFileType):
