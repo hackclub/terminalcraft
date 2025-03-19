@@ -24,3 +24,9 @@ The UI is built using [Terminal.Gui](https://github.com/gui-cs/Terminal.Gui)
 - Scroll through pages using the buttons at the bottom of the application
 - Configure displayed columns by right-clicking the table and clicking "Edit Columns"
 - To edit a column, double-click it
+
+## How to run on Linux
+- Make sure the .NET SDK is installed
+- Clone the repo
+- Navigate to the "Telescope GUI" folder
+- Run `dotnet run`
