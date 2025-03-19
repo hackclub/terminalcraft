@@ -11,7 +11,7 @@
 
 ## Installation
 
-1. Clone the repository:
+1. Clone the repository OR Download the ZIP file and extract it:
     ```
     git clone https://github.com/FinnE145/Command-Line-Interaction
     ```
@@ -25,6 +25,8 @@
     ```
 
 ## Usage
+
+> Skip steps #1 and #2 if you are using a public or externally hosted API instance.
 
 1. Run the Flask application:
     ```
@@ -44,11 +46,12 @@
 
 ## Endpoints
 
-- `/convo` - Manage conversations
-- `/convo/<int:convo_id>` - Manage a specific conversation
-- `/convo/<int:convo_id>/user/<int:user_id>` - Manage users in a specific conversation
-- `/convo/<int:convo_id>/message/<int:message_id>` - Manage messages in a specific conversation
-- `/user/<int:user_id>` - Manage users
+- `/messages` - Manage messages
+- `/messages/<int:message_id>` - Manage a specific message
+- `/convos` - Manage conversations
+- `/convos/<int:convo_id>` - Manage a specific conversation
+- `/users` - Manage users
+- `/users/<int:user_id>` - Manage a specific user
 
 > For more information, see the [API docs](#api_docs.md)
 

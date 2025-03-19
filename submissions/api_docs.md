@@ -1,6 +1,8 @@
 
 # Command-Line Interaction API Documentation
 
+> Note: These are the plans for the full implementation of the API. The current implementation may not have all of these features.
+
 ## Overview:
 
 #### Messages

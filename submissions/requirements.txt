@@ -2,4 +2,4 @@ flask==3.1.0
 flask_restful==0.3.10
 iformat==0.3.3
 requests==2.32.3
-colorama0.4.6
+colorama==0.4.6
