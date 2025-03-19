@@ -14,14 +14,16 @@
     My project is a CLI that can launch Minecraft Java Edition. It is unique because it provides a terminal-based interface for users who prefer or require a non-GUI method to start the game. It will soon have support for multiple Minecraft versions and Modpacks.
 
 4. **How many people have tested your extension?**
-   _(We recommend at least 3)_
+  
+   4
 
 5. **On What operating systems have you tested this project?**
-   _(macOS/Linux/Windows)_
+
+   Windows and Linux(Debian and Ubunto)
 
 6. **Does your project include a Readme file with instructions on how to use it?**
    
-    Yes.
+    Yes it does
 
 ---
 
