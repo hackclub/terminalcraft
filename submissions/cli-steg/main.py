@@ -7,6 +7,8 @@ from rich.prompt import Prompt
 from rich.panel import Panel
 import wave
 import struct
+import os
+import tempfile
 
 console = Console()
 
@@ -161,6 +163,84 @@ def decodeImg(image_path):
     return message
 
 def encodeAudio(location, message, output_path):
+# wave does not support RF64 because it is not standard and usually files in this are bigger than 4gb so i  use a temp file to convert it into wav 
+    try:
+        with open(location, 'rb') as f:
+            header = f.read(4)
+        if header != b'RIFF':
+            console.print("[yellow]Unsupported file type! Hang Tight , fixing it ....[/yellow]")
+            with open(location, 'rb') as f:
+                raw_data = f.read()
+          
+            sampwidth = 2   # 16-bit
+            channels = 1    # mono
+            framerate = 44100
+            num_samples = len(raw_data) // sampwidth
+            nframes = num_samples // channels  # noqa: F841
+           # double solution if jsut changing the type does not work
+            temp_wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+            with wave.open(temp_wav.name, 'wb') as temp_wave:
+                temp_wave.setnchannels(channels)
+                temp_wave.setsampwidth(sampwidth)
+                temp_wave.setframerate(framerate)
+                temp_wave.writeframes(raw_data)
+            # Use the temporary WAV file as the input.
+            location = temp_wav.name
+    except Exception as e:
+        console.print(f"[red]Error checking/converting audio: {e}[/red]")
+        return
+
+    
+    try:
+        with wave.open(location, 'rb') as wave_read:
+            params = wave_read.getparams() 
+            frames = wave_read.readframes(params.nframes)
+            sample_width = params.sampwidth
+            if sample_width != 2:
+                console.print("[yellow]Warning: Only 16-bit PCM WAV files are fully supported.[/yellow]") # some 64 bit files when very small work but its like an edge case
+            num_samples = params.nframes * params.nchannels
+            sample_format = "<" + "h" * num_samples
+            samples = list(struct.unpack(sample_format, frames))
+    except Exception as e:
+        console.print(f"[red]Error opening audio: {e}[/red]")
+        return
+
+    message_bits = toBinary(message)
+    message_length = len(message_bits)
+    length_bin = f"{message_length:032b}"
+    data_bits = list(length_bin) + message_bits
+
+    max_capacity = len(samples)  # one bit per sample
+    if len(data_bits) > max_capacity:
+        console.print("[red]Error: The audio file is too small for the message.[/red]")
+        return
+
+    # embed bits into low depth as audio is more sensitive to changes
+    data_index = 0
+    new_samples = []
+    for sample in samples:
+        new_sample = sample
+        if data_index < len(data_bits):
+            bit = int(data_bits[data_index])
+            new_sample = embedBit(sample, bit)
+            data_index += 1
+        new_samples.append(new_sample)
+
+    try:
+        new_frames = struct.pack(sample_format, *new_samples)
+        with wave.open(output_path, 'wb') as wave_write:
+            wave_write.setparams(params)
+            wave_write.writeframes(new_frames)
+        console.print(f"[green]Message encoded successfully into [bold]{output_path}[/bold].[/green]")
+    except Exception as e:
+        console.print(f"[red]Error saving audio: {e}[/red]")
+
+  # clean the temp file
+    if os.path.basename(location).startswith("tmp"):
+        try:
+            os.remove(location)
+        except Exception:
+            pass
     try:
         with wave.open(location, 'rb') as wave_read:
             params = wave_read.getparams() 
@@ -245,9 +325,9 @@ def menu():
             "[green]2.[/green] Simple Decode\n"
             "[green]3.[/green] Password-based Encode\n"
             "[green]4.[/green] Password-based Decode\n"
-            "[green]6.[/green] Audio Encode\n"
-            "[green]7.[/green] Audio Decode\n"
-            "[green]8.[/green] Exit",
+            "[green]5.[/green] Audio Encode\n"
+            "[green]6.[/green] Audio Decode\n"
+            "[green]7.[/green] Exit",
             
             title="Menu", border_style="cyan"
         ))
