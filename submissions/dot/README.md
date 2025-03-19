@@ -11,6 +11,8 @@
 
 A tool that comes in handy when managing your dotfiles.
 
+![scrnshtCrpd](https://github.com/user-attachments/assets/cae15a48-629a-4577-a58f-5b83f51d1702)
+
 ## Features
 
 - Create and manage symlinks for scripts and configuration files
