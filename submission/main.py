@@ -1,11 +1,11 @@
 import sys
 
-if __name__!="__main__":
-    raise RuntimeError("This script should be run directly and not imported as a module.")
+'''if __name__!="__main__":
+    raise RuntimeError("This script should be run directly and not imported as a module.")'''
 
 # make sure console argument are valid
 if len(sys.argv)!=3:
-    print("Two Command Line Arguments Expected: <mode> <filename>")
+    print("Two Command Line Arguments Expected: \"buzzerTone.py <mode> <filename>\"")
     sys.exit()
 if sys.argv[1]=="c":
     import compile
