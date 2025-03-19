@@ -24,7 +24,7 @@ pip install -r requirements.txt
 Run the script using:
 
 ```bash
-python reconx.py
+python osint.py
 ```
 
 You will be prompted to choose an option from the menu to perform reconnaissance tasks.
@@ -32,7 +32,6 @@ You will be prompted to choose an option from the menu to perform reconnaissance
 ## Dependencies
 - `requests`
 - `whois`
-- `shodan`
 - `socialscan`
 - `dns.resolver`
 - `socket`

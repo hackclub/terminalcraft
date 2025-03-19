@@ -1,6 +1,5 @@
 requests
 whois
-shodan
 socialscan
 dnspython
 python-dotenv
