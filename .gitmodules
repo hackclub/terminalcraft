@@ -1,0 +1,6 @@
+[submodule "cgol-tui-rs"]
+	path = cgol-tui-rs
+	url = https://github.com/jeromeschmied/cgol-tui-rs
+[submodule "submissions/cgol-tui-rs"]
+	path = submissions/cgol-tui-rs
+	url = https://github.com/jeromeschmied/cgol-tui-rs
