@@ -134,7 +134,7 @@ def command(kitty):
         if command == "status":
             print(f"Updated Stats:")
             time.sleep(1)
-            print(f"{kitty['img']} \nHunger: {kitty['hunger']}, \nHappiness:  {kitty['happiness']}, \nHealth:  {kitty['health']}, \nSleep: {kitty["sleep"]}")
+            print(f"{kitty['img']} \nHunger: {kitty['hunger']}, \nHappiness:  {kitty['happiness']}, \nHealth:  {kitty['health']}, \nSleep: {kitty['sleep']}")
         elif command == "feed":
             if kitty["hunger"] < 5:
                 feed(kitty)
@@ -399,7 +399,7 @@ def main():
         time.sleep(1)
         print("Meet your CLI Kitty, " + kname + "!")
         time.sleep(1)
-        print(f"{kitty['img']} \nHunger: {kitty['hunger']}, \nHappiness:  {kitty['happiness']}, \nHealth:  {kitty['health']}, \nSleep: {kitty["sleep"]}")
+        print(f"{kitty['img']} \nHunger: {kitty['hunger']}, \nHappiness:  {kitty['happiness']}, \nHealth:  {kitty['health']}, \nSleep: {kitty['sleep']}")
         print(f"Remember to check in on Kitty! She gets hungry, sad, and sick fast (Every 10-25 seconds)! Alsooo, you can play with her anytime! Other commands only work when she needs them :3")
 
         gameThread = threading.Thread(target = gameLoop, args=(kitty,), daemon=True)
