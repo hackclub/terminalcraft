@@ -1,0 +1,45 @@
+{
+  "name": "@palmdevs/coder-tracker",
+  "version": "1.0.0",
+  "license": "MIT",
+  "bin": {
+    "coder-tracker": "./src/cli.tsx"
+  },
+  "module": "./src/cli.tsx",
+  "type": "module",
+  "files": ["drizzle", "dist"],
+  "scripts": {
+    "postinstall": "drizzle-kit generate"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "@inkjs/ui": "^2.0.0",
+    "@parcel/watcher": "^2.5.1",
+    "@sapphire/duration": "^1.1.4",
+    "diff": "^7.0.0",
+    "drizzle-kit": "^0.30.5",
+    "drizzle-orm": "^0.40.1",
+    "ink": "^5.2.0",
+    "ink-gradient": "^3.0.0",
+    "ink-multi-select": "^2.0.0",
+    "ink-select-input": "^6.0.0",
+    "ink-text-input": "^6.0.0",
+    "parse-gitignore": "1.0.1",
+    "react": "^18.2.0",
+    "react-error-boundary": "^5.0.0",
+    "react-router": "^7.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@libsql/client": "^0.15.0",
+    "@types/bun": "^1.2.5",
+    "@types/diff": "^7.0.1",
+    "@types/parse-gitignore": "^1.0.2",
+    "@types/react": "^18.0.32",
+    "chalk": "^5.2.0",
+    "typescript": "^5.0.3"
+  },
+  "trustedDependencies": ["@biomejs/biome", "@parcel/watcher", "esbuild"]
+}
