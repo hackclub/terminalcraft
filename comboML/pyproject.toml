@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "combo_ml"
+version = "1.1.1"
+description = "A Textual-based ML feature optimization tool using combinatorics"
+authors = [{name = "Abdur Rehman Tariq", email = "artariqdv@gmail.com"}]
+readme = "README.md"
+license = { text = "MIT" }
+dependencies = [
+    "textual",
+    "pandas",
+    "numpy",
+    "scikit-learn"
+]
+
+[project.scripts]
+comboML = "combo_ml:run"
+
+[tool.hatch.build.targets.sdist]
+include = ["combo_ml"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
