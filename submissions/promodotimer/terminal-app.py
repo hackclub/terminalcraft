@@ -138,5 +138,5 @@ class PromodoTimer(App):
 
 
 if __name__ == "__main__":
-    app = ChronoTrackApp()
+    app = PromodoTimer()
     app.run()
