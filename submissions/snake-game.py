@@ -8,8 +8,13 @@ def main(stdscr):
     sh, sw = stdscr.getmaxyx()
     w = curses.newwin(sh, sw, 0, 0)
     w.keypad(1)
-    w.timeout(75)  
-
+    
+    # Base timeout value
+    base_timeout = 75
+    
+    # Start with the base timeout
+    current_timeout = base_timeout
+    w.timeout(current_timeout)
     
     curses.start_color()
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)     
@@ -49,9 +54,15 @@ def main(stdscr):
     
     
     food_type = choice(food_types)
-    food = [sh // 2, sw // 2]
+    
+    # Ensure food is generated within the boundaries
+    food = [randint(1, sh - 2), randint(1, sw - 2)]
+    
     food_char, food_color, food_points = food_type
-    w.addch(food[0], food[1], food_char, curses.color_pair(food_color))
+    try:
+        w.addch(food[0], food[1], food_char, curses.color_pair(food_color))
+    except curses.error:
+        pass
 
     
     key = curses.KEY_RIGHT
@@ -60,6 +71,9 @@ def main(stdscr):
     last_food_time = time()
     bonus_food_active = False
     bonus_food = None
+    
+    # Initialize move counter (to occasionally skip vertical moves)
+    move_counter = 0
 
     
     high_score = load_high_score()
@@ -72,9 +86,7 @@ def main(stdscr):
         pass
 
     while True:
-        
         next_key = w.getch()
-        
         
         if next_key == ord(' '):
             paused = not paused
@@ -85,18 +97,23 @@ def main(stdscr):
                 except curses.error:
                     pass
             else:
-                
                 try:
                     w.addstr(sh // 2, sw // 2 - 3, "      ")
                 except curses.error:
                     pass
         
-        
         if paused:
             continue
             
-        key = key if next_key == -1 else next_key
-
+        if next_key != -1 and next_key in [curses.KEY_UP, curses.KEY_DOWN, curses.KEY_LEFT, curses.KEY_RIGHT]:
+            key = next_key
+        
+        # Adjust timeout based on movement direction
+        if key in [curses.KEY_UP, curses.KEY_DOWN]:
+            move_counter += 1
+            # Skip every third vertical move to make it slower
+            if move_counter % 3 == 0:
+                continue
         
         if key == curses.KEY_DOWN and snake[0][0] + 1 != snake[1][0]:
             new_head = [snake[0][0] + 1, snake[0][1]]
@@ -107,7 +124,6 @@ def main(stdscr):
         elif key == curses.KEY_RIGHT and snake[0][1] + 1 != snake[1][1]:
             new_head = [snake[0][0], snake[0][1] + 1]
         else:
-            
             if key == curses.KEY_DOWN:
                 new_head = [snake[0][0] + 1, snake[0][1]]
             elif key == curses.KEY_UP:
@@ -143,15 +159,14 @@ def main(stdscr):
             score += food_points
             
             
-            if score % 10 == 0 and w.timeout() > 40:
-                w.timeout(w.timeout() - 5)  
+            if score % 10 == 0 and current_timeout > 40:
+                current_timeout -= 5
+                w.timeout(current_timeout)
                 
             
             food = None
             food_type = choice(food_types)
             food_char, food_color, food_points = food_type
-            
-            
             attempts = 0
             while food is None and attempts < 20:
                 nf = [
@@ -212,7 +227,6 @@ def main(stdscr):
         
         for i, segment in enumerate(snake):
             try:
-                
                 if i == 0:
                     w.addch(segment[0], segment[1], curses.ACS_CKBOARD, curses.A_BOLD | curses.color_pair(1))
                 else:
