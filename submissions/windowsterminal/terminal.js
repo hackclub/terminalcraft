@@ -23,7 +23,6 @@ function prompt() {
   }
 }
 
-
 function executeCommand(command) {
   switch (command.toLowerCase()) {
     case 'help':
@@ -47,7 +46,6 @@ function executeCommand(command) {
   }
   prompt();
 }
-
 
 function startGame() {
   inGame = true;
@@ -163,18 +161,20 @@ function findCrate() {
 function startBlackjack(bet) {
   const playerCard1 = Math.floor(Math.random() * 10) + 1;
   const playerCard2 = Math.floor(Math.random() * 10) + 1;
-  const dealerCard = Math.floor(Math.random() * 10) + 1;
+  const dealerCard1 = Math.floor(Math.random() * 10) + 1;
   const dealerCard2 = Math.floor(Math.random() * 10) + 1;
 
   const playerTotal = playerCard1 + playerCard2;
-  const dealerTotal = dealerCard + dealerCard2;
+  const dealerTotal = dealerCard1 + dealerCard2;
 
   console.log(`Your cards: ${playerCard1}, ${playerCard2} (Total: ${playerTotal})`);
-  console.log(`Dealer's cards: ${dealerCard}, ${dealerCard2} (Total: ${dealerTotal})`);
+  console.log(`Dealer's cards: ${dealerCard1}, ${dealerCard2} (Total: ${dealerTotal})`);
 
   if (playerTotal > dealerTotal || dealerTotal > 21) {
     currency += bet;
     console.log(chalk.green(`You win ${bet} coins!`));
+  } else if (playerTotal === dealerTotal) {
+    console.log(chalk.yellow(`It's a draw! No coins won or lost.`));
   } else {
     currency -= bet;
     console.log(chalk.red(`You lose ${bet} coins.`));
