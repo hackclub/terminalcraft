@@ -149,18 +149,20 @@ def loading_animation(message):
     sys.stdout.write("\r" + " " * (len(message) + 2) + "\r")
     sys.stdout.flush()
 
+
 def social_media_search():
     username = input("Enter username: ")
     loading_animation("Searching social media")
     results = {}
     sites = ["https://twitter.com/", "https://instagram.com/", "https://facebook.com/"]   
+
     for site in sites:
         url = site + username
         response = requests.get(url)
-    results[url] = "Exists" if response.status_code == 200 else "Not Found"
+        results[url] = "Exists" if response.status_code == 200 else "Not Found"  # Fix indentation
     save_report({"Social Media Search": results})
-    print(json.dumps(results, indent=4))
 
+    print(json.dumps(results, indent=4))
 
 def get_dns_records():
     domain = input("Enter domain: ")
