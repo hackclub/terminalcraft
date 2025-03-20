@@ -2,7 +2,8 @@
 
 ## Installation 
 
--   there are pre-built binaries for mainstream platforms: [releases](https://github.com/JeromeSchmied/terminalcraft/tree/cgol-tui-rs/submissions/cgol-tui-rs/releases/latest)
+-   there are pre-built binaries for mainstream platforms: [releases](https://github.com/JeromeSchmied/cgol-tui-rs/releases/latest)
+-   once you've downloaded the one for your platform and architecture, `chmod +x $cgol-tui-bin-you-have-downloaded` in case of linux or macos
 
 ### having the [Rust toolchain](https://rustup.rs) installed
 -   `cargo install cgol-tui`
