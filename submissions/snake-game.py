@@ -56,7 +56,15 @@ def main(stdscr):
     food_type = choice(food_types)
     
     
-    food = [randint(1, sh - 2), randint(1, sw - 2)]
+    food = None
+    attempts = 0
+    while food is None and attempts < 20:
+        nf = [randint(1, sh - 2), randint(1, sw - 2)]
+        food = nf if nf not in snake else None
+        attempts += 1
+
+    if food is None:  
+        food = [sh // 2 + 5, sw // 2 + 5]  
     
     food_char, food_color, food_points = food_type
     try:
@@ -176,7 +184,7 @@ def main(stdscr):
                 food = nf if nf not in snake else None
                 attempts += 1
                 
-            if food:
+            if food is not None:
                 try:
                     w.addch(food[0], food[1], food_char, curses.color_pair(food_color))
                 except curses.error:
@@ -204,7 +212,7 @@ def main(stdscr):
         else:
             tail = snake.pop()
             try:
-                w.addch(tail[0], tail[1], ' ')
+                w.addstr(tail[0], tail[1], "  ")
             except curses.error:
                 pass
 
@@ -228,9 +236,9 @@ def main(stdscr):
         for i, segment in enumerate(snake):
             try:
                 if i == 0:
-                    w.addch(segment[0], segment[1], curses.ACS_CKBOARD, curses.A_BOLD | curses.color_pair(1))
+                    w.addstr(segment[0], segment[1], "██", curses.A_BOLD | curses.color_pair(1))  
                 else:
-                    w.addch(segment[0], segment[1], curses.ACS_CKBOARD, curses.color_pair(1))
+                    w.addstr(segment[0], segment[1], "██", curses.color_pair(1))  
             except curses.error:
                 pass
 
@@ -254,6 +262,18 @@ def main(stdscr):
             w.addstr(2, sw // 2 - len(score_str) // 2, score_str)
         except curses.error:
             pass
+        
+        if food is not None:
+            try:
+                w.addch(food[0], food[1], food_char, curses.color_pair(food_color))
+            except curses.error:
+                pass
+
+        if bonus_food_active and bonus_food is not None:
+            try:
+                w.addch(bonus_food[0], bonus_food[1], '$', curses.A_BOLD | curses.color_pair(5))
+            except curses.error:
+                pass
         
         w.refresh()
         
