@@ -1,18 +1,6 @@
 import socket
 import threading
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(('0.0.0.0', 3000))
-server.listen(1)
-def receive(client_socket):
-    while True:
-        try:
-            data = client_socket.recv(1024)
-            if data:
-                print(f"{addr} said: {data.decode('utf-8')}")
-                if data.decode('utf-8') == "sending...":
-                    receive_file(client_socket)
-        except:
-            continue
+clients = []
 def receive_file(client_socket):
     file_name = client_socket.recv(1024).decode()
     print(f"Receiving file: {file_name}")
@@ -26,18 +14,50 @@ def receive_file(client_socket):
         file.write(file_data)
     print(f"File received successfully: {file_name}")
 
+def server_send():
+    while True:
+        message = input()
+        if message.lower() == "exit":
+            print("Shutting down server...")
+            for client in clients:
+                client.close()
+            break
+        for client in clients:
+            try:
+                client.send(message.encode('utf-8'))
+            except:
+                clients.remove(client)
 
-client_socket, addr = server.accept()
-print(f'Connected by {addr}')
-thread_receive = threading.Thread(target=receive, args=(client_socket,))
-thread_receive.start()
-while True:
-    data = input()
-    if data == "exit_chat":
-        print("Closing connection...")
+def handle_client(client_socket, addr):
+    print(f'Connected by {addr}')
+    clients.append(client_socket)
+    try:
+        while True:
+            data = client_socket.recv(1024)
+            if not data:
+                break
+            print(f"{addr} said: {data.decode('utf-8')}")
+            if data.decode('utf-8') == "sending...":
+                receive_file(client_socket)
+    except:
+        pass
+    finally:
+        print(f"Connection closed: {addr}")
+        clients.remove(client_socket)
         client_socket.close()
-        server.close()
-        break
-    else:
-        client_socket.send(data.encode('utf-8'))
 
+def start_server(host='0.0.0.0', port=2000):
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((host, port))
+    server.listen(5)
+    print(f"Server listening on {host}:{port}")
+    threading.Thread(target=server_send).start()
+    while True:
+        client_socket, address = server.accept()
+        client_thread = threading.Thread(target=handle_client, args=(client_socket, address))
+        client_thread.start()
+
+
+
+if __name__ == "__main__":
+    start_server()
