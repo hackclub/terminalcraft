@@ -97,7 +97,7 @@ def search_item(screen, curses, current_value, selection, matrix, vectorizer):
         elif c == 32: # space 
             current_text += ' '
         
-        elif c == 8: # Delete key
+        elif c == 8 or c == 263: # Delete key
             if len(current_text) <18:
                 screen.addstr(y, x+len(current_text), " ", curses.color_pair(1)) # deletes cursor
             current_text = current_text[:-1]
@@ -171,7 +171,7 @@ def change_float(screen, curses, current_value, selection):
             screen.addstr(y, x+len(current_float)+2, " ", curses.color_pair(1)) # deletes cursor
             return float("0." + current_float)
 
-        elif c == 8: # Delete key
+        elif c == 8 or c == 263: # Delete key
             screen.addstr(y, x+len(current_float)+2, " ", curses.color_pair(1)) # deletes cursor
             current_float = current_float[:-1]
 
