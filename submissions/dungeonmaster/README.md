@@ -19,7 +19,7 @@ Dungeon Master is a text-based RPG powered by AI, where you explore a fantasy wo
 
 3. Start the game by running:
    ```sh
-   node index.js
+   node main.js
    ```
 
 ## Troubleshooting
