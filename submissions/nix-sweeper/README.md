@@ -20,3 +20,10 @@ nix run github:dj-laser/nix-sweeper
 
 After it compiles, it will start the minesweeper game!
 Running it again will not recompile it, as it is saved to the nix store!
+
+### Controls
+- `WASD` and `Arrow Keys`: move cursor
+- `F`: flag as mine
+- `Space`: Reveal tile
+- `R`: Reset board
+- `Q`: Quit
