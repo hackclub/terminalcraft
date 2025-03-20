@@ -1,0 +1,5 @@
+requests==2.31.0
+python-whois==0.7.3
+socialscan==1.0.4
+dnspython==2.4.2
+python-dotenv==1.0.0
