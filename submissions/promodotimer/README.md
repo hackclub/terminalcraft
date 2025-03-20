@@ -1,5 +1,3 @@
-Here's an updated version of the GitHub README that includes the required libraries for your `terminal-app.py` and explains the setup accordingly:
-
 ---
 
 # Terminal App
@@ -34,8 +32,8 @@ This project uses the following libraries:
 First, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/terminal-app.git
-cd terminal-app
+git clone https://github.com/Coderlogy/terminalcraft.git
+cd submissions/promodotimer
 ```
 
 ### 2. Set up a virtual environment (Optional but recommended)
@@ -44,7 +42,10 @@ To keep dependencies isolated, it's a good idea to set up a virtual environment.
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+source venv/bin/activate  
+
+# On Windows just download:
+https://github.com/CoderLogy/terminalcraft/releases/download/V1.0-beta/Promodo.Timer.App.exe
 ```
 
 ### 3. Install dependencies
@@ -70,16 +71,6 @@ Once everything is set up, you can run the `terminal-app.py` script from the ter
 ```bash
 python terminal-app.py
 ```
-
-### Example
-
-If your script requires any command-line arguments or configurations, you can run the app with the desired parameters. For example:
-
-```bash
-python terminal-app.py --option value
-```
-
-Check the code or documentation to see what arguments or configurations the app supports.
 
 ## Troubleshooting
 
