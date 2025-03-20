@@ -1,0 +1,16 @@
+README.md
+setup.py
+CLI_multiplayer.egg-info/PKG-INFO
+CLI_multiplayer.egg-info/SOURCES.txt
+CLI_multiplayer.egg-info/dependency_links.txt
+CLI_multiplayer.egg-info/entry_points.txt
+CLI_multiplayer.egg-info/top_level.txt
+TwoPlayerGamesCLI/ConnectFour.py
+TwoPlayerGamesCLI/HangMan.py
+TwoPlayerGamesCLI/Multiplayer_CLI.py
+TwoPlayerGamesCLI/TruthLie.py
+TwoPlayerGamesCLI/Unscramble.py
+TwoPlayerGamesCLI/WordChain.py
+TwoPlayerGamesCLI/__init__.py
+TwoPlayerGamesCLI/basic_func.py
+TwoPlayerGamesCLI/guess_num.py

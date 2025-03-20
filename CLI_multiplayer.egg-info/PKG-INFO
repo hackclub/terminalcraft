@@ -1,0 +1,5 @@
+Metadata-Version: 2.2
+Name: CLI-multiplayer
+Version: 0.2
+Requires-Python: >=3.7
+Dynamic: requires-python
