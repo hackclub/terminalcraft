@@ -19,7 +19,7 @@ namespace TextAdventure
         private List<string> gevondenClues = new List<string>(); // Dit zijn de gevonden aanwijzingen
         private bool clueDraakArm = false;
         private bool bloedigMes = false;
-        private string partnerchoice1 = "";
+
         private bool Angela = false;
         private bool Jack = false;
         private bool Cam = false;
@@ -100,7 +100,7 @@ Console.WriteLine("Who do you take with you?");
      
 private void Scene1b() { // Plaats delict onderzoeken en aanwijzingen vinden    
 Console.Clear();
-    Console.WriteLine("You are in the car with Booth and " + partnerchoice1 + ". You step out of the SUV, the cold air biting at your skin.");
+    Console.WriteLine("You are in the car with Booth and " + partner + ". You step out of the SUV, the cold air biting at your skin.");
     Console.WriteLine("The Smithsonian National Museum of Natural History stands before you, its large glass facade illuminated by street lamps, while your footsteps echo on the marble stairs.");
     Console.WriteLine("Booth quickly walks to the entrance, but you, as always, can't help but let your thoughts drift to the puzzle before you.");
     Console.WriteLine("The museum is quiet, the atmosphere heavy with old history and science. The doors slide open, and you step inside, your eyes already searching for details—the crack in the floor, the smells of dust and old paper. The space is empty, the hall immense.");
@@ -129,16 +129,16 @@ private void Scene1c() {
     "Use UV light to find traces of blood or other fluids.",
     "Call the lab to ask questions about something you found.",
     "Examine the other mummies, maybe just for fun. But also to see if there's anything suspicious. Especially because you're a bit distracted...",
-    "Talk to the lab."
+    "Talk to the lab. (And exit the scene)"
     };
 
                 string labpartner = "";
                 string labpartnerHijZij = "";
-                if (partnerchoice1 == "Dr. Camille 'Cam' Saroyan"){
+                if (partner == "Dr. Camille 'Cam' Saroyan"){
                  labpartner = "Dr. Zack Addy";
                  labpartnerHijZij = "He";
                 }
-                else if (partnerchoice1 == "Dr. Zack Addy"){
+                else if (partner == "Dr. Zack Addy"){
                  labpartner = "Dr. Camille 'Cam' Saroyan";
                  labpartnerHijZij = "She";
                 }
@@ -252,7 +252,7 @@ private void Scene1c() {
 
     }
         
-    else if (gekozenOptie == "Talk to the lab."){
+    else if (gekozenOptie == "Talk to the lab. (And exit the scene)"){
         Console.Clear();
         Console.WriteLine("You call the lab and ask if they have received any of the evidence yet and if they have found anything.");
         Console.WriteLine(labpartner + " shouts from a distance and says, 'I know who it is!'");
@@ -262,7 +262,7 @@ private void Scene1c() {
         Console.Clear();
         Console.WriteLine("You call Booth and tell him who the victim was and that he worked at the museum.");
         Console.WriteLine("You tell Booth to bring all the staff to the station. Then we’ll question them together.");
-        Console.WriteLine("You say that you and " + partnerchoice1 + " are coming to the FBI HQ and hang up.");
+        Console.WriteLine("You say that you and " + partner + " are coming to the FBI HQ and hang up.");
         Console.WriteLine("Press any key to continue...");
         Console.ReadKey();
         Scene2();
@@ -280,7 +280,7 @@ private void Scene1c() {
         Console.Clear();
         Console.WriteLine("You call Booth and tell him who the victim was and that he worked at the museum.");
         Console.WriteLine("You tell Booth to bring all the staff to the station. Then we’ll question them together.");
-        Console.WriteLine("You say that you and " + partnerchoice1 + " are coming to the FBI HQ and hang up.");
+        Console.WriteLine("You say that you and " + partner + " are coming to the FBI HQ and hang up.");
         Console.WriteLine("Press any key to continue...");
         Console.ReadKey();
         Scene2();
