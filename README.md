@@ -3,7 +3,7 @@
 ## Project Details
 
 1. **What is the name of your project?**
-   - **cpptui-snake**
+   - **cpp-snake**
 
 2. **How many hours did you spend developing this?**
    - **I worked on it at school with a friend, for about 10-15 whole lessons or so**
@@ -28,6 +28,6 @@
 ## Additional Comments
 
 * The snake game (example) is the project, that was made for this tui app submission, the rest of the repo is the custom TUI library itself!
-* Build and run instructions and requirements can be found on my github. 
-* Pre built binaries are also posted for all platforms!
-
+* Pre built binaries are also posted for all platforms on the github
+* (the tui lib's other usages and examples on the github)
+* tui lib repo: github.com/csboo/cpptui
