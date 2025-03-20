@@ -9,6 +9,15 @@ for cmd in python3 pip3 curl; do
   fi
 done
 
+# Determine the shell RC file
+if [ -n "$ZSH_VERSION" ]; then
+  SHELL_RC="$HOME/.zshrc"
+elif [ -n "$BASH_VERSION" ]; then
+  SHELL_RC="$HOME/.bashrc"
+else
+  SHELL_RC="$HOME/.profile"
+fi
+
 CLIENT_URL="https://raw.githubusercontent.com/yazidears/clipkeep/refs/heads/main/clipkeep.py"
 INSTALL_DIR="$HOME/.local/bin"
 INSTALL_FILE="$INSTALL_DIR/clipkeep"
@@ -45,33 +54,14 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
   echo "Added $INSTALL_DIR to PATH in $SHELL_RC."
 fi
 
-
 # Apply the changes immediately
 export PATH="$HOME/.local/bin:$PATH"
 
-# Source the shell configuration file only if it exists
+# Source the shell configuration file if it exists
 if [ -f "$SHELL_RC" ]; then
   source "$SHELL_RC"
 else
   echo "Warning: $SHELL_RC not found. Restart your terminal for changes to take effect."
-fi
-
-# Automatically update the user's shell configuration file
-if [ -n "$ZSH_VERSION" ]; then
-  SHELL_RC="$HOME/.zshrc"
-elif [ -n "$BASH_VERSION" ]; then
-  SHELL_RC="$HOME/.bashrc"
-else
-  SHELL_RC="$HOME/.profile"
-fi
-
-if [ -f "$SHELL_RC" ]; then
-  if ! grep -q "$INSTALL_DIR" "$SHELL_RC"; then
-    echo "export PATH=\$PATH:$INSTALL_DIR" >> "$SHELL_RC"
-    echo "Added $INSTALL_DIR to PATH in $SHELL_RC."
-  fi
-else
-  echo "No shell configuration file found. Please add $INSTALL_DIR to your PATH manually."
 fi
 
 # Test connection to the server
@@ -81,15 +71,15 @@ if echo "$PING_OUTPUT" | grep -q '"status": "ok"'; then
   echo "Server connection successful: $PING_OUTPUT"
 else
   echo "Warning: Unable to connect to the server. Please check your network or server status."
-  echo "warning, but honest: it's probably us and not you :D"
-
+  echo "Warning, but honest: it's probably us and not you :D"
 fi
-echo "if clipkeep doesn't run when you try to summon it, try with the next command:"
-echo "export PATH=$HOME/.local/bin:$PATH"
-echo "note that this is a temporal solution"
+
+echo "If clipkeep doesn't run when you try to summon it, try running:"
+echo "export PATH=\$HOME/.local/bin:\$PATH"
+echo "Note that this is a temporary solution."
 echo "clipkeep installed successfully! You can now run 'clipkeep' from your terminal."
 
-# Optionally, offer to reload the shell to update the PATH immediately
+# Optionally, offer to reload the user's shell to update the PATH immediately
 if [ -t 1 ]; then
   read -r -p "Do you want to reload your shell now to update your PATH? (y/N) " answer
   if [[ "$answer" =~ ^[Yy]$ ]]; then
