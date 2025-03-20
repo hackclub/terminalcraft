@@ -25,7 +25,7 @@
 
 This project is still under construction  so it will soon have more games.
 
-##Installation
+## Installation
 
 make sure you have pyhton installed.
 
