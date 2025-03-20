@@ -16,7 +16,7 @@ def generate_matrix():
     return tfidf_matrix, vectoriser
 
 def search_matrix(tfidf_matrix, vectoriser, search_item):
-    print(search_item)
+    # print(search_item)
     # search_item = vectoriser.transform(['crossfade'])
     # similarities = cosine_similarity(tfidf_matrix, search_item)
 
@@ -30,7 +30,7 @@ def search_matrix(tfidf_matrix, vectoriser, search_item):
         most_similar_index = numpy.argmax(similarities)
         # print(most_similar_index)
         search_result = skinlist[most_similar_index]
-        print(search_result)
+        # print(search_result)
         if search_result == "#######":
             break
         results.append(search_result)
@@ -38,5 +38,5 @@ def search_matrix(tfidf_matrix, vectoriser, search_item):
         # Delete the item we just saw from the similarities list
         similarities = numpy.delete(similarities, most_similar_index)
     
-    print(search_result)
+    # print(search_result)
     return results

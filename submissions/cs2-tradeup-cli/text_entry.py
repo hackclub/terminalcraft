@@ -130,7 +130,7 @@ def search_item(screen, curses, current_value, selection, matrix, vectorizer):
                 screen.addstr(y, x+17, " ", curses.color_pair(2))
 
             best_matches = search_matrix(matrix, vectorizer, current_text)
-            print(best_matches)
+            # print(best_matches)
 
         for count, i in enumerate(best_matches):
             color = 1 if current_search_selection != count+1 else 2
