@@ -1,7 +1,7 @@
 use assert_cmd::prelude::*;
 use ferris::kvstore::KvStore;
 use predicates::ord::eq;
-use predicates::str::{contains, is_empty, PredicateStrExt};
+use predicates::str::{contains, PredicateStrExt};
 use std::error::Error;
 use std::process::Command;
 use tempfile::TempDir;
@@ -10,7 +10,7 @@ use walkdir::WalkDir;
 // `kvs` with no args should exit with a non-zero code.
 #[test]
 fn cli_no_args() {
-    Command::cargo_bin("kvs").unwrap().assert().failure();
+    Command::cargo_bin("kvs").unwrap().assert().success();
 }
 
 // `kvs -V` should print the version

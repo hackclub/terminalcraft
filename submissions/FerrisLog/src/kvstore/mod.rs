@@ -3,7 +3,7 @@ use std::{
     fs::{self, create_dir, File},
     io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
-    str::FromStr
+    str::FromStr,
 };
 pub mod command;
 pub mod error;
@@ -45,7 +45,6 @@ impl KvStore {
 
         Ok(())
     }
-
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()> {
         let cmd = Command::set(key.clone(), val.clone());
@@ -185,35 +184,32 @@ impl KvStore {
         Ok(())
     }
 
-    pub fn list_key(&mut self){
-        if self.table.is_empty(){
+    pub fn list_key(&mut self) {
+        if self.table.is_empty() {
             println!("No key is found");
         }
         print!("Keys: ");
-        for i in self.table.clone().into_keys(){
-
-            print!("{}, ",i);
-
+        for i in self.table.clone().into_keys() {
+            print!("{}, ", i);
         }
     }
 
-    pub fn count(&mut self) -> u32{
+    pub fn count(&mut self) -> u32 {
         self.table.clone().into_keys().count() as u32
     }
-    
-    pub fn create_snapshot(&mut self) -> KvResult<PathBuf>{
 
+    pub fn create_snapshot(&mut self) -> KvResult<PathBuf> {
         let binding = PathBuf::from_str("/").unwrap();
         let parent_dir = self.path.parent().unwrap_or(binding.as_ref());
-        let cur_date :chrono::DateTime<chrono::Local> = Local::now();
-        let mut f = File::options()
-            .read(true)
-            .open(&self.path)
-            .unwrap();
-        
-        let new_log_path: PathBuf = parent_dir.join("snapshots").join(format!("log_{}.txt", cur_date.format("%Y-%m-%d_%H-%M-%S").to_string()));
+        let cur_date: chrono::DateTime<chrono::Local> = Local::now();
+        let mut f = File::options().read(true).open(&self.path).unwrap();
 
-        let _  = create_dir(parent_dir.join("snapshots"));
+        let new_log_path: PathBuf = parent_dir.join("snapshots").join(format!(
+            "log_{}.txt",
+            cur_date.format("%Y-%m-%d_%H-%M-%S").to_string()
+        ));
+
+        let _ = create_dir(parent_dir.join("snapshots"));
         let _ = File::create(&new_log_path);
 
         let mut cur_f = File::options()
@@ -221,30 +217,25 @@ impl KvStore {
             .truncate(true)
             .open(&new_log_path)
             .unwrap();
-        
+
         let mut buffer = Vec::new();
 
-
-        let _  = f.read_to_end(&mut buffer);
+        let _ = f.read_to_end(&mut buffer);
 
         let _ = cur_f.write_all(buffer.as_ref());
-        
-        Ok(new_log_path)
 
+        Ok(new_log_path)
     }
 
-    pub fn load_snapshot(&mut self, path: PathBuf) -> KvResult<()>{
+    pub fn load_snapshot(&mut self, path: PathBuf) -> KvResult<()> {
         let mut f = File::options()
             .truncate(true)
             .write(true)
             .open(&self.path)
             .unwrap();
-        
-        let mut fr = File::options()
-            .read(true)
-            .open(path)
-            .unwrap();
-        
+
+        let mut fr = File::options().read(true).open(path).unwrap();
+
         let mut buffer: Vec<u8> = Vec::new();
 
         let _ = fr.read_to_end(&mut buffer);
@@ -253,17 +244,4 @@ impl KvStore {
 
         Ok(())
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
