@@ -4,7 +4,7 @@ use ratatui::{
     style::{Color, Modifier, Style},
     symbols,
     text::{Line, Span, Text},
-    widgets::{Block, BorderType, Borders, Chart, Dataset, Gauge, Paragraph, Tabs, Wrap},
+    widgets::{Block, BorderType, Borders, Chart, Dataset, Gauge, Paragraph, Wrap},
     Frame,
 };
 
@@ -329,7 +329,11 @@ fn draw_test_complete_new(app: &App, frame: &mut Frame, area: Rect) {
 
     let total_height = inner_area.height;
     let content_height = results_lines.len().max(settings_lines.len()) as u16;
-    let padding_top = (total_height - content_height) / 2;
+    let padding_top = if total_height > content_height {
+        (total_height - content_height) / 2
+    } else {
+        0
+    };
 
     let left_column = Layout::default()
         .direction(Direction::Vertical)

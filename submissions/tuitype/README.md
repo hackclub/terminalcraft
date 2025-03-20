@@ -21,20 +21,7 @@ cargo run
 
 ## WebAssembly Support
 
-TuiType can be compiled to WebAssembly for running in a browser or other WASI-compatible environments.
-
-### Building for WASI
-
-```bash
-cargo build --target wasm32-wasi --release
-```
-
-### Building for Web with wasm-bindgen
-
-```bash
-cargo build --target wasm32-unknown-unknown --release
-wasm-bindgen --target web --out-dir ./web/pkg ./target/wasm32-unknown-unknown/release/tuitype.wasm
-```
+- WIP
 
 ## Usage
 
