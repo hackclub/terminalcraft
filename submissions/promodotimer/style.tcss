@@ -1,0 +1,34 @@
+#clock {
+    text-align: center;
+    color: cyan;
+    margin-bottom: 1;
+}
+
+.title {
+    text-align: center;
+    color: green;
+}
+
+#timer_display {
+    text-align: center;
+    color: yellow;
+    margin-bottom: 1;
+}
+
+#start_work {
+    background: green;
+    color: white;
+    margin: 1;
+}
+
+#start_break {
+    background: blue;
+    color: white;
+    margin: 1;
+}
+
+#stop_timer {
+    background: red;
+    color: white;
+    margin: 1;
+}
