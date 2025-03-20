@@ -1,0 +1,13 @@
+README.md
+setup.py
+git_guardian/__init__.py
+git_guardian/cli.py
+git_guardian/hook_manager.py
+git_guardian/reporter.py
+git_guardian/scanner.py
+git_guardian_cli.egg-info/PKG-INFO
+git_guardian_cli.egg-info/SOURCES.txt
+git_guardian_cli.egg-info/dependency_links.txt
+git_guardian_cli.egg-info/entry_points.txt
+git_guardian_cli.egg-info/requires.txt
+git_guardian_cli.egg-info/top_level.txt
