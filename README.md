@@ -22,6 +22,7 @@
 
 6. **Does your project include a Readme file with instructions on how to use it?**
    - **Yes**
+   - see submissons/BUILD_AND_RUN.md
 
 ---
 
