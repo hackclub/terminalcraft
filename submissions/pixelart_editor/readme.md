@@ -1,4 +1,4 @@
-# TermPaint - ASCII Art Editor in Terminal
+# asciiart_editor - ASCII Art Editor in Terminal
 
 
 A feature-rich terminal-based ASCII art editor with advanced drawing capabilities, supporting mouse input, multiple colors, undo/redo history, and various drawing tools. Perfect for creating retro-style artwork directly in your terminal!
@@ -28,6 +28,49 @@ A feature-rich terminal-based ASCII art editor with advanced drawing capabilitie
   - Character picker
   - Real-time preview
 
+
+## Quickstart ⚡  
+*Create basic shapes in under 1 minute:*
+
+### **Single Point**
+1. Press `←→↑↓` to move cursor  
+2. Select color with `1`-`7`  
+3. Press `Space` to place character  
+
+### **Straight Line**
+1. Move to start position → Press `l`  
+2. Move to end position → Press `l` again  
+*Example:*  
+```
+A----B (Press 'l' at A, then at B)
+```
+
+### **Filled Triangle**
+1. **Draw Outline** with 3 lines:  
+   ```
+    ▲
+   / \ 
+  /___\```
+  
+   - Use `l` tool for each edge  
+
+2. **Fill Interior**:  
+   a. Move cursor inside triangle  
+   b. Press `f` to flood-fill  
+
+3. **Add Details**:  
+   - Use different colors (`2`-`7`) for borders vs fill  
+   - Toggle grid (`z`) for perfect angles  
+
+---
+
+**Pro Tip:** Combine these techniques to create:  
+- Rectangles (4 lines + fill)  
+- Diamonds (rotated squares)  
+- Pixel-art characters (single-point details)  
+
+---
+
 ## Installation 💻
 
 **Requirements:**
@@ -35,6 +78,7 @@ A feature-rich terminal-based ASCII art editor with advanced drawing capabilitie
 - curses-compatible terminal
 
 ```bash
+pip install curses-menu  # Only required if not pre-installed
 git clone https://github.com/piter231/pixelart_editor.git
 cd pixelart_editor
 ```
