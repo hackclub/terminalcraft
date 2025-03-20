@@ -3,22 +3,22 @@
 ## Project Details
 
 1. **What is the name of your project?**
+driveExplorer
 
 2. **How many hours did you spend developing this?**
-   _(Give your best estimate or show proof using hackatime/wakatime)_
+   ~6h (+2.5h reading thru docs, etc.) 
+   <br>![alt text](image.png)
 
 3. **Briefly describe what your project is. What makes it unique?**
-   _(Provide a brief description of the functionality or innovation)_
+   Saves a specific folder onto your google drive with the google drive API, could be useful for making backup folders or similar
 
 4. **How many people have tested your extension?**
-   _(We recommend at least 3)_
+   ~4
 
 5. **On What operating systems have you tested this project?**
-   _(MacOS/Linux/Windows)_
-
+   Windows & Linux
 6. **Does your project include a Readme file with instructions on how to use it?**
-   _(Yes/No)_
-
+   Yes
 ---
 
 ## Additional Comments
