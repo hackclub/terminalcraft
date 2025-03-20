@@ -47,10 +47,11 @@ A----B (Press 'l' at A, then at B)
 
 ### **Filled Triangle**
 1. **Draw Outline** with 3 lines:  
-   ```
+```text
     ▲
    / \ 
-  /___\```
+  /___\
+  ```
   
    - Use `l` tool for each edge  
 
