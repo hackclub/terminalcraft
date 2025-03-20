@@ -74,7 +74,7 @@ class ClockStatic(Static):
 
 
 # Main App class
-class ChronoTrackApp(App):
+class PromodoTimer(App):
     CSS_PATH = "style.tcss"  # External CSS for styling
 
     def __init__(self):
