@@ -10,14 +10,14 @@ GetMeA is an AI-powered software installer. It aims to combat the recent trend o
 
 Just run getmea and tell it what to install. It will use your system package manager if possible but fall back to searching the web for you and coming up with a plan. Because AI has proven itself to be extremely not reliable, you'll, of course, be asked for confirmation before it runs any commands to protect your highly customized Linux installation.
 
-Planned features:
+Roadmap:
 
-- Multiple concurrent research attempts
-- Automatically search package registry to confirm AI's decision
-- Automatically try to debug failed commands
-- Replace crawl4ai due to it's giant dependency tree
+- [ ] Multiple concurrent research attempts
+- [ ] Automatically search package registry to confirm AI's decision
+- [ ] Automatically try to debug failed commands
+- [x] Replace crawl4ai due to it's giant dependency tree - Integrated stripped down version
 
-## ~~Installation~~ Currently broken due to giant blob of dependencies from crawl4ai -> Please use the development setup
+## Installation
 
 - Download the [latest build artifact](https://nightly.link/playlogo/GetMeA/workflows/nuitka.yaml/main/Linux%20build.zip) and unzip it:
 
@@ -41,12 +41,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Debug project
-python src/main.py # <- Works!
+python src/main.py
 
 # Compile project
-nuitka src/main.py # Currently takes around 1 hour.... Need to find a better solution for crawl4ai
+nuitka src/main.py
 ```
 
 ## Attribution
 
-This product includes software developed by UncleCode (<https://x.com/unclecode>) as part of the Crawl4AI project (<https://github.com/unclecode/crawl4ai>).
+- This product includes software developed by UncleCode (<https://x.com/unclecode>) as part of the Crawl4AI project (<https://github.com/unclecode/crawl4ai>).
+- This project uses a (heavely) minified version of the awesome [duckduckgo_search](https://github.com/deedy5/duckduckgo_search/) package

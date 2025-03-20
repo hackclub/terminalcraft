@@ -1,4 +1,4 @@
-from duckduckgo_search import DDGS
+from duckduckgo.search import DDGS
 
 
 CAPTURE = ["NAME", "ID", "ID_LIKE", "VERSION"]

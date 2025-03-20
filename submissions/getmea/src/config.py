@@ -56,8 +56,9 @@ class ConfigManager:
                 print(
                     f"Copied default config to {CONFIG_DIR}. Please configure this file with your OpenAI API compatible base_url and token, and rerun this command."
                 )
+                exit(0)
 
-            exit(0)
+            return False
 
         # Load custom config
         self.config = toml.load(config_file_path)

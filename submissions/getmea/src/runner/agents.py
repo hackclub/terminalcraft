@@ -7,7 +7,7 @@ from config import config
 from typing import TypedDict
 
 from runner.collector import get_linux_flavor, search_duck_duck
-from runner.crawler import main as crawl
+from html2markdown.crawler import main as crawl
 
 
 # Types
@@ -130,8 +130,8 @@ class SearchingAgent(BasePrompt):
                     "content": f"""You are a Google search agent expert! The user will provide with 5 search results for the query {routing_res['webSearchQuery']}.
 
 Your task is to determine the best and second best search result matching the query given above.
-- The query will be about installing a given software. Please prefer the official software sources above and third party ones.
-- Sometimes the website description can be off, use common sense and argue in your though about the best and second best match.
+- The query will be about installing a given software. Please prefer the official software sources above any third party ones.
+- Sometimes the website description can be off, use common sense and argue in your thought about the best and second best match.
 
 
 Please respond only in the following JSON format (without a code block, just raw JSON):
@@ -170,7 +170,7 @@ class ExtractingAgent(BasePrompt):
 
             if len(scraped) < (SPLIT_SIZE + SPLIT_OVERLAP):
                 split = scraped
-                count = math.Inf
+                count = math.inf
             else:
                 split = scraped[: (SPLIT_SIZE + SPLIT_OVERLAP)]
                 scraped = scraped[(SPLIT_SIZE - SPLIT_OVERLAP) :]

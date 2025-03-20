@@ -2,8 +2,7 @@
 # nuitka-project: --mode=onefile
 # nuitka-project: --include-data-dir=./data=data
 # nuitka-project: --output-filename=getmea.bin
-# nuitka-project: --lto=no
-# nuitka-project: --nofollow-import-to=playwright,litellm
+
 
 from args import args, parser
 from setup import setup
