@@ -11,6 +11,7 @@ This project is inspired by the simplicity and power of socket programming in Py
 
 ## Features
 - Real-time text messaging between client and server.
+- Server broadcasts to all connected to client.
 - File transfer functionality (e.g., images, documents).
 - Graceful connection termination.
 - Cross-platform compatibility (Windows, macOS, Linux).
