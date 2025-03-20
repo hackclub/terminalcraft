@@ -8,7 +8,7 @@ A simple terminal-based Python application built with `pygame`, `textual`, and o
 
 Before running the application, ensure you have the following:
 
-- **Python 3.6** or higher installed on your system.
+- **Python 3.8** or higher installed on your system.
 - **pip** (Python package manager) to install dependencies.
 
 ### Libraries Used
