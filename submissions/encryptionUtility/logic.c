@@ -58,7 +58,7 @@ char *getKeyContent(int keySource, const char *defaultFilename, const char *prom
         }
 
         // Process filename
-        filename = processPath(filename, true);
+        filename = processPath(filename, true, false);
         if (filename == NULL)
         {
             printf("Error: Failed to process filename\n");
@@ -74,7 +74,7 @@ char *getKeyContent(int keySource, const char *defaultFilename, const char *prom
         }
 
         // Read file content
-        keyContent = readFileContent(filename, &keyContentLength);
+        keyContent = readFileContent(filename, &keyContentLength, true);
         if (keyContent == NULL)
         {
             printf("Error: Failed to read key file\n");
@@ -96,7 +96,7 @@ bool handleFileOutput(const char *content, size_t contentLength, bool isBinary)
         return false;
 
     // Process filename
-    filename = processPath(filename, false);
+    filename = processPath(filename, false, false);
     if (filename == NULL)
     {
         printf("Error: Failed to process filename\n");
@@ -195,7 +195,7 @@ void encryptHandler()
             return;
 
         // Process filename
-        filename = processPath(filename, true);
+        filename = processPath(filename, true, false);
         if (filename == NULL)
         {
             printf("Error: Failed to process filename\n");
@@ -211,7 +211,7 @@ void encryptHandler()
         }
 
         // Read file content using the new function
-        content = readFileContent(filename, &contentLength);
+        content = readFileContent(filename, &contentLength, true);  // Use binary mode for encryption
         if (content == NULL)
         {
             free(filename);
@@ -700,7 +700,7 @@ void decryptHandler()
             return;
 
         // Process filename
-        filename = processPath(filename, true);
+        filename = processPath(filename, true, false);
         if (filename == NULL)
         {
             printf("Error: Failed to process filename\n");
@@ -716,7 +716,7 @@ void decryptHandler()
         }
 
         // Read file content using the new function
-        content = readFileContent(filename, &contentLength);
+        content = readFileContent(filename, &contentLength, true);  // Use binary mode for decryption
         if (content == NULL)
         {
             free(filename);
@@ -1168,7 +1168,7 @@ void generateKeyHandler()
     }
 
     // Save public key to file
-    char *pubKeyPathname = processPath(pubKeyFilename, false);
+    char *pubKeyPathname = processPath(pubKeyFilename, false, false);
     
     /* printf("Public key file: %s\n", pubKeyPathname); */
     
@@ -1212,7 +1212,7 @@ void generateKeyHandler()
     fclose(pubKeyFile);
 
     // Save private key to file
-    char *privKeyPathname = processPath(privKeyFilename, false);
+    char *privKeyPathname = processPath(privKeyFilename, false, false);
     
     // Create or verify the file exists
     if (!fileExists(privKeyPathname))
@@ -1317,7 +1317,7 @@ void hashHandler()
             return;
 
         // Process filename
-        filename = processPath(filename, true);
+        filename = processPath(filename, true, false);
         if (filename == NULL)
         {
             printf("Error: Failed to process filename\n");
@@ -1333,7 +1333,7 @@ void hashHandler()
         }
 
         // Read file content using the new function
-        content = readFileContent(filename, &contentLength);
+        content = readFileContent(filename, &contentLength, true);  // Use binary mode for hashing
         if (content == NULL)
         {
             free(filename);
@@ -1446,7 +1446,13 @@ void hashHandler()
         }
 
         // Process filename
-        filename = processPath(filename, false);
+        filename = processPath(filename, false, false);
+        if (filename == NULL)
+        {
+            printf("Error: Failed to process filename\n");
+            free(hashOutput);
+            return;
+        }
 
         // Create or verify the file exists
         if (!fileExists(filename))
