@@ -26,7 +26,7 @@
 
 > If you want to stop schema error from happening when using OpenAI or OpenRouter add `"repeatRequest": true` into config.json <br>
 
-> recommended model: `liquid/lfm-3b` on openrouter. It's incredibly cheap and runs well.
+> recommended model: `liquid/lfm-3b` on openrouter. It's incredibly cheap and runs well. <br>
 > recommended model: `anthropic/claude-3.7-sonnet` on openrouter. Still pretty cheap, AMAZING performance.
 
 - Run the file with `python main.py`
