@@ -9,7 +9,6 @@ from typing import Optional
 
 # providers
 import ollama
-from openai import OpenAI
 import requests
 
 # terminal buddy
@@ -33,7 +32,7 @@ if key == None and provider != "ollama":
 
 if provider == None:
     provider = input(
-        "Enter provider to use, leave empty for ollama. Available providers: [openai, openrouter, ollama]: "
+        "Enter provider to use, leave empty for openrouter. [openrouter, ollama]: "
     )
     data["provider"] = provider
 
@@ -102,10 +101,19 @@ model = data.get("model")
 maxTokens: int = data.get("maxTokens", 1024)
 repeatition = data.get("repeatRequest")
 todo_list = data.get("todo_list", [])
-availProviders = ["openai", "openrouter", "ollama"]
+availProviders = ["openrouter", "ollama"]
+
+if provider == "":
+    provider = "openrouter"
 
 if provider not in availProviders:
     raise Exception("Invalid/Unsupported provider in config.json")
+
+if provider == "openrouter":
+    print("""Recommended models:
+If you're broke: liquid/lfm-3b is really solid and EXTERMELY cheap. Each prompt - about 1/100th of a cent
+If you're fine with losing a dollar or 2: anthropic/claude-3.7-sonnet (self explanatory, probably the best model for TerminalBuddy) - about 1/10th of a cent
+""")
 
 if model == None:
     model = input("Enter model to use: ")
@@ -119,61 +127,6 @@ if repeatition == None:
 
 def aiPrompt(user_input: str):
     match provider:
-        case "openai":
-            openAIClient = OpenAI(api_key=key, model=model)
-            messageHistory.append({"role": "user", "content": user_input})
-
-            def getRes():
-                comp = openAIClient.chat.completions.create(
-                    extra_body={},
-                    model=model,
-                    max_tokens=maxTokens,
-                    messages=messageHistory,
-                    response_format="json",
-                    # response_format={type:"json_schema", "json_schema": CommandResponse.model_json_schema()},
-                )
-
-                # print(comp.choices)
-                # print("message.content: ", comp.choices[0].message.content)
-                # print(comp.choices[0].message.content)
-                shouldContinue = True
-                try:
-                    message = CommandResponse.model_validate_json(
-                        comp.choices[0].message.content
-                    )
-                except:
-                    if repeatition:
-                        messageHistory.append(
-                            {
-                                "role": "assistant",
-                                "content": comp.choices[0].message.content,
-                            }
-                        )
-                        messageHistory.append(
-                            {
-                                "role": "system",
-                                "content": 'Please ONLY respond in the format: {"commands": [], "message": ""}',
-                            }
-                        )
-                        return getRes()
-                    else:
-                        raise Exception("Invalid response format from OpenRouter")
-                    # shouldContinue = False
-                # click.echo(message)
-                # message: CommandResponse = json.loads(
-                #     command_response
-                # )
-                # print("message: ", message)
-                if shouldContinue:
-                    messageHistory.append(
-                        {
-                            "role": "assistant",
-                            "content": comp.choices[0].message.content,
-                        }
-                    )
-                    return message
-
-            return getRes()
         case "openrouter":
             openRouterClient = OpenAI(
                 base_url="https://openrouter.ai/api/v1", api_key=key

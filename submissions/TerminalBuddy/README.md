@@ -1,4 +1,7 @@
-# Terminal Buddy
+# Terminal Buddy | Productivity at its finest
+
+![Imagine showing Terminal Buddy at function](preview.png) 
+
 ## Requirements
 - Python 3.13 or newer. 
 ## How to run
@@ -25,6 +28,7 @@
 > If you want to stop schema error from happening when using OpenAI or OpenRouter add `"repeatRequest": true` into config.json <br>
 
 > recommended model: `liquid/lfm-3b` on openrouter. It's incredibly cheap and runs well.
+> recommended model: `anthropic/claude-3.7-sonnet` on openrouter. Still pretty cheap, AMAZING performance.
 
 - Run the file with `python main.py`
 ### If you don't want config saved
