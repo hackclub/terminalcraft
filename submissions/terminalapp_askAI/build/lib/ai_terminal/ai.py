@@ -5,6 +5,7 @@ import time
 import threading
 import argparse
 import subprocess
+import readline
 import os
 import concurrent.futures
 from multiprocessing import Process

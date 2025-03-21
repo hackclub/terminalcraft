@@ -1,6 +1,7 @@
 import requests
 import json
 import sys
+import readline
 import time
 import threading
 from termcolor import colored
@@ -48,6 +49,7 @@ def main():
 
     while True:
         question = console.input("\n🌸 [bold magenta]Ask anything (or type 'exit' to quit): [/bold magenta] ")
+        # question = input("\n🌸 Ask anything (or type 'exit' to quit): ")
 
         if question.lower() in ["exit", "quit"]:
             console.print("\n💫 [bold yellow]Goodbye, stay magical! 💖✨[/bold yellow]\n")

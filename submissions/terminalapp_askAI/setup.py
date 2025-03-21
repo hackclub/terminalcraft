@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="hc_ai_terminal",
-    version="0.3",
+    version="0.5",
     packages=find_packages(),
     entry_points={
         'console_scripts': [
