@@ -1,0 +1,32 @@
+name: System Security Utility
+description: Select a security category to manage
+subsections:
+  firewall:
+    name: Firewall
+    description: Firewall configuration and status
+    actions:
+      - name: Configure UFW
+        description: Set up and configure UFW firewall, Set up IPv4 in System CTL
+        script_path: scripts/ufw_sysctl.sh
+  
+  remote_access:
+    name: Remote Access
+    description: Manage remote access points
+    actions:
+      - name: Configure SSH
+        description: Modify sshd_config
+        script_path: scripts/ssh.sh
+  
+  least_privilege:
+    name: Least Privilege
+    description: Manage permissions and access
+    actions:
+      - name: Set File Permissions
+        description: Set file permissions to least privilege
+        script_path: scripts/file_perms.sh
+      - name: Disable Root Access
+        description: Disable direct root login
+        script_path: scripts/dis_root.sh
+      - name: Disable Guest Account
+        description: Disable guest account and remote login
+        script_path: scripts/dis_guest_remote.sh
