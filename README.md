@@ -22,7 +22,7 @@
 
 6. **Does your project include a Readme file with instructions on how to use it?**
    - **Yes**
-   - see submissons/BUILD_AND_RUN.md
+   - check it out [here](./submissions/cpp-snake/BUILD_AND_RUN.md)
 
 ---
 
@@ -31,4 +31,4 @@
 * The snake game (example) is the project, that was made for this tui app submission, the rest of the repo is the custom TUI library itself!
 * Pre built binaries are also posted for all platforms on the github
 * (the tui lib's other usages and examples on the github)
-* tui lib repo: github.com/csboo/cpptui
+* tui lib repo: [github.com/csboo/cpptui](github.com/csboo/cpptui)
