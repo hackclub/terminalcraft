@@ -2,15 +2,63 @@ import curses
 from random import randint, choice
 from time import time
 
-def main(stdscr):
-    
+def show_menu(stdscr):
     curses.curs_set(0)
     sh, sw = stdscr.getmaxyx()
     w = curses.newwin(sh, sw, 0, 0)
     w.keypad(1)
     
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
     
-    base_timeout = 75
+    w.clear()
+    
+    
+    title = "SNAKE GAME"
+    try:
+        w.addstr(sh // 4, (sw - len(title)) // 2, title, curses.A_BOLD | curses.color_pair(2))
+    except curses.error:
+        pass
+    
+    
+    options = [
+        "1. Easy (Slow speed)",
+        "2. Hard (fast speed)"
+    ]
+    
+    for i, option in enumerate(options):
+        try:
+            w.addstr(sh // 4 + 3 + i, (sw - len(option)) // 2, option, curses.color_pair(3))
+        except curses.error:
+            pass
+    
+    
+    instructions = "Press 1 or 2 to select difficulty"
+    try:
+        w.addstr(sh // 4 + 6, (sw - len(instructions)) // 2, instructions)
+    except curses.error:
+        pass
+    
+    w.refresh()
+    
+    while True:
+        key = w.getch()
+        if key in [ord('1'), ord('2')]:
+            if key == ord('1'):
+                return 120  
+            elif key == ord('2'):
+                return 1    
+
+def main(stdscr):
+    
+    base_timeout = show_menu(stdscr)
+    
+    curses.curs_set(0)
+    sh, sw = stdscr.getmaxyx()
+    w = curses.newwin(sh, sw, 0, 0)
+    w.keypad(1)
     
     
     current_timeout = base_timeout
@@ -22,6 +70,7 @@ def main(stdscr):
     curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)   
     curses.init_pair(4, curses.COLOR_BLUE, curses.COLOR_BLACK)    
     curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK) 
+    
     
     for y in range(sh):
         try:
@@ -87,8 +136,10 @@ def main(stdscr):
     high_score = load_high_score()
 
     
+    difficulty = "Easy" if current_timeout == 120 else "Hard"
+    
     try:
-        score_str = f"Score: {score} | High Score: {high_score}"
+        score_str = f"Score: {score} | High Score: {high_score} | Level: {difficulty}"
         w.addstr(2, sw // 2 - len(score_str) // 2, score_str)
     except curses.error:
         pass
@@ -156,10 +207,11 @@ def main(stdscr):
                 w.addstr(sh // 2 - 2, sw // 2 - len("Game Over") // 2, "Game Over")
                 w.addstr(sh // 2, sw // 2 - len(f"Final Score: {score}") // 2, f"Final Score: {score}")
                 w.addstr(sh // 2 + 2, sw // 2 - len(f"High Score: {high_score}") // 2, f"High Score: {high_score}")
+                w.addstr(sh // 2 + 4, sw // 2 - len("Press any key to exit") // 2, "Press any key to exit")
             except curses.error:
                 pass
             w.refresh()
-            curses.napms(3000)
+            w.getch()  
             break
 
         
@@ -168,7 +220,11 @@ def main(stdscr):
             
             
             if score % 10 == 0 and current_timeout > 40:
-                current_timeout -= 5
+                if difficulty == "Hard":
+                    speed_increase = 7  
+                else:
+                    speed_increase = 5  
+                current_timeout -= speed_increase
                 w.timeout(current_timeout)
                 
             
@@ -258,7 +314,7 @@ def main(stdscr):
                 
         
         try:
-            score_str = f"Score: {score} | High Score: {high_score}"
+            score_str = f"Score: {score} | High Score: {high_score} | Level: {difficulty}"
             w.addstr(2, sw // 2 - len(score_str) // 2, score_str)
         except curses.error:
             pass
