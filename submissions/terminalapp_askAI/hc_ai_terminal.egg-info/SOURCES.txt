@@ -1,0 +1,10 @@
+README.md
+setup.py
+ai_terminal/__init__.py
+ai_terminal/ai.py
+ai_terminal/setup.py
+hc_ai_terminal.egg-info/PKG-INFO
+hc_ai_terminal.egg-info/SOURCES.txt
+hc_ai_terminal.egg-info/dependency_links.txt
+hc_ai_terminal.egg-info/entry_points.txt
+hc_ai_terminal.egg-info/top_level.txt
