@@ -3,7 +3,7 @@
 ![Imagine showing Terminal Buddy at function](preview.png) 
 
 ## Requirements
-- Python 3.13 or newer. 
+- Python 3.12 or newer. 
 ## How to run
 
 - Download and extract the files
