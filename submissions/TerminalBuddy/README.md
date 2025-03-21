@@ -1,6 +1,6 @@
 # Terminal Buddy
 ## Requirements
-- The latest version of Python (older versions may work but untested)
+- Python 3.13 or newer. 
 ## How to run
 
 - Download and extract the files
