@@ -17,3 +17,6 @@ A classic Snake game with enhanced features, playable in your terminal window.
   - Rare food (£): Magenta, worth 5 points
 - **Bonus Food ($)**: Appears randomly for a limited time, worth 10 points
 - **Score Tracking**: Current score and high score displayed at the top
+- **Difficulty levels**:
+- easy: snake is slow
+- hard: snake is fast
