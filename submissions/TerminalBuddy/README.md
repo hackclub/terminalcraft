@@ -11,7 +11,6 @@
 - run `pip install -r requirements.txt` to install the required packages
 
 ### If you want to have api configuration saved
-> Config.json doesn't work on MacOS (atleast it didn't work for me)
 - Make a config.json file in the directory with the extracted files
 - Change it's contents to:
 ```
