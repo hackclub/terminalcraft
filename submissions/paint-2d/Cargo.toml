@@ -1,11 +1,12 @@
 [package]
 name = "paint-2d"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 license = "MIT"
 authors = ["RandomSearch"]
 description = "A fun, two-dimensional painting app that runs in your terminal"
 
 [dependencies]
+chrono = "0.4.40"
 crossterm = "0.28.1"
-ctrlc = "3.4.5"
+image = "0.25.5"
