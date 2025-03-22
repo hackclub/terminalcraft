@@ -2,6 +2,8 @@ package configuration
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -33,7 +35,12 @@ func setParentPointers(parent *Directory, subdirs map[string]*Directory) {
 }
 
 func LoadDirectories() {
-	data, err := os.ReadFile("../../directories.yaml")
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+
+	data, err := os.ReadFile(homeDir + "/Documents/ssu/directories.yaml")
 	if err != nil {
 		fmt.Printf("%s\n", err)
 	}
@@ -45,4 +52,28 @@ func LoadDirectories() {
 	}
 
 	setParentPointers(&Root, Root.Subsections)
+}
+
+func DownloadFile(url string, filepath string) error {
+	//create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	//waits until the file is fully downloaded
+	defer resp.Body.Close()
+
+	//write the file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

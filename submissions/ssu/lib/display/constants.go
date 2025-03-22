@@ -34,6 +34,7 @@ const (
 	KeyDown   = byte(66)
 	KeyEscape = byte(27)
 	KeyEnter  = byte(13)
+	KeyView   = byte(118)
 )
 
 var NavigationKeys = map[byte]bool{

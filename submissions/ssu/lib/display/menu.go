@@ -126,6 +126,10 @@ func (m *Menu) Display() (interface{}, error) {
 		switch keyCode {
 		case KeyEscape:
 			return -1, nil
+		case KeyView:
+			menuItem := m.MenuItems[m.CursorPos]
+			fmt.Println("\r")
+			return "v:" + menuItem.Text, nil
 		case KeyEnter:
 			menuItem := m.MenuItems[m.CursorPos]
 			fmt.Println("\r")
