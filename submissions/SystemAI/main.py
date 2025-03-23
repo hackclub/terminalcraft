@@ -220,7 +220,7 @@ def analyze_performance(stats):
         response = ollama.chat(model="llama3.1", messages=[{"role": "user", "content": prompt}])
         return response["message"]["content"]
     else:
-        return "Ollama is not installed or the Ollama service is not running. Skipping performance analysis."
+        return False
 
 shownnumber = 0
 print("AI will analyze only only once every eigth iteration")
@@ -263,8 +263,9 @@ def display_dashboard():
         if shownnumber % 8 == 0:
             print('ANALYZING VIA AI... Please be patient!')
             analysis = analyze_performance(stats)
-            print("AI Insights:", analysis)
-            time.sleep(45)
+            if analysis != False:
+                print("AI Insights:", analysis)
+                time.sleep(45)
                 
         combined_stats = {**stats, **speed_test_results}
         
