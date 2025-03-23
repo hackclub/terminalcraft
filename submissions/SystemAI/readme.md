@@ -32,9 +32,7 @@ pip install ollama
 
 Run the script using:
 
-python main.py and Llama3.1
-
-or run the exe with Ollama running Llama3.1
+python main.py or run the exe with Llama3.1 via Ollama (optional, only used for the AI analysis)
 
 <h2>System Monitoring</h2>
 
@@ -68,7 +66,7 @@ The script is designed to be run continuously in a terminal window.
 
 Internet speed tests may take a while to compute.
 
-Weather API requires an active internet connection and a valid API key.
+Weather API requires an active internet connection and a valid API key(One is already there :p).
 
 <h2>Contributing</h2>
 
