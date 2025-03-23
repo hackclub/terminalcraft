@@ -15,7 +15,7 @@
 - System information including uptime, CPU and RAM usage,
 - Active network connection counter,
 - Data usage tracking for current session,
-- Cross-platform support (Windows, macOS, Linux) (MADE WITH  H O P E),
+- Cross-platform support (Windows, macOS, Linux) (MADE WITH H O P E),
 - Slim and well designed app made just for you!
 
 ## Struggles
