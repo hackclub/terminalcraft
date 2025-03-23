@@ -17,7 +17,7 @@ Overall, the usage is super simple with only 2 commands:
 
 1. Clone the repo:
 ```
-git clone https://github.com/yourusername/driveExplorer.git
+git clone https://github.com/ILikeMice/driveExplorer.git
 cd driveExplorer
 ```
 
