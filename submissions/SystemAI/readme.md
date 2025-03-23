@@ -20,13 +20,7 @@ AI-Based Performance Analysis (Ollama Integration)
 
 <h2>Dependencies</h2>
 
-Ensure you have the following Python libraries installed before running the script:
-
-pip install psutil speedtest-cli rich GPUtil matplotlib numpy requests
-
-If you want AI-based performance analysis, install Ollama:
-
-pip install ollama
+Listed in requirements.txt
 
 <h2>Usage</h2>
 
