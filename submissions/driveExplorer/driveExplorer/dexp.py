@@ -239,8 +239,11 @@ def browse():
                     )
                 )
             file.seek(0)
-            with open(os.path.expanduser("~/Downloads") + "/" + file_name, "wb") as f:
-                f.write(file.read())
+            try:
+                with open(os.path.expanduser("~/Downloads") + "/" + file_name, "wb") as f:
+                    f.write(file.read())
+            except:
+                return secho("Error! Please try creating a downloads folder if you dont already!", fd="red")
             secho(f"File '{file_name}' downloaded successfully!", fg="green")
         except HttpError as error:
             secho(f"An error occurred: {error}")
