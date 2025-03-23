@@ -32,7 +32,7 @@ pip install ollama
 
 Run the script using:
 
-python script.py and Llama3.1
+python main.py and Llama3.1
 
 or run the exe with Ollama running Llama3.1
 
