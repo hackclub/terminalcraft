@@ -20,7 +20,7 @@ AI-Based Performance Analysis (Ollama Integration)
 
 <h2>Dependencies</h2>
 
-Listed in requirements.txt
+pip install -r requirements.txt
 
 <h2>Usage</h2>
 
