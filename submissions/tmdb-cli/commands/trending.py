@@ -2,7 +2,7 @@ from utils import environment, json, results
 import requests
 
 def fetch(args):
-    API_KEY = environment.get_api_key()
+    API_KEY = environment.api_key()
     BASE_URL = environment.base_url()
     REGION = environment.region()
     
@@ -16,7 +16,7 @@ def fetch(args):
             print("No results found")
             return
         
-        results.process(results_list)
+        results.process(results_list, 10)
 
         if args.json:
             json.save(data, "trending.json")

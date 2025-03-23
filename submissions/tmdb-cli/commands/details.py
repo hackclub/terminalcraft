@@ -2,7 +2,7 @@ import requests
 from utils import environment, json, imgcat
 
 def fetch(args):
-    url = f"{environment.base_url()}/{args.type}/{args.id}?api_key={environment.api_key()}&page={args.page}"
+    url = f"{environment.base_url()}/{args.type}/{args.id}?api_key={environment.api_key()}"
     response = requests.get(url)
     
     if response.status_code == 200:
