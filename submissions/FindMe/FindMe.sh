@@ -60,7 +60,7 @@ while true; do
         clear
         # Check if user selected an option
         if [ $? -eq 0 ]; then
-            if [[ $loca == '/' || $loca == '/home' || $loca == "/home/$(whoami)" || $loca == "/USERS"]]; then
+            if [[ $loca == '/' || $loca == '/home' || $loca == "/home/$(whoami)" || $loca == "/USERS" ]]; then
                 # Display find method selection
                 find_method=$(dialog --checklist 'Choose the methods that you want to use to find the file.' 0 0 7 "-name" 'Search by the name of the file' off "-type" 'select the file type (file ,dir)' off "-size" 'search for files (+n)greater or (-n)smaller then.' off "-iname" 'Searches for files with a specific name,regardless of case.' off "-readable" 'A file that you can read its content' off "-writable" 'A file that you can edit and change its content' off "-executable" 'A file that the sofware can run as a program.' off 3>&1 1>&2 2>&3)
                 clear
