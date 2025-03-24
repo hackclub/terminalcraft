@@ -8,7 +8,7 @@ My project is a simple task manager. I created it for my small buisness as I hav
 The program has a few features, like: 
 -Calculator
 -To-Do list
--Inventory manger
+-Inventory manager
 
 When you run the program 4 options will pop up. By entering a number you chose the task that you want the program to run.
 Also program saves all data that you edntered in it.
