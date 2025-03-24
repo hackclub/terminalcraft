@@ -1,5 +1,2 @@
-socket
-random
-threading
 pyaudio
 numpy
