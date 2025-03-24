@@ -12,7 +12,7 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-console.log(chalk.green("Welcome to Windows Terminal by Stevens Antony!"));
+console.log(chalk.green("Welcome to OwO Terminal Game by Stevens Antony!"));
 console.log(chalk.green("Type 'help' to get a list of commands."));
 
 function prompt() {
