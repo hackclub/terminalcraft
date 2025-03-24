@@ -1,5 +1,7 @@
 # cli
-
+## What is this ?
+this is the one cli with the useful tool like github checking or components and page (coming soon) tool 
+## How to use
 To install dependencies:
 
 ```bash
