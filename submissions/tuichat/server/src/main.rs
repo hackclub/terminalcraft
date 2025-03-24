@@ -38,7 +38,7 @@ async fn main() -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let server = TcpListener::bind("127.0.0.1:4242").await?;
+    let server = TcpListener::bind(&args[1]).await?;
     let names = names_resolver::Names::new();
     let channels = channel_utils::Channels::new();
     names.insert("Server".to_owned());
