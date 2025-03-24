@@ -11,7 +11,7 @@ bun install
 To run:
 
 ```bash
-bun run index.ts
+bun run start
 ```
 
 or build to the exe file by:
