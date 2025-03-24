@@ -1,8 +1,11 @@
 import random
+import os
 
 def loadWords(filename):
     """ Returns a list of words from a given file """
-    with open(filename, 'r') as file:
+    script_dir = os.path.dirname(os.path.abspath(__file__))  # Get script's directory
+    file_path = os.path.join(script_dir, filename)  # Construct full file path
+    with open(file_path, 'r') as file:
         return file.read().strip().split("\n")
 
 def chooseWord(wordlist):
