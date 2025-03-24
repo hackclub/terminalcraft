@@ -1,19 +1,23 @@
 import socket
 import threading
+import struct
 clients = []
 def receive_file(client_socket):
-    file_name = client_socket.recv(1024).decode()
-    print(f"Receiving file: {file_name}")
-    file_size = int(client_socket.recv(1024).decode())
-    print(f"File size: {file_size} bytes")
-    file_data = b""
-    while len(file_data) < file_size:
-        data = client_socket.recv(1024)
-        file_data += data
-    with open(file_name, "wb") as file:
-        file.write(file_data)
-    print(f"File received successfully: {file_name}")
-
+    try:
+        file_name_size = struct.unpack("I", client_socket.recv(4))[0]
+        file_name = client_socket.recv(file_name_size).decode()
+        print(f"Receiving file: {file_name}")
+        file_size = struct.unpack("Q", client_socket.recv(8))[0]
+        print(f"File size: {file_size} bytes")
+        file_data = b""
+        while len(file_data) < file_size:
+            data = client_socket.recv(4096)
+            file_data += data
+        with open(file_name, "wb") as file:
+            file.write(file_data)
+        print(f"File received successfully: {file_name}")
+    except Exception as e:
+        print(f"Error occurred: {e}")
 def server_send():
     while True:
         message = input()
@@ -46,7 +50,7 @@ def handle_client(client_socket, addr):
         clients.remove(client_socket)
         client_socket.close()
 
-def start_server(host='0.0.0.0', port=2000):
+def start_server(host='0.0.0.0', port=5000):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen(5)
