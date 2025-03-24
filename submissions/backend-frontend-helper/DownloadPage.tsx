@@ -50,8 +50,10 @@ export const DownloadPage = ({ args }: { args: string[] }) => {
   } else if (step === 2) {
     const metaFileUrl = args[0];
     if (
-      !metaFileUrl.startsWith(
-        "https://raw.githubusercontent.com/code-ga/helper-cli-tool-repository/refs/heads/"
+      !(
+        metaFileUrl.startsWith(
+          "https://raw.githubusercontent.com/code-ga/helper-cli-tool-repository/refs/heads/"
+        ) || metaFileUrl.startsWith("https://github.com/")
       )
     ) {
       return <Alert variant="error">Invalid meta file url</Alert>;
