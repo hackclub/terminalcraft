@@ -25,7 +25,7 @@
     "terminal-size": "^4.0.0"
   },
   "scripts": {
-    "start": "bun run index.ts",
+    "start": "bun run index.tsx",
     "build": "bun build --compile --outfile=./build/helper main.tsx"
   }
 }
