@@ -1,0 +1,10 @@
+You should have Node.js to run this code.
+Works for all systems: MacOs, Linux and Windows(preferred)
+This programs has a built in OwO game.
+Type help to get all instructions.
+Use the owo commmand to play the text based game!
+And to exit the game use stop command.
+There is a difference between the exit command and stop command:
+The stop command is use to exit the game to use the other commands like clear, exit and help commands. But the exit command exits the whole terminal(Gotta try it out!).
+When you use the owo command, it will give a list of commands used to play the game like hunt, sell, crates, slots, blackjack and coinflip(Try them all as much as you want!).
+Thats all I guess. Any concerns please DM me at slack(@Stevens). Thank you and hope you love it!
