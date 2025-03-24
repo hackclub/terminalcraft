@@ -32,7 +32,7 @@ public class TreeGenerators {
 
     public static void activate2ndStage() {
         multiplier = -1;
-        treeGoal *= (1 / 4);
+        treeGoal *= (long) (treeGoal / 4.0);
     }
 
     public static long getTreeGoal() {

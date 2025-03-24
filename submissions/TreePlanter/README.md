@@ -9,6 +9,7 @@ A make number bigger and smaller game.
 
 ```bash
 C:> java -jar path\to\app.jar
+# Just by the way "path\to" is just the file path to the jar file wherever it is downloaded to on your device
 ```
 
 3. Now you can play the game. Enjoy! (☆▽☆)
