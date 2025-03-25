@@ -27,6 +27,13 @@ Tested only on windows 10, python 3.9 client and Windows 10 azure vm pyhton 3.9.
 
 
 1. Execute `c1.py`.
+
+```python c1.py <server_ip>```
+
+For example:
+
+```python c1.py 192.168.1.100```
+
 2. Enter your name when prompted.
 
 Both parties must run the client program to start communication.
