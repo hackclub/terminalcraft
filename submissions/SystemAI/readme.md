@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 Run the script using:
 
-python main.py or run the exe with Llama3.1 via Ollama (optional, only used for the AI analysis). Model can be changed by changing the m9del on line
+python main.py or run the exe with Llama3.1 via Ollama (optional, only used for the AI analysis). Model can be changed by changing the m9del on line 220
 
 <h2>System Monitoring</h2>
 
