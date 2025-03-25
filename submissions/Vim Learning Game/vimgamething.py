@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import time
@@ -295,7 +297,7 @@ class VimEscapeChallenge:
                 self.stdscr.attroff(curses.color_pair(message_color))
         except curses.error:
             pass
-        
+
         if self.current_mode == GameMode.COMMAND or self.current_mode == GameMode.EX:
             cursor_pos = 1 + len(self.command_buffer)
             if cursor_pos >= self.width:
@@ -413,6 +415,8 @@ class VimEscapeChallenge:
             self.status_message = f"Clue already found. ({self.clues_found}/{self.total_clues}) {clue_message}"
 
     def process_normal_mode(self, key):
+        buffer_empty = len(self.buffer) == 0
+        
         if key == ord('i'):
             self.current_mode = GameMode.INSERT
             self.status_message = "-- INSERT MODE --"
@@ -428,18 +432,18 @@ class VimEscapeChallenge:
         elif key == ord('h') and self.cursor_x > 0:
             self.cursor_x -= 1
         elif key == ord('l'):
-            if len(self.buffer) > 0 and self.cursor_x < len(self.buffer[self.cursor_y]) - 1:
+            if not buffer_empty and self.cursor_y < len(self.buffer) and self.cursor_x < len(self.buffer[self.cursor_y]) - 1:
                 self.cursor_x += 1
-        elif key == ord('j') and self.cursor_y < len(self.buffer) - 1:
+        elif key == ord('j') and not buffer_empty and self.cursor_y < len(self.buffer) - 1:
             self.cursor_y += 1
-            if len(self.buffer[self.cursor_y]) <= self.cursor_x:
-                self.cursor_x = max(0, len(self.buffer[self.cursor_y]) - 1)
-        elif key == ord('k') and self.cursor_y > 0:
+            if self.cursor_y < len(self.buffer) and self.cursor_x > 0:
+                self.cursor_x = min(self.cursor_x, max(0, len(self.buffer[self.cursor_y]) - 1))
+        elif key == ord('k') and self.cursor_y > 0 and not buffer_empty:
             self.cursor_y -= 1
-            if len(self.buffer[self.cursor_y]) <= self.cursor_x:
-                self.cursor_x = max(0, len(self.buffer[self.cursor_y]) - 1)
+            if self.cursor_x > 0:
+                self.cursor_x = min(self.cursor_x, max(0, len(self.buffer[self.cursor_y]) - 1))
         elif key == ord('w'):
-            if len(self.buffer) > 0:
+            if not buffer_empty and self.cursor_y < len(self.buffer):
                 line = self.buffer[self.cursor_y]
                 start = self.cursor_x + 1
                 if start >= len(line):
@@ -453,7 +457,7 @@ class VimEscapeChallenge:
                     else:
                         self.cursor_x = len(line) - 1
         elif key == ord('b'):
-            if len(self.buffer) > 0:
+            if not buffer_empty and self.cursor_y < len(self.buffer):
                 line = self.buffer[self.cursor_y]
                 if self.cursor_x == 0:
                     if self.cursor_y > 0:
@@ -469,7 +473,7 @@ class VimEscapeChallenge:
         elif key == ord('0'):
             self.cursor_x = 0
         elif key == ord('$'):
-            if len(self.buffer) > 0:
+            if not buffer_empty and self.cursor_y < len(self.buffer):
                 self.cursor_x = max(0, len(self.buffer[self.cursor_y]) - 1)
         elif key == ord('g'):
             next_key = self.stdscr.getch()
@@ -478,13 +482,14 @@ class VimEscapeChallenge:
                 self.cursor_x = 0
                 self.check_for_clues(action="goto_top")
         elif key == ord('G'):
-            self.cursor_y = len(self.buffer) - 1
-            self.cursor_x = 0
-            self.check_for_clues(action="goto_bottom")
+            if not buffer_empty:
+                self.cursor_y = len(self.buffer) - 1
+                self.cursor_x = 0
+                self.check_for_clues(action="goto_bottom")
         elif key == ord('d'):
             next_key = self.stdscr.getch()
             if next_key == ord('d'):
-                if len(self.buffer) > 0:
+                if not buffer_empty and self.cursor_y < len(self.buffer):
                     deleted_line = self.buffer.pop(self.cursor_y)
                     if self.cursor_y >= len(self.buffer) and self.cursor_y > 0:
                         self.cursor_y -= 1
@@ -494,7 +499,7 @@ class VimEscapeChallenge:
             next_key = self.stdscr.getch()
             if next_key == ord('w'):
                 self.current_mode = GameMode.INSERT
-                if len(self.buffer) > 0:
+                if not buffer_empty and self.cursor_y < len(self.buffer):
                     line = self.buffer[self.cursor_y]
                     start = self.cursor_x
                     match = re.search(r'\b\W', line[start:])
@@ -504,13 +509,13 @@ class VimEscapeChallenge:
         elif key == ord('y'):
             next_key = self.stdscr.getch()
             if next_key == ord('y'):
-                if len(self.buffer) > 0:
+                if not buffer_empty and self.cursor_y < len(self.buffer):
                     self.status_message = f"Yanked: {self.buffer[self.cursor_y]}"
                     if "SPECIAL_VIM_CLUE" in self.buffer[self.cursor_y]:
                         self.check_for_clues(action="yank")
         elif key == ord('f'):
             char_to_find = self.stdscr.getch()
-            if len(self.buffer) > 0:
+            if not buffer_empty and self.cursor_y < len(self.buffer):
                 line = self.buffer[self.cursor_y]
                 start = self.cursor_x + 1
                 if start < len(line):
@@ -553,17 +558,18 @@ class VimEscapeChallenge:
             self.check_for_clues(action="examine_char")
         elif key == 22:
             self.status_message = "Visual Block mode"
-            if "ESCAPE" in "".join(self.buffer):
+            if not buffer_empty and any("ESCAPE" in line for line in self.buffer):
                 self.check_for_clues(action="visual_block")
         elif key in range(49, 58):
             num = key - 48
             next_cmd = self.stdscr.getch()
             if next_cmd == ord('j'):
-                target_y = min(self.cursor_y + num, len(self.buffer) - 1)
-                self.cursor_y = target_y
-                self.status_message = f"{num}j"
-                if num == 5:
-                    self.check_for_clues(action="multiple_command")
+                if not buffer_empty:
+                    target_y = min(self.cursor_y + num, len(self.buffer) - 1)
+                    self.cursor_y = target_y
+                    self.status_message = f"{num}j"
+                    if num == 5:
+                        self.check_for_clues(action="multiple_command")
 
     def process_insert_mode(self, key):
         if key == 27:
