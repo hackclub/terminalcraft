@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 Run the script using:
 
-python main.py or run the exe with Llama3.1 via Ollama (optional, only used for the AI analysis)
+python main.py or run the exe with Llama3.1 via Ollama (optional, only used for the AI analysis). Model can be changed by changing the m9del on line
 
 <h2>System Monitoring</h2>
 
@@ -60,7 +60,7 @@ The script is designed to be run continuously in a terminal window.
 
 Internet speed tests may take a while to compute.
 
-Weather API requires an active internet connection and a valid API key(One is already there :p).
+Weather API requires an active internet connection and a valid API key(One is already there :p). By default it searches for Ann Arbor. You can pass in another city when calling.
 
 <h2>Contributing</h2>
 
