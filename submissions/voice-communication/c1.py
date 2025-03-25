@@ -8,6 +8,14 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
 
+if len(sys.argv) != 2:
+    print(f"Usage: {sys.argv[0]} <server_ip>")
+    sys.exit(1)
+
+HOST = sys.argv[1]  # Get IP from command-line argument
+PORT = 12345
+
+
 def receive_audio():
     while True:
         try:
@@ -29,10 +37,6 @@ def send_audio():
         except Exception as e:
             print(f"Error sending audio: {e}")
             break
-
-
-HOST = 'Host Ip'  # Replace with the actual IP
-PORT = 12345
 
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
