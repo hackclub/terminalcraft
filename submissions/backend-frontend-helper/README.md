@@ -66,7 +66,27 @@ note: you can make the builded file can be run anywhere by this docs
 
 **bun.js runtime needed**
 
-
+## Commands
+```
+─ Components (components)
+  ─ List (list)
+    List all available components in from the repository
+    Usage: helper.exe components list
+  ─ Download (download)
+    Download a component from the repository
+    Usage: helper.exe components download [component meta url]
+  ─ Init (init)
+    Init the config file for downloading components
+    Usage: helper.exe components init
+─ Github (github)
+  Some util for github repository
+  ─ issues (issues)
+    Using: helper.exe github issues [number of issues]
+    list 10 newest issues of this repository (repository url get from local git config)
+  ─ issue (issue)
+    using: helper.exe github issue [number of issue]
+    open an issue of this repository (repository url get from local git config)
+```
 ## Important
 - This cli tool depends on the [Components Repository](https://github.com/code-ga/helper-cli-tool-repository) so they need the internet to run
 
