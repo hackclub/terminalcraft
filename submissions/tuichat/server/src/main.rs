@@ -48,17 +48,17 @@ async fn main() -> anyhow::Result<()> {
     }
 }
 
-fn server_message(s: &String) -> Message {
+fn server_message(s: &str) -> Message {
     Message {
         user: User {
             username: "Server".to_owned(),
         },
-        contents: s.clone(),
+        contents: s.to_owned(),
         timestamp: 0,
     }
 }
 
-fn encoded_server_message(s: &String) -> String {
+fn encoded_server_message(s: &str) -> String {
     encode_message(&server_message(s))
 }
 
@@ -108,12 +108,17 @@ async fn handle_user(
                 let message_contents = decoded_message.contents;
 
                 if message_contents.starts_with("/help") {
-                    handle!(sink.send(HELP_MESSAGE).await);
+                    handle!(sink.send(encoded_server_message(HELP_MESSAGE)).await);
                 } else if message_contents.starts_with("/setname") {
-                    let new_name = message_contents
+                    let new_name = match message_contents
                         .split_ascii_whitespace()
-                        .nth(1)
-                        .unwrap()
+                        .nth(1) {
+                            Some(name) => name,
+                            None => {
+                                handle!(sink.send(encoded_server_message(&format!("Usage: /setname <new_name>"))).await);
+                                continue;
+                            }
+                        }
                         .to_owned();
                     let changed_name = names.insert(new_name.clone());
                     if changed_name {
@@ -126,10 +131,15 @@ async fn handle_user(
                 } else if message_contents.starts_with("/exit") {
                     break Ok(());
                 } else if message_contents.starts_with("/jc") {
-                    let new_channel = message_contents
+                    let new_channel = match message_contents
                                 .split_ascii_whitespace()
-                                .nth(1)
-                                .unwrap()
+                                .nth(1) {
+                                    Some(channel) => channel,
+                                    None => {
+                                        handle!(sink.send(encoded_server_message(&format!("Usage: /jc <channel_name>"))).await);
+                                        continue;
+                                    }
+                                }
                                 .to_owned();
 
                             if new_channel == channel_name {
