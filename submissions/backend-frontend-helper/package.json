@@ -26,6 +26,7 @@
   },
   "scripts": {
     "start": "bun run index.tsx",
-    "build": "bun build --compile --outfile=./build/helper main.tsx"
+    "build": "bun build --compile --outfile=./build/helper main.tsx",
+    "dev": "bun run --watch index.tsx"
   }
 }
