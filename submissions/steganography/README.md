@@ -1,6 +1,6 @@
 # Steganography Tool
 
-This is a simple steganography tool that allows users to hide and extract messages from images using the Least Significant Bit (LSB) method.
+This is a simple steganography tool that allows users to hide and extract messages from images using the Least Significant Bit (LSB) method. Added Self-destruction and password feature.
 
 
 ## Requirements
