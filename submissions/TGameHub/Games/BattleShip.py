@@ -98,6 +98,3 @@ def game(stdscr):
 
 def play():
     curses.wrapper(game)
-
-if __name__ == "__main__":
-    play()

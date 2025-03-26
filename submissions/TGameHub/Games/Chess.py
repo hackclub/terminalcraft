@@ -98,4 +98,3 @@ def main(win):
 
 def play():
     curses.wrapper(main)
-play()

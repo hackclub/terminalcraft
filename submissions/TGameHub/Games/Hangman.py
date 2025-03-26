@@ -58,6 +58,3 @@ def play():
     wordlist = loadWords("words.txt")
     secretWord = chooseWord(wordlist).lower()
     hangman(secretWord)
-
-# Run the game
-play()
