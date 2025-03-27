@@ -14,7 +14,7 @@ def receive():
         try:
             data = client.recv(1024)
             if data:
-                print(data.decode('utf-8'))
+                print("Server texted: ",data.decode('utf-8'))
         except:
             continue
 
