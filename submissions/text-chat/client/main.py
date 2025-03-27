@@ -6,7 +6,7 @@ import struct
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ip_address = ''
 ip_address = input("please enter the server's private IP address")
-client.connect((ip_address, 5000))#ip address here
+client.connect((ip_address, 9000))#ip address here
 filename = ""
 filepath = ""
 def receive():
@@ -14,7 +14,7 @@ def receive():
         try:
             data = client.recv(1024)
             if data:
-                print("Server texted: ",data.decode('utf-8'))
+                print(data.decode('utf-8'))
         except:
             continue
 
@@ -33,7 +33,7 @@ def send_file(filepath, client):
     print(f"File '{filepath}' sent successfully.")
 while True:
     thread_receive = threading.Thread(target=receive, daemon=True).start()
-    print("Type your message/command:   ")
+    print("Type your message:   ")
     data = input()
     if data == "send_file":
         print("ENTER FILE PATH:")
