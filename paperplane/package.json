@@ -1,0 +1,35 @@
+{
+  "name": "@atom06/paperplane",
+  "version": "1.0.0",
+  "description": "A simple CLI tool to create a new project with a template",
+  "main": "index.ts",
+  "module": "index.ts",
+  "type": "module",
+  "bin": {
+    "paperplane": "index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "ora": "^8.2.0"
+  },
+  "author": {
+    "name": "Atom06",
+    "email": "steve.alappat@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theatom06/paperplane"
+  },
+  "bugs": {
+    "url": "https://github.com/theatom06/paperplane/issues"
+  },
+  "homepage": "https://github.com/theatom06/paperplane#readme"
+}
