@@ -4,10 +4,10 @@ import struct
 clients = []
 def receive_file(client_socket):
     try:
-        file_name_size = struct.unpack("I", client_socket.recv(4))[0]
+        file_name_size = struct.unpack("!I", client_socket.recv(4))[0]
         file_name = client_socket.recv(file_name_size).decode()
         print(f"Receiving file: {file_name}")
-        file_size = struct.unpack("Q", client_socket.recv(8))[0]
+        file_size = struct.unpack("!Q", client_socket.recv(8))[0]
         print(f"File size: {file_size} bytes")
         file_data = b""
         while len(file_data) < file_size:
@@ -47,6 +47,7 @@ def handle_client(client_socket, addr):
                 break
             print(f"{addr} said: {data.decode('utf-8')}")
             if data.decode('utf-8') == "sending...":
+                client_socket.send("READY".encode())
                 receive_file(client_socket)
             else:
                 broadcast(client_socket, f"{addr} said: {data}".encode('utf-8'))
