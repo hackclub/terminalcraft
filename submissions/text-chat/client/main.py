@@ -23,9 +23,13 @@ def send_file(filepath, client):
     file_name = os.path.basename(filepath).encode('utf-8')
     file_size = os.path.getsize(filepath)
     client.send("sending...".encode('utf-8'))
-    client.send(struct.pack("I", len(file_name)))
+    ack = client.recv(1024)  # Add this line
+    if ack.decode() != "READY":
+        print("Server not ready, aborting file transfer.")
+        return
+    client.send(struct.pack("!I", len(file_name)))
     client.send(file_name)
-    client.send(struct.pack("Q", file_size))
+    client.send(struct.pack("!Q", file_size))
     with open(filepath, "rb") as file:
         while chunk := file.read(4096):
             client.send(chunk)
