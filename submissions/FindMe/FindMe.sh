@@ -26,38 +26,129 @@ if [ "$machine" = "Mac" ]; then
 
     fi
 elif [ "$machine" = "Linux" ]; then
-    if ! command -v figlet &> /dev/null; then
+#Debian reqiuerments
+deb-req() {
+        if ! command -v figlet &> /dev/null; then
         sudo apt-get install -y figlet  || exit 1
-        if [[ $? -eq 1 ]]; then
-        sudo dnf install figlet
-        fi
     fi
     if ! command -v dialog &> /dev/null; then
         sudo apt-get install -y dialog || exit 1
-        if [[ $? -eq 1 ]]; then
-        sudo dnf install dialog
-        fi
     fi
     if ! command -v boxes &> /dev/null; then
         sudo apt-get install -y boxes || exit 1
-        if [[ $? -eq 1 ]]; then
-        sudo dnf install boxes
-        fi
     fi
     if ! command -v lolcat &> /dev/null; then
         sudo apt-get install -y lolcat || exit 1
-        if [[ $? -eq 1 ]]; then
-        sudo dnf install lolcat
-        fi
     fi
     if ! command -v gum &> /dev/null; then
         sudo apt install gum
-        if [[ $? -eq 1 ]]; then
-        curl -LO https://github.com/charmbracelet/gum/releases/latest/download/gum_0.13.0_linux_amd64.rpm
-        sudo rpm -i gum_*.rpm
-        sudo dnf install gum 
-        fi
     fi
+}
+#Arch requerments
+arch-req() {
+    if ! command -v figlet &> /dev/null; then
+        sudo pacman -S --noconfirm figlet || exit 1
+    fi
+    if ! command -v dialog &> /dev/null; then
+        sudo pacman -S --noconfirm dialog || exit 1
+    fi
+    if ! command -v boxes &> /dev/null; then
+        yay -S --noconfirm boxes || exit 1
+    fi
+    if ! command -v lolcat &> /dev/null; then
+        yay -S --noconfirm lolcat || exit 1
+    fi
+    if ! command -v gum &> /dev/null; then
+        yay -S --noconfirm gum || exit 1
+    fi
+}
+#Opensus requeirments
+suse-req() {
+    if ! command -v figlet &> /dev/null; then
+        sudo zypper install -y figlet || exit 1
+    fi
+    if ! command -v dialog &> /dev/null; then
+        sudo zypper install -y dialog || exit 1
+    fi
+    if ! command -v boxes &> /dev/null; then
+        sudo zypper install -y boxes || exit 1
+    fi
+    if ! command -v lolcat &> /dev/null; then
+        sudo zypper install -y lolcat || exit 1
+    fi
+    if ! command -v gum &> /dev/null; then
+        echo "Gum not in repos, installing manually..."
+        curl -LO https://github.com/charmbracelet/gum/releases/latest/download/gum_0.13.0_linux_amd64.rpm
+        sudo rpm -i gum_*.rpm || exit 1
+        rm gum_*.rpm
+    fi
+}
+#Fedora and RedHat and CentOS requeirments
+rpm-req() {
+    if command -v dnf &> /dev/null; then
+        PKG_MGR="dnf"
+    else
+        PKG_MGR="yum"
+    fi
+    
+    sudo $PKG_MGR install -y epel-release
+    
+    if ! command -v figlet &> /dev/null; then
+        sudo $PKG_MGR install -y figlet || exit 1
+    fi
+    if ! command -v dialog &> /dev/null; then
+        sudo $PKG_MGR install -y dialog || exit 1
+    fi
+    if ! command -v boxes &> /dev/null; then
+        sudo $PKG_MGR install -y boxes || exit 1
+    fi
+    if ! command -v lolcat &> /dev/null; then
+        sudo $PKG_MGR install -y lolcat || exit 1
+    fi
+    if ! command -v gum &> /dev/null; then
+        sudo $PKG_MGR install -y gum || {
+            echo "Gum not in repos, installing manually..."
+            curl -LO https://github.com/charmbracelet/gum/releases/latest/download/gum_0.13.0_linux_amd64.rpm
+            sudo rpm -i gum_*.rpm || exit 1
+            rm gum_*.rpm
+        }
+    fi
+}
+
+    # Detect distribution
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        DISTRO=$ID
+    elif [ -f /etc/redhat-release ]; then
+        DISTRO="rhel"
+    elif [ -f /etc/arch-release ]; then
+        DISTRO="arch"
+    elif [ -f /etc/SuSE-release ]; then
+        DISTRO="suse"
+    else
+        echo "Unsupported Linux distribution"
+        exit 1
+    fi
+
+    # Install packages based on distro
+    case $DISTRO in
+        ubuntu|debian|pop|linuxmint|kali)
+            echo "Detected Distro: $DISTRO"
+            deb-req ;;
+        fedora|rhel|centos|almalinux|rocky)
+            echo "Detected Distro: $DISTRO"
+            rpm-req ;;
+        arch|manjaro|endeavouros)
+            echo "Detected Distro: $DISTRO"
+            arch-req ;;
+        opensuse*|sles|sled)
+            echo "Detected Distro: $DISTRO"
+            suse-req ;;
+        *)
+            echo "Unsupported distribution: $DISTRO"
+            exit 1 ;;
+    esac
+
 fi
 
 # Main loop
@@ -127,7 +218,7 @@ break
 
         find_command+=" -type \"$file_type\" 2>/dev/null"
     fi
-    
+
     if [[ $find_method == *"-size"* ]]; then
         file_size=$(dialog --inputbox "Enter the file size (+num to search more than the num or -num to search less than the num or num  ex.5M megabyte or 5k kilobyte)." 0 0 2>&1 >/dev/tty)
         if [[ -z "$file_size" ]]; then
@@ -164,7 +255,9 @@ break
     
     cat "$results_file" | while read -r path; do
     echo -e "\033]8;;file://$path\a$path\033]8;;\a"
-    done | gum choose --no-limit --header="Select files to open (Enter to confirm)" > "$selected_file"
+    done | gum choose --no-limit --header="Select files to open (Space to select, Enter to confirm)" > "$selected_file" 
+
+
     
     # Open selected files
     while read -r path; do
@@ -222,7 +315,7 @@ break
 
     # Method selection
     gum style --foreground 212 "SELECT SEARCH METHODS (SPACE to select, ENTER to confirm)"
-    methods=$(gum choose --no-limit \
+    methods=$(gum choose  --no-limit \
     "Name: Search by filename" \
     "Type: Search by file type" \
     "Size: Search by file size" \
@@ -312,7 +405,7 @@ fi
     cat "$results_file" | while read -r path; do
         # Make paths clickable (terminal escape codes)
         echo -e "\033]8;;file://$path\a$path\033]8;;\a"
-    done | gum choose --no-limit --header="Select files to open (Enter to confirm)" > "$selected_file"
+    done | gum choose --no-limit --header="Select files to open (Space to select, Enter to confirm)"> "$selected_file"
     
     # Open selected files
     while read -r path; do
