@@ -46,6 +46,7 @@ deb-req() {
 }
 #Arch requerments
 arch-req() {
+
     if ! command -v figlet &> /dev/null; then
         sudo pacman -S --noconfirm figlet || exit 1
     fi
@@ -53,13 +54,34 @@ arch-req() {
         sudo pacman -S --noconfirm dialog || exit 1
     fi
     if ! command -v boxes &> /dev/null; then
-        yay -S --noconfirm boxes || exit 1
+        if command -v yay &> /dev/null; then
+     	yay -S --noconfirm boxes || exit 1
+     	elif command -v paru &> /dev/null; then
+        paru -S --noconfirm boxes || exit 1
+	else
+ 	echo "Error: No AUR helper (yay/paru) found. Please install one first."
+        exit 1
+	fi
     fi
     if ! command -v lolcat &> /dev/null; then
-        yay -S --noconfirm lolcat || exit 1
+        if command -v yay &> /dev/null; then
+     	yay -S --noconfirm lolcat || exit 1
+     	elif command -v paru &> /dev/null; then
+        paru -S --noconfirm lolcat || exit 1
+	else
+ 	echo "Error: No AUR helper (yay/paru) found. Please install one first."
+        exit 1
+	fi
     fi
     if ! command -v gum &> /dev/null; then
-        yay -S --noconfirm gum || exit 1
+        if command -v yay &> /dev/null; then
+     	yay -S --noconfirm gum || exit 1
+     	elif command -v paru &> /dev/null; then
+        paru -S --noconfirm gum || exit 1
+	else
+ 	echo "Error: No AUR helper (yay/paru) found. Please install one first."
+        exit 1
+	fi
     fi
 }
 #Opensus requeirments
