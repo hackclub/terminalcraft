@@ -3,12 +3,15 @@ import threading
 import struct
 clients = []
 def receive_file(client_socket):
+    print("Receiving file now...")
     try:
+        print("Waiting for filename size...")
         file_name_size = struct.unpack("!I", client_socket.recv(4))[0]
+        print(f"Filename size received: {file_name_size}")
         file_name = client_socket.recv(file_name_size).decode()
-        print(f"Receiving file: {file_name}")
+        print(f"Filename received: {file_name}")
         file_size = struct.unpack("!Q", client_socket.recv(8))[0]
-        print(f"File size: {file_size} bytes")
+        print(f"File size received: {file_size} bytes")
         received_bytes = 0
         with open(file_name, "wb") as file:
             while received_bytes < file_size:
@@ -52,7 +55,6 @@ def handle_client(client_socket, addr):
                 break
             print(f"{addr} said: {data.decode('utf-8')}")
             if data.decode().strip() == "sending...":
-                client_socket.send("READY".encode())  
                 receive_file(client_socket)
             else:
                 broadcast(client_socket, f"{addr} said: {data}".encode('utf-8'))
@@ -65,7 +67,7 @@ def handle_client(client_socket, addr):
         client_socket.close()
 
 
-def start_server(host='0.0.0.0', port=9000):
+def start_server(host='0.0.0.0', port=1000):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen(5)
