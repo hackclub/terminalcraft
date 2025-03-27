@@ -33,6 +33,7 @@ def send_file(filepath, client):
     print(f"File '{filepath}' sent successfully.")
 while True:
     thread_receive = threading.Thread(target=receive, daemon=True).start()
+    print("Type your message/command:   ")
     data = input()
     if data == "send_file":
         print("ENTER FILE PATH:")
