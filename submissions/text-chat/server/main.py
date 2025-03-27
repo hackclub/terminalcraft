@@ -26,12 +26,17 @@ def server_send():
             for client in clients:
                 client.close()
             break
-        for client in clients:
+        else:
+            broadcast(None, f"Server: {message}".encode('utf-8'))
+
+
+def broadcast(client_socket, data):
+    for client in clients:
+        if client != client_socket:
             try:
-                client.send(message.encode('utf-8'))
+                client.send(data)
             except:
                 clients.remove(client)
-
 def handle_client(client_socket, addr):
     print(f'Connected by {addr}')
     clients.append(client_socket)
@@ -43,6 +48,8 @@ def handle_client(client_socket, addr):
             print(f"{addr} said: {data.decode('utf-8')}")
             if data.decode('utf-8') == "sending...":
                 receive_file(client_socket)
+            else:
+                broadcast(client_socket, f"{addr} said: {data}".encode('utf-8'))
     except:
         pass
     finally:
@@ -50,7 +57,7 @@ def handle_client(client_socket, addr):
         clients.remove(client_socket)
         client_socket.close()
 
-def start_server(host='0.0.0.0', port=5000):
+def start_server(host='0.0.0.0', port=9000):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen(5)
