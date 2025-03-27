@@ -1,0 +1,62 @@
+{
+    "alphabets": [
+        "latin-upper",
+        "latin-lower",
+        "cyrillic-upper",
+        "cyrillic-lower",
+        "greek-upper",
+        "greek-lower",
+        "katakana"
+    ],
+    "ciphers":[
+        {
+            "type":"substitution",
+            "key": {
+                "a": "α",
+                "b": "в",
+                "c": "ϴ",
+                "d": "д",
+                "e": "ε",
+                "f": "ғ",
+                "g": "ギ",
+                "h": "η",
+                "i": "ι",
+                "j": "ジ",
+                "k": "κ",
+                "l": "λ",
+                "m": "μ",
+                "n": "и",
+                "o": "ο",
+                "p": "ρ",
+                "q": "ԛ",
+                "r": "я",
+                "s": "ϟ",
+                "t": "τ",
+                "u": "υ",
+                "v": "в",
+                "w": "ш",
+                "x": "ж",
+                "y": "у",
+                "z": "ζ",
+                "ch": "ч",
+                "th": "θ",
+                "sh": "シ",
+                "ph": "φ",
+                "oo": "∞",
+                "qu": "ク",
+                "ck": "クκ",
+                "ng": "νγ",
+                "kn": "κи",
+                "wh": "ψ"
+            },
+            "caseSensitive": true
+        },
+        {
+            "type":"caesar",
+            "key": {
+                "shift":3
+            },
+            "caseSensitive": true
+        }
+    ]
+}
