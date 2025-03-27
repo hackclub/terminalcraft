@@ -12,4 +12,21 @@ The same way but you need to have homebrew installed to make the tool install th
 > [!NOTE]
 > You can install homebrew with this command ``` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ```
 > And like linux you will need to give it an execute permission with this command ``` chmod +x [And the FindMe.sh PATH] ```
-> ### Hope you enjoy using my tool. 😊😊
+
+> [!IMPORTANT]
+> For **Arch Linux** you need to have **paru** or **yay** AUR helper/
+> ### You can install yay using:
+>```
+>sudo pacman -S --needed git base-devel
+>git clone https://aur.archlinux.org/yay.git
+>cd yay
+>makepkg -si
+>```  
+> ### and for paru:
+>```
+>sudo pacman -S --needed git base-devel
+>it clone https://aur.archlinux.org/paru.git
+>cd paru
+>makepkg -si
+>```
+### Hope you enjoy using my tool. 😊😊
