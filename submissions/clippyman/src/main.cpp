@@ -492,7 +492,7 @@ int main(int argc, char* argv[])
         clipboardListenerUnix.AddCopyCallback(CopyEntry);
 
         if (!piped)
-            info("Type or Paste the text to copy, then press enter and CTRL+D to save and exit");
+            info("Type or Paste the text to save in the clipboard history, then press enter and CTRL+D to save and exit");
 
         clipboardListenerUnix.PollClipboard();
         return EXIT_SUCCESS;
