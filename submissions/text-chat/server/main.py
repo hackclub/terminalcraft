@@ -1,10 +1,15 @@
 import socket
 import threading
 import struct
+
 clients = []
+
+
 def receive_file(client_socket):
     print("Receiving file now...")
     try:
+        client_socket.send("READY".encode())
+        client_socket.send("READY".encode())
         print("Waiting for filename size...")
         file_name_size = struct.unpack("!I", client_socket.recv(4))[0]
         print(f"Filename size received: {file_name_size}")
@@ -13,6 +18,7 @@ def receive_file(client_socket):
         file_size = struct.unpack("!Q", client_socket.recv(8))[0]
         print(f"File size received: {file_size} bytes")
         received_bytes = 0
+
         with open(file_name, "wb") as file:
             while received_bytes < file_size:
                 chunk = client_socket.recv(min(4096, file_size - received_bytes))
@@ -23,6 +29,8 @@ def receive_file(client_socket):
         print(f"File received successfully: {file_name}")
     except Exception as e:
         print(f"Error occurred: {e}")
+
+
 def server_send():
     while True:
         message = input()
@@ -80,8 +88,6 @@ def start_server(host='0.0.0.0', port=1000):
             client_thread.start()
         except Exception as e:
             print(f"Error accepting connection: {e}")
-
-
 
 
 if __name__ == "__main__":
