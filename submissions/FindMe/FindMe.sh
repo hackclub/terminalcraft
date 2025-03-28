@@ -10,7 +10,6 @@ case "${unameOut}" in
 esac
 
 echo "Detected OS: ${machine}"
-
 if [ "$machine" = "Mac" ]; then
     if ! command -v figlet &> /dev/null; then
         brew install figlet || exit 1
