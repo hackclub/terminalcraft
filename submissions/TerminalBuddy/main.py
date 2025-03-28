@@ -10,6 +10,7 @@ from typing import Optional
 # providers
 import ollama
 import requests
+from openai import OpenAI
 
 # terminal buddy
 
