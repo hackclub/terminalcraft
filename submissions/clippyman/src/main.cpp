@@ -37,7 +37,7 @@
 #include "util.hpp"
 
 #include "clipboard/ClipboardListener.hpp"
-#if PLATFORM_XORG
+#if PLATFORM_X11
 #include "clipboard/x11/ClipboardListenerX11.hpp"
 #include <xcb/xproto.h>
 #elif PLATFORM_WAYLAND
@@ -77,6 +77,7 @@ R"(Usage: clippyman [OPTIONS]...
     -i, --input                 Enter in terminal input mode
     -p, --path <path>           Path to where we'll search/save the clipboard history
     -P, --primary [<bool>]      Use the primary clipboard instead
+    -S, --silent [<bool>]       Print or Not an info message along the search content you selected
     --wl-seat <name>            The seat for using in wayland (just leave it empty if you don't know what's this)
     -s, --search                Delete/Search clipboard history. At the moment is not possible to search UTF-8 characters
                                 Press TAB to switch beetwen search bar and clipboard history.
@@ -188,7 +189,7 @@ R"({
 }
 
 #define SEARCH_TITLE_LEN (2 + 8) // 2 for box border, 8 for "Search: "
-int search_algo(const Config& config)
+int search_algo(const CClipboardListener& clipboardListener, const Config& config)
 {
 restart:
     FILE*                     file = fopen(config.path.c_str(), "r+");
@@ -349,7 +350,7 @@ restart:
             else if (ch == '\n' && selected < std::string::npos - 1 && !results.empty())
             {
                 endwin();
-                info("Selected content:\n{}", results[selected]);
+                clipboardListener.CopyToClipboard(results[selected]);
                 return 0;
             }
         }
@@ -408,20 +409,21 @@ bool parseargs(int argc, char* argv[], Config& config, const std::string& config
     int opt               = 0;
     int option_index      = 0;
     opterr                = 1;  // re-enable since before we disabled for "invalid option" error
-    const char* optstring = "-Vhisp:C:P::";
+    const char* optstring = "-Vhisp:C:P::S::";
 
     // clang-format off
     static const struct option opts[] = {
-        {"version",    no_argument,       0, 'V'},
-        {"help",       no_argument,       0, 'h'},
-        {"input",      no_argument,       0, 'i'},
-        {"search",     no_argument,       0, 's'},
+        {"version",     no_argument,       0, 'V'},
+        {"help",        no_argument,       0, 'h'},
+        {"input",       no_argument,       0, 'i'},
+        {"search",      no_argument,       0, 's'},
 
-        {"path",       required_argument, 0, 'p'},
-        {"config",     required_argument, 0, 'C'},
-        {"primary",    optional_argument, 0, 'P'},
-        {"wl-seat",    required_argument, 0, 6968},
-        {"gen-config", optional_argument, 0, 6969},
+        {"path",        required_argument, 0, 'p'},
+        {"config",      required_argument, 0, 'C'},
+        {"primary",     optional_argument, 0, 'P'},
+        {"wl-seat",     required_argument, 0, 6967},
+        {"gen-config",  optional_argument, 0, 6968},
+        {"silent",      optional_argument, 0, 6969},
 
         {0,0,0,0}
     };
@@ -449,6 +451,13 @@ bool parseargs(int argc, char* argv[], Config& config, const std::string& config
                     config.primary_clip = str_to_bool(optarg);
                 else
                     config.primary_clip = true;
+                break;
+
+            case 'S':
+                if (OPTIONAL_ARGUMENT_IS_PRESENT)
+                    config.silent = str_to_bool(optarg);
+                else
+                    config.silent = true;
                 break;
 
             case 6969:
@@ -481,14 +490,12 @@ int main(int argc, char* argv[])
     if (config.arg_search && config.arg_terminal_input)
         die("Please only use either --search or --input");
 
-    if (config.arg_search)
-        return search_algo(config);
+    CClipboardListenerUnix clipboardListenerUnix;
 
     bool piped = !isatty(STDIN_FILENO);
     // debug("piped = {}", piped);
-    if (piped || PLATFORM_UNIX || config.arg_terminal_input)
+    if (!config.arg_search && (piped || PLATFORM_UNIX || config.arg_terminal_input))
     {
-        CClipboardListenerUnix clipboardListenerUnix;
         clipboardListenerUnix.AddCopyCallback(CopyEntry);
 
         if (!piped)
@@ -499,7 +506,7 @@ int main(int argc, char* argv[])
     }
 
 #if !PLATFORM_UNIX
-    #if PLATFORM_XORG
+    #if PLATFORM_X11
         CClipboardListenerX11 clipboardListener;
         clipboardListener.AddCopyCallback(CopyCallback);
         clipboardListener.AddCopyCallback(CopyEntry);
@@ -514,13 +521,19 @@ int main(int argc, char* argv[])
         clipboardListener.AddCopyCallback(CopyCallback);
         clipboardListener.AddCopyCallback(CopyEntry);
     #endif
- 
+
+    if (config.arg_search)
+        return search_algo(clipboardListener, config);
+
     while (true)
     {
         // debug("POLLING");
         clipboardListener.PollClipboard();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
+#else
+    if (config.arg_search)
+        return search_algo(clipboardListenerUnix, config);
 #endif
 
     return EXIT_SUCCESS;

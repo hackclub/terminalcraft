@@ -15,10 +15,11 @@ public:
 
     bool arg_search = false;
     bool arg_terminal_input = false;
-    
+
     std::string path;
     std::string wl_seat;
     bool primary_clip = false;
+    bool silent = false;
 
     /**
      * Load config file and parse every config variables
@@ -64,6 +65,9 @@ primary = false
 
 # The seat for using in wayland (i don't know what that is tbh, just leave it empty)
 wl-seat = ""
+
+# Print an info message along the search content you selected
+silent = false
 )";
 
 #endif // _CONFIG_HPP_

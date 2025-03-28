@@ -20,11 +20,7 @@ public:
     CClipboardListenerWayland(const wc_options& options);
     ~CClipboardListenerWayland();
 
-    /*
-     * Registers a callback for when the user copies something.
-     */
     void AddCopyCallback(const std::function<void(const CopyEvent&)>& func) override;
-
     void PollClipboard() override;
 
 private:

@@ -1,7 +1,7 @@
 #ifndef _CLIPBOARD_LISTENER_X11_HPP_
 #define _CLIPBOARD_LISTENER_X11_HPP_
 
-#if PLATFORM_XORG
+#if PLATFORM_X11
 
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -14,12 +14,11 @@ public:
     CClipboardListenerX11();
     ~CClipboardListenerX11();
 
-    /*
-     * Registers a callback for when the user copies something.
-     */
     void AddCopyCallback(const std::function<void(const CopyEvent&)>& func) override;
 
     void PollClipboard() override;
+
+    void CopyToClipboard(const std::string& str) const override;
 
 private:
     std::vector<std::function<void(const CopyEvent&)>> m_CopyEventCallbacks;
@@ -33,6 +32,6 @@ private:
     xcb_atom_t m_Clipboard, m_UTF8String, m_ClipboardProperty;
 };
 
-#endif  // PLATFORM_XORG
+#endif  // PLATFORM_X11
 
 #endif  // !CLIPBOARD_LISTENER_X11_HPP_

@@ -1,18 +1,24 @@
-#include <cstdint>
-#if PLATFORM_XORG
+#if PLATFORM_X11
 
 #include "clipboard/x11/ClipboardListenerX11.hpp"
 
+#include <unistd.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
+#include <cstdint>
+#include <cstring>
+#include <ctime>
 #include <string>
 
-#include "config.hpp"
 #include "EventData.hpp"
+#include "config.hpp"
 #include "util.hpp"
 
-static xcb_atom_t getAtom(xcb_connection_t* connection, const std::string& name)
+namespace
+{
+
+xcb_atom_t getAtom(xcb_connection_t* connection, const std::string& name)
 {
     xcb_intern_atom_cookie_t cookie = xcb_intern_atom(connection, 0, name.size(), name.c_str());
     xcb_intern_atom_reply_t* reply  = xcb_intern_atom_reply(connection, cookie, NULL);
@@ -22,6 +28,8 @@ static xcb_atom_t getAtom(xcb_connection_t* connection, const std::string& name)
 
     return reply->atom;
 }
+
+}  // namespace
 
 CClipboardListenerX11::CClipboardListenerX11()
 {
@@ -64,15 +72,14 @@ void CClipboardListenerX11::AddCopyCallback(const std::function<void(const CopyE
 void CClipboardListenerX11::PollClipboard()
 {
     /* Request the clipboard contents */
-    xcb_convert_selection(m_XCBConnection, m_Window, m_Clipboard, m_UTF8String, m_ClipboardProperty,
-                          XCB_TIME_CURRENT_TIME);
+    xcb_convert_selection(m_XCBConnection, m_Window, m_Clipboard, m_UTF8String, m_ClipboardProperty, XCB_CURRENT_TIME);
     xcb_flush(m_XCBConnection);
 
-    xcb_generic_event_t* event = xcb_wait_for_event(m_XCBConnection);
-    if (event != NULL)
+    xcb_generic_event_t* event;
+    if ((event = xcb_wait_for_event(m_XCBConnection)))
     {
-        xcb_get_property_cookie_t propertyCookie =
-            xcb_get_property(m_XCBConnection, 0, m_Window, m_ClipboardProperty, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT16_MAX);
+        xcb_get_property_cookie_t propertyCookie = xcb_get_property(m_XCBConnection, 0, m_Window, m_ClipboardProperty,
+                                                                    XCB_GET_PROPERTY_TYPE_ANY, 0, UINT16_MAX);
 
         xcb_generic_error_t*      error         = nullptr;
         xcb_get_property_reply_t* propertyReply = xcb_get_property_reply(m_XCBConnection, propertyCookie, &error);
@@ -80,7 +87,7 @@ void CClipboardListenerX11::PollClipboard()
         if (error)
             die("Unknown libxcb error: {}", error->error_code);
 
-        CopyEvent copyEvent{reinterpret_cast<char*>(xcb_get_property_value(propertyReply))};
+        CopyEvent copyEvent{ reinterpret_cast<char*>(xcb_get_property_value(propertyReply)) };
 
         /* Simple but fine approach */
         if (copyEvent.content == m_LastClipboardContent)
@@ -91,7 +98,7 @@ void CClipboardListenerX11::PollClipboard()
 
         if (copyEvent.content[0] == '\0')
         {
-            std::string tmp{copyEvent.content};
+            std::string tmp{ copyEvent.content };
             copyEvent.content.clear();
             for (char c : tmp)
             {
@@ -109,8 +116,82 @@ void CClipboardListenerX11::PollClipboard()
 
     end:
         free(propertyReply);
+    }
+
+    free(event);
+}
+
+static void runInBg(xcb_connection_t* m_XCBConnection, xcb_atom_t target, xcb_atom_t property, const std::string& str)
+{
+    // handle selection requests in event loop
+    xcb_generic_event_t* event;
+    if ((event = xcb_wait_for_event(m_XCBConnection)))
+    {
+        if ((event->response_type & ~0x80) == XCB_SELECTION_REQUEST)
+        {
+            xcb_selection_request_event_t* request = reinterpret_cast<xcb_selection_request_event_t*>(event);
+            if (request->target == target)
+            {
+                xcb_selection_notify_event_t notify_event = {};
+                // setting the property
+                xcb_change_property(m_XCBConnection, XCB_PROP_MODE_REPLACE, request->requestor, property, target, 8,
+                                    str.size(), str.c_str());
+                notify_event.response_type = XCB_SELECTION_NOTIFY;
+                notify_event.requestor     = request->requestor;
+                notify_event.selection     = request->selection;
+                notify_event.target        = request->target;
+                notify_event.property      = property;
+                notify_event.time          = request->time;
+
+                xcb_send_event(m_XCBConnection, false, request->requestor, XCB_EVENT_MASK_NO_EVENT,
+                               reinterpret_cast<const char*>(&notify_event));
+                xcb_flush(m_XCBConnection);
+            }
+        }
         free(event);
     }
 }
 
-#endif  // PLATFORM_XORG
+void CClipboardListenerX11::CopyToClipboard(const std::string& str) const
+{
+    xcb_intern_atom_cookie_t cookie_selection = xcb_intern_atom(m_XCBConnection, 0, 9, "CLIPBOARD");
+    xcb_intern_atom_cookie_t cookie_target    = xcb_intern_atom(m_XCBConnection, 0, 11, "UTF8_STRING");
+    xcb_intern_atom_cookie_t cookie_property  = xcb_intern_atom(m_XCBConnection, 0, 8, "XCB_CLIPBOARD");
+
+    xcb_intern_atom_reply_t* reply_selection = xcb_intern_atom_reply(m_XCBConnection, cookie_selection, NULL);
+    xcb_intern_atom_reply_t* reply_target    = xcb_intern_atom_reply(m_XCBConnection, cookie_target, NULL);
+    xcb_intern_atom_reply_t* reply_property  = xcb_intern_atom_reply(m_XCBConnection, cookie_property, NULL);
+
+    if (!reply_selection || !reply_target || !reply_property)
+    {
+        free(reply_selection);
+        free(reply_target);
+        free(reply_property);
+        die("Failed to get reply atoms");
+    }
+
+    xcb_atom_t selection = reply_selection->atom;
+    xcb_atom_t target    = reply_target->atom;
+    xcb_atom_t property  = reply_property->atom;
+
+    free(reply_selection);
+    free(reply_target);
+    free(reply_property);
+
+    // set our window as the selection owner
+    xcb_set_selection_owner(m_XCBConnection, m_Window, selection, XCB_CURRENT_TIME);
+    xcb_flush(m_XCBConnection);
+    if (!config.silent)
+        info("Copied to clipboard!");
+
+    // run the task in the background, waiting for any event
+    pid_t pid = fork();
+    if (pid < 0)
+        die("failed to fork(): {}", strerror(errno));
+    else if (pid == 0)
+        runInBg(m_XCBConnection, target, property, str);
+    else
+        exit(0);
+}
+
+#endif  // PLATFORM_X11

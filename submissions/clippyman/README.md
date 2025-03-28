@@ -8,7 +8,7 @@ Search online how to install in your OS.
 # Building
 normal Makefile
 ```bash
-# PLATFORM can be xorg, wayland or unix
+# PLATFORM can be x11, wayland or unix
 # it will be added in the binary name at the end
 # e.g clippyman-wayland
 # For all OS it's best to use PLATFORM=unix
@@ -18,7 +18,7 @@ make PLATFORM=unix DEBUG=0
 Alternatively if you wish to use cmake
 ```bash
 mkdir build && cd $_
-# here you need to specify the platform like -DPLATFORM_WAYLAND or -DPLATFORM_XORG
+# here you need to specify the platform like -DPLATFORM_WAYLAND or -DPLATFORM_X11
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make # or ninja
 ```
@@ -36,10 +36,10 @@ $ cd build/debug
 
 Remember that clippyman can be compiled with different binary names, depending on the platform you compiled on.
 * `clippyman` if compiled with `PLATFORM=unix` (make) or without `PLATFORM` flags
-* `clippyman-xorg` if compiled with either `PLATFORM=xorg` (make) or `-DPLATFORM_XORG=1` (cmake)
+* `clippyman-x11` if compiled with either `PLATFORM=x11` (make) or `-DPLATFORM_X11=1` (cmake)
 * `clippyman-wayland` if compiled with either `PLATFORM=wayland` (make) or `-DPLATFORM_WAYLAND=1` (cmake)
 
-If you have compiled for either xorg/x11 or wayland, then when you run the binary without arguments,\
+If you have compiled for either x11 or wayland, then when you run the binary without arguments,\
 it will listen in the background what you copy for then printing in the terminal and saving it in the clipboard history.
 
 If you run with `-i` then it will enter in terminal input mode, where you'll Type or Paste the text to save in the clipboard history, then press enter and CTRL+D to save and exit
