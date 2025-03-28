@@ -23,8 +23,8 @@ else
         BUILDDIR  = build/release
 endif
 
-ifeq ($(filter xorg wayland unix,$(PLATFORM)),)
-    $(error Invalid platform "$(PLATFORM)". Choose either: xorg, wayland, unix)
+ifeq ($(filter xorg x11 wayland unix,$(PLATFORM)),)
+    $(error Invalid platform "$(PLATFORM)". Choose either: x11 (xorg), wayland, unix)
 endif
 
 NAME		= clippyman
@@ -38,10 +38,14 @@ LDFLAGS   	+= -L./$(BUILDDIR)/fmt -lfmt -lncurses
 CXXFLAGS  	?= -mtune=generic -march=native
 CXXFLAGS        += -Wno-unused-parameter -fvisibility=hidden -Iinclude -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\" -DBRANCH=\"$(BRANCH)\"
 
-ifeq ($(PLATFORM),xorg)
+ifeq ($(shell uname -s),Darwin)
+	CXXFLAGS += -stdlib=libc++
+endif
+
+ifeq ($(PLATFORM),$(or x11,xorg))
 	LDFLAGS  += -lxcb -lxcb-xfixes
 	CXXFLAGS += -DPLATFORM_WAYLAND=0 -DPLATFORM_XORG=1 -DPLATFORM_UNIX=0
-	TARGET   := $(TARGET)-$(PLATFORM)
+	TARGET   := $(TARGET)-xorg
 endif
 
 ifeq ($(PLATFORM),wayland)

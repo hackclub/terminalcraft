@@ -36,8 +36,10 @@
 #include "utf8.h"
 #include "util.hpp"
 
+#include "clipboard/ClipboardListener.hpp"
 #if PLATFORM_XORG
 #include "clipboard/x11/ClipboardListenerX11.hpp"
+#include <xcb/xproto.h>
 #elif PLATFORM_WAYLAND
 #include "clipboard/wayland/ClipboardListenerWayland.hpp"
 extern "C" {
@@ -55,6 +57,7 @@ extern "C" {
      : (optarg != NULL))
 // clang-format on
 
+// include/config.hpp
 Config config;
 // src/box.cpp
 void draw_search_box(const std::string& query, const std::vector<std::string>& results, const size_t max_width, const size_t max_visible,

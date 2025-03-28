@@ -1,3 +1,4 @@
+#include <cstdint>
 #if PLATFORM_XORG
 
 #include "clipboard/x11/ClipboardListenerX11.hpp"
@@ -11,7 +12,7 @@
 #include "EventData.hpp"
 #include "util.hpp"
 
-xcb_atom_t getAtom(xcb_connection_t* connection, const std::string& name)
+static xcb_atom_t getAtom(xcb_connection_t* connection, const std::string& name)
 {
     xcb_intern_atom_cookie_t cookie = xcb_intern_atom(connection, 0, name.size(), name.c_str());
     xcb_intern_atom_reply_t* reply  = xcb_intern_atom_reply(connection, cookie, NULL);
@@ -67,11 +68,11 @@ void CClipboardListenerX11::PollClipboard()
                           XCB_TIME_CURRENT_TIME);
     xcb_flush(m_XCBConnection);
 
-    xcb_generic_event_t* event;
-    if ((event = xcb_wait_for_event(m_XCBConnection)) != NULL)
+    xcb_generic_event_t* event = xcb_wait_for_event(m_XCBConnection);
+    if (event != NULL)
     {
         xcb_get_property_cookie_t propertyCookie =
-            xcb_get_property(m_XCBConnection, 0, m_Window, m_ClipboardProperty, XCB_GET_PROPERTY_TYPE_ANY, 0, 1024);
+            xcb_get_property(m_XCBConnection, 0, m_Window, m_ClipboardProperty, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT16_MAX);
 
         xcb_generic_error_t*      error         = nullptr;
         xcb_get_property_reply_t* propertyReply = xcb_get_property_reply(m_XCBConnection, propertyCookie, &error);
@@ -83,15 +84,30 @@ void CClipboardListenerX11::PollClipboard()
 
         /* Simple but fine approach */
         if (copyEvent.content == m_LastClipboardContent)
-            return;
+            goto end;
 
         if (copyEvent.content.find_first_not_of(' ') == std::string::npos)
-            return;
+            goto end;
+
+        if (copyEvent.content[0] == '\0')
+        {
+            std::string tmp{copyEvent.content};
+            copyEvent.content.clear();
+            for (char c : tmp)
+            {
+                if (c != '\0')
+                    copyEvent.content += c;
+            }
+
+            if (copyEvent.content == m_LastClipboardContent)
+                goto end;
+        }
 
         m_LastClipboardContent = copyEvent.content;
         for (const auto& callback : m_CopyEventCallbacks)
             callback(copyEvent);
 
+    end:
         free(propertyReply);
         free(event);
     }
