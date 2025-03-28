@@ -12,7 +12,6 @@
 
 using namespace std;
 
-
 // Clear command line
 void clearScreen() {
 #ifdef _WIN32
@@ -22,7 +21,6 @@ void clearScreen() {
 #endif
 }
 
-
 void createDirectory(const string& path) {
     #ifdef _WIN32
         mkdir(path.c_str());
@@ -30,7 +28,6 @@ void createDirectory(const string& path) {
         mkdir(path.c_str(), 0777);
     #endif
 }
-
 
 bool directoryExists(const string& path) {
     DIR* dir = opendir(path.c_str());
@@ -41,7 +38,6 @@ bool directoryExists(const string& path) {
     return false;
 }
 
-
 string currentBusiness;
 vector<string> businesses;
 
@@ -51,13 +47,15 @@ void loadBusinesses() {
 
     string business;
     while (getline(inFile, business)) {
-        businesses.push_back(business);
+        if (!business.empty()) {
+            businesses.push_back(business);
+        }
     }
     inFile.close();
 }
 
 void saveBusinesses() {
-    ofstream outFile("businesses.txt", ios::trunc);
+    ofstream outFile("businesses.txt");
     if (!outFile) {
         cerr << "Error saving businesses!" << endl;
         return;
@@ -72,7 +70,12 @@ void saveBusinesses() {
 void ensureBusinessDirectory() {
     if (currentBusiness.empty()) return;
 
-    string dirPath = "businesses/" + currentBusiness;
+    string dirPath = "businesses";
+    if (!directoryExists(dirPath)) {
+        createDirectory(dirPath);
+    }
+
+    dirPath = "businesses/" + currentBusiness;
     if (!directoryExists(dirPath)) {
         createDirectory(dirPath);
     }
@@ -110,6 +113,7 @@ bool selectBusiness() {
         ensureBusinessDirectory();
     } else if (choice > 0 && choice <= static_cast<int>(businesses.size())) {
         currentBusiness = businesses[choice - 1];
+        ensureBusinessDirectory();
     } else {
         cout << "Invalid choice!" << endl;
         return selectBusiness();
@@ -130,16 +134,19 @@ vector<Item> inventory;
 void loadInventory() {
     if (currentBusiness.empty()) return;
 
+    inventory.clear();
     string filename = "businesses/" + currentBusiness + "/inventory.txt";
     ifstream inFile(filename);
     if (!inFile) return;
 
-    inventory.clear();
     Item item;
     while (getline(inFile, item.name)) {
-        inFile >> item.count;
-        inFile.ignore(numeric_limits<streamsize>::max(), '\n');
-        getline(inFile, item.description);
+        string countStr;
+        if (!getline(inFile, countStr)) break;
+        item.count = stoi(countStr);
+
+        if (!getline(inFile, item.description)) break;
+
         inventory.push_back(item);
     }
     inFile.close();
@@ -153,9 +160,9 @@ void saveInventory(bool forceSave = false) {
 
     ensureBusinessDirectory();
     string filename = "businesses/" + currentBusiness + "/inventory.txt";
-    ofstream outFile(filename, ios::trunc);
+    ofstream outFile(filename);
     if (!outFile) {
-        cerr << "Error saving inventory!" << endl;
+        cerr << "Error saving inventory to: " << filename << endl;
         return;
     }
 
@@ -180,17 +187,17 @@ void loadTasks() {
 
     string filename = "businesses/" + currentBusiness + "/tasks.txt";
     ifstream inFile(filename);
-    if (!inFile) {
-
-        return;
-    }
+    if (!inFile) return;
 
     string task;
     bool status;
     while (getline(inFile, task)) {
         if (task.empty()) continue;
-        inFile >> status;
-        inFile.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        string statusStr;
+        if (!getline(inFile, statusStr)) break;
+        status = (statusStr == "1");
+
         taskKeeper.push_back(task);
         taskStatus.push_back(status);
     }
@@ -202,7 +209,7 @@ void saveTasks() {
 
     ensureBusinessDirectory();
     string filename = "businesses/" + currentBusiness + "/tasks.txt";
-    ofstream outFile(filename, ios::trunc);
+    ofstream outFile(filename);
     if (!outFile) {
         cerr << "Error saving tasks to: " << filename << endl;
         return;
@@ -210,7 +217,7 @@ void saveTasks() {
 
     for (size_t i = 0; i < taskKeeper.size(); i++) {
         outFile << taskKeeper[i] << endl;
-        outFile << taskStatus[i] << endl;
+        outFile << (taskStatus[i] ? "1" : "0") << endl;
     }
     outFile.close();
 }
@@ -271,7 +278,7 @@ double Expression(const string& operation) {
 
 // Task functions
 void displayTasks() {
-    cout << "\nYour To-Do List:" << endl;
+    cout << "\nYour To-Do List for " << currentBusiness << ":" << endl;
     if (taskKeeper.empty()) {
         cout << "No tasks to display!" << endl;
     } else {
@@ -348,6 +355,13 @@ void markTaskAsCompleted() {
 // Inventory functions
 void editItem() {
     int itemNumber;
+    cout << "\nCurrent Inventory for " << currentBusiness << ":" << endl;
+    for (size_t i = 0; i < inventory.size(); i++) {
+        cout << i + 1 << ". Name: " << inventory[i].name
+             << ", Count: " << inventory[i].count
+             << ", Description: " << inventory[i].description << endl;
+    }
+
     cout << "Enter the number of the item you want to edit: ";
     cin >> itemNumber;
     cin.ignore();
@@ -370,8 +384,12 @@ void editItem() {
     cout << "Enter new count (or press Enter to keep unchanged): ";
     string newCount;
     getline(cin, newCount);
-    if (!newCount.empty() && isdigit(newCount[0])) {
-        item.count = stoi(newCount);
+    if (!newCount.empty()) {
+        try {
+            item.count = stoi(newCount);
+        } catch (...) {
+            cout << "Invalid number entered. Count remains unchanged." << endl;
+        }
     }
 
     cout << "Enter new description (or press Enter to keep unchanged): ";
@@ -382,10 +400,18 @@ void editItem() {
     }
 
     saveInventory(true);
+    cout << "Item updated successfully!" << endl;
 }
 
 void removeItem() {
     int itemNumber;
+    cout << "\nCurrent Inventory for " << currentBusiness << ":" << endl;
+    for (size_t i = 0; i < inventory.size(); i++) {
+        cout << i + 1 << ". Name: " << inventory[i].name
+             << ", Count: " << inventory[i].count
+             << ", Description: " << inventory[i].description << endl;
+    }
+
     cout << "Enter the number of the item you want to remove: ";
     cin >> itemNumber;
     cin.ignore();
@@ -397,7 +423,7 @@ void removeItem() {
 
     inventory.erase(inventory.begin() + itemNumber - 1);
     saveInventory(true);
-    cout << "Item removed!" << endl;
+    cout << "Item removed successfully!" << endl;
 }
 
 // Main Menu Function
@@ -409,6 +435,10 @@ void mainMenu() {
 
 // Main function
 int main() {
+
+    if (!directoryExists("businesses")) {
+        createDirectory("businesses");
+    }
 
     loadBusinesses();
 
@@ -422,6 +452,7 @@ int main() {
     int options = 0;
     do {
         mainMenu();
+        cout << "Enter your choice: ";
         cin >> options;
         cin.ignore();
 
@@ -444,7 +475,7 @@ int main() {
             clearScreen();
             int option;
             while (true) {
-                cout << "\nTask Menu:" << endl;
+                cout << "\nTask Menu for " << currentBusiness << ":" << endl;
                 cout << "1. Add a task" << endl;
                 cout << "2. Remove a task" << endl;
                 cout << "3. Display tasks" << endl;
@@ -471,7 +502,8 @@ int main() {
         if (options == 2) {
             clearScreen();
             string operation;
-            cout << "Enter equations or type 'exit' to leave: ";
+            cout << "Calculator (type 'exit' to leave)\n";
+            cout << "Enter equation: ";
             while (true) {
                 getline(cin, operation);
                 if (operation == "exit") break;
@@ -490,32 +522,32 @@ int main() {
         // Option 3 - Item tracking
         if (options == 3) {
             clearScreen();
-            string userChoice1;
-
+            int choice;
             do {
-                cout << "Inventory Menu:\n1. Add Item\n2. Edit Item\n3. Remove Item\n4. View Inventory\n5. Return to Main Menu\n";
-                int choice;
+                cout << "\nInventory Menu for " << currentBusiness << ":" << endl;
+                cout << "1. Add Item\n2. Edit Item\n3. Remove Item\n4. View Inventory\n5. Return to Main Menu\n";
+                cout << "Choose an option: ";
                 cin >> choice;
                 cin.ignore();
 
                 if (choice == 1) {
                     Item newItem;
-
-                    cout << "Please enter item name:" << endl;
+                    cout << "Enter item name: ";
                     getline(cin, newItem.name);
 
-                    cout << "Please enter item count:" << endl;
+                    cout << "Enter item count: ";
                     while (true) {
                         string countStr;
                         getline(cin, countStr);
-                        if (isdigit(countStr[0])) {
+                        try {
                             newItem.count = stoi(countStr);
                             break;
+                        } catch (...) {
+                            cout << "Invalid number. Please enter a valid count: ";
                         }
-                        cout << "Please enter a valid number for count: ";
                     }
 
-                    cout << "Please enter item description:" << endl;
+                    cout << "Enter item description: ";
                     getline(cin, newItem.description);
 
                     inventory.push_back(newItem);
@@ -526,20 +558,21 @@ int main() {
                 } else if (choice == 3) {
                     removeItem();
                 } else if (choice == 4) {
-                    cout << "\nCurrent Inventory:\n";
-                    for (size_t i = 0; i < inventory.size(); i++) {
-                        cout << i + 1 << ". Name: " << inventory[i].name
-                             << ", Count: " << inventory[i].count
-                             << ", Description: " << inventory[i].description << endl;
+                    cout << "\nCurrent Inventory for " << currentBusiness << ":" << endl;
+                    if (inventory.empty()) {
+                        cout << "No items in inventory." << endl;
+                    } else {
+                        for (size_t i = 0; i < inventory.size(); i++) {
+                            cout << i + 1 << ". Name: " << inventory[i].name
+                                 << ", Count: " << inventory[i].count
+                                 << ", Description: " << inventory[i].description << endl;
+                        }
                     }
-                } else {
-                    saveInventory(true);
-                    break;
+                } else if (choice != 5) {
+                    cout << "Invalid option!" << endl;
                 }
-
-            } while (true);
+            } while (choice != 5);
         }
-
 
         if (options == 4) {
             saveInventory(true);
