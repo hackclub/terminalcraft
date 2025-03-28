@@ -1,7 +1,6 @@
 import socket
 import threading
 import os
-import shutil
 import struct
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ip_address = ''
@@ -23,6 +22,9 @@ def send_file(filepath, client):
     file_name = os.path.basename(filepath)
     file_size = os.path.getsize(filepath)
     client.send("sending...".encode('utf-8'))
+    if client.recv(1024).decode() != "READY":
+        print("Server not ready, aborting file transfer.")
+        return
     client.send(struct.pack("!I", len(file_name)))
     client.send(file_name.encode())
     client.send(struct.pack("!Q", file_size))
