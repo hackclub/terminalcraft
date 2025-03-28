@@ -188,18 +188,21 @@ while true; do
 
     # Display dialog menu
     if [ $machine = "Linux" ]; then
-    loca=$(dialog --menu 'choose where to find' 0 0 3 '/' 'Find in the root dir' '/home' 'Find in the home dir for all users' "/home/$(whoami)" 'Find in the current user home dir'  'Exit' "Exit the program" 3>&1 1>&2 2>&3)
+    loca=$(dialog --menu 'choose where to find' 0 0 3 '/' 'Find in the root dir' '/home' 'Find in the home dir for all users' "/home/$(whoami)" 'Find in the current user home dir' 'Custom Location' "Let's you enter a specific location" 'Exit' "Exit the program" 3>&1 1>&2 2>&3)
     if [[ $loca == "Exit" ]]; then
 clear        
 break
     fi
-
+    if [[ $loca = "Custom Location" ]]; then
+    loca=$(dialog --inputbox "Enter the location full PATH" 0 0  2>&1 >/dev/tty)
+    che=$(test -e "$loca" && echo "Exists" || echo "invaild PATH")
+    fi
     clear
     if [[ -z "$loca" ]]; then
         echo "No location selected. Returning to the beginning..."
         continue
     fi
-
+    if [[ $che = "Exists" || $loca = "/" || $loca = "/home" || $loca = "/home/$(whoami)" ]]; then
     # Display find method selection
     find_method=$(dialog --checklist 'Choose the methods that you want to use to find the file. (Press space to check them) ' 0 0 7 "-name" 'Search by the name of the file' off "-iname" 'Searches for files with a specific name,regardless of case.' off "-type" 'select the file type (file ,dir)' off "-size" 'search for files (+n)greater or (-n)smaller then.' off "-readable" 'A file that you can read its content' off "-writable" 'A file that you can edit and change its content' off "-executable" 'A file that the sofware can run as a program.' off 2>&1 >/dev/tty)
     clear
@@ -304,7 +307,11 @@ break
 
    
     clear
-
+    elif [[ $che = "invaild PATH" ]]; then
+    echo $che
+    sleep 2
+    continue
+    fi
 
 #============================================================================================================================================
 
@@ -318,23 +325,25 @@ break
         "/ : Root directory" \
         "/Users : All users' home" \
         "/Library : The library directory" \
+        "Custom-Location : Let's you enter a specific location"\
         "Exit : Quit program")
 
     # Handle selection
-    case $loca in
-        *Root*) loca="/" ;;
-        *All*) loca="/Users" ;;
-        *Library*) loca="/Library" ;;
-        *Exit*) 
-            gum confirm "Really exit?" && { clear; exit; } || continue
-            ;;
-        *) 
-            gum style --foreground 196 "No location selected"
-            sleep 1
-            continue
-            ;;
-    esac
-
+    if [[ $loca = "/ : Root directory" ]]; then
+        loca="/"
+    elif [[ $loca = "/Users : All users' home" ]]; then
+        loca="/Users"
+    elif [[ $loca = "/Library : The library directory" ]]; then
+        loca="/Library"
+    elif [[ $loca = "Custom-Location : Let's you enter a specific location" ]]; then 
+        loca=$(gum input --placeholder "Enter the location full PATH" --prompt.foreground=212)
+        che=$(test -e "$loca" && echo "Exists" || echo "invaild PATH")
+    else
+        clear
+        break
+    fi
+    
+    if [[ $che = "Exists" || $loca = "/" || $loca = "/Users" || $loca = "/Library" ]]; then
     # Method selection
     gum style --foreground 212 "SELECT SEARCH METHODS (SPACE to select, ENTER to confirm)"
     methods=$(gum choose  --no-limit \
@@ -454,6 +463,11 @@ fi
     else
         gum style --foreground 196 "No search criteria specified"
         sleep 1
+    fi
+    elif [[ $che = "invaild PATH" ]]; then
+    echo $che 
+    sleep 2
+    continue
     fi
 
 fi
