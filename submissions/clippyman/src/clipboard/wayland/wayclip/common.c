@@ -81,7 +81,7 @@ copyfd(const int in, const int out)
 	do {
 		ssize_t rcount = read(in, buf, BUFSIZ);
 		if (rcount == -1) {
-			wc_warn("read failed");
+			//wc_warn("read failed");
 			return;
 		}
 
@@ -90,7 +90,7 @@ copyfd(const int in, const int out)
 		while (wcount < rcount) {
 			ssize_t len = write(out, ptr, rcount);
 			if (len == -1) {
-				wc_warn("read failed");
+				//wc_warn("read failed");
 				return;
 			}
 
@@ -101,3 +101,5 @@ copyfd(const int in, const int out)
 			break;
 	} while (1);
 }
+
+// vim:shiftwidth=8

@@ -51,6 +51,7 @@ Usage: clippyman [OPTIONS]...
     -i, --input                 Enter in terminal input mode (on by default for unix builds)
     -p, --path <path>           Path to where we'll search/save the clipboard history
     -P, --primary [<bool>]      Use the primary clipboard instead
+    -S, --silent [<bool>]       Print or Not an info message along the search content you selected
     --wl-seat <name>            The seat for using in wayland (just leave it empty if you don't know what's this)
     -s, --search                Delete/Search clipboard history. At the moment is not possible to search UTF-8 characters
                                 Press TAB to switch beetwen search bar and clipboard history.
@@ -80,4 +81,7 @@ primary = false
 
 # The seat for using in wayland (i don't know what that is tbh, just leave it empty)
 wl-seat = ""
+
+# Print an info message along the search content you selected
+silent = false
 ```

@@ -29,8 +29,12 @@ public:
     virtual void CopyToClipboard(const std::string& str) const
     {
         if (!config.silent)
-            info("NOT yet implemented copy to clipboard in here, only X11.\n"
-                 "Printing the selected content:");
+        {
+        #if !PLATFORM_UNIX
+            info("NOT yet implemented copy to clipboard in here, only X11.");
+        #endif
+            info("Printing the selected content:");
+        }
         fmt::print("{}", str);
         fmt::print("\n");
     }

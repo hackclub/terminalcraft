@@ -110,3 +110,5 @@ main_waypaste(struct wl_display *display, const int fd)
 
 	zwlr_data_control_device_v1_add_listener(device, &device_listener, NULL);
 }
+
+// vim:shiftwidth=8

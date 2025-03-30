@@ -2,6 +2,7 @@
 #define PLATFORM_UNIX 0
 #endif
 
+#define _POSIX_C_SOURCE 2 // getopt
 #include <getopt.h>
 #include <ncurses.h>
 #include <unistd.h>
@@ -240,7 +241,6 @@ restart:
         if (ch == '\t')
         {
             is_search_tab = !is_search_tab;
-            curs_set(is_search_tab);
         }
         else if (is_search_tab)
         {
@@ -269,7 +269,11 @@ restart:
                 if (cursor_x < SEARCH_TITLE_LEN + query.size())
                     ++cursor_x;
             }
-            else
+            else if (ch == KEY_DOWN)
+            {
+                is_search_tab = false;
+            }
+            else if (!(ch >= KEY_UP && ch <= KEY_MAX))
             {
                 // pass then increase
                 if (!erased)
@@ -281,9 +285,6 @@ restart:
 
                 results = entries_value;
                 results.erase(std::remove_if(results.begin(), results.end(), [&](const std::string& s){return !hasStart(s, query);}), results.end());
-
-                if (selected >= results.size())
-                    selected = results.empty() ? -1 : 0;  // Keep selection valid
             }
         }
         else
@@ -303,8 +304,13 @@ restart:
             else if (ch == KEY_UP || ch == KEY_LEFT)
             {
                 if (del)
+                {
                     del_selected = true;
-
+                }
+                else if (selected == 0)
+                {
+                    is_search_tab = true;
+                }
                 else if (selected > 0)
                 {
                     --selected;
@@ -347,7 +353,7 @@ restart:
             {
                 del = false;
             }
-            else if (ch == '\n' && selected < std::string::npos - 1 && !results.empty())
+            else if (ch == '\n' && !results.empty())
             {
                 endwin();
                 clipboardListener.CopyToClipboard(results[selected]);
@@ -360,6 +366,8 @@ restart:
         else
             draw_search_box(query, (query.empty() ? entries_value : results), max_width, max_visible,
                             selected, scroll_offset, cursor_x, is_search_tab);
+        
+        curs_set(is_search_tab);
     }
 
     endwin();

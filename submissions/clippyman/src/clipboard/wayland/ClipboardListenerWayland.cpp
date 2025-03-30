@@ -24,9 +24,6 @@ CClipboardListenerWayland::CClipboardListenerWayland(const wc_options& options)
     if (!m_display)
         die("Failed to connect to wayland display!");
 
-    close(STDIN_FILENO);
-    main_waycopy(m_display, m_options);
-
     const char *env = getenv("TMPDIR");
     if (env != NULL)
     {
@@ -35,18 +32,27 @@ CClipboardListenerWayland::CClipboardListenerWayland(const wc_options& options)
 
         m_path = env;
     }
-   
+
     m_path += tempname;
-    int fd = mkstemp(m_path.data());
-    if (fd == -1)
+    m_fd = mkstemp(m_path.data());
+    if (m_fd == -1)
         die("Failed to create temporary file for copy buffer");
 
-    main_waypaste(m_display, fd);
+    if (!config.arg_search)
+    {
+        close(STDIN_FILENO);
+        main_waycopy(m_display, m_options, STDIN_FILENO);
+        main_waypaste(m_display, m_fd);
+    }
 }
 
-/*
- * Registers a callback for when the user copies something.
- */
+CClipboardListenerWayland::~CClipboardListenerWayland()
+{
+    wl_display_disconnect(m_display);
+    if (unlink(m_path.c_str()) == -1)
+        warn("Failed to remove temporary file '{}", m_path);
+}
+
 void CClipboardListenerWayland::AddCopyCallback(const std::function<void(const CopyEvent&)>& func)
 {
     m_CopyEventCallbacks.push_back(func);
@@ -56,7 +62,7 @@ void CClipboardListenerWayland::PollClipboard()
 {
     wl_display_roundtrip(m_display);
 
-    // for checking duplicated
+    // for checking duplicated every 50ms
     // instead of:
     // * opening the file
     // * get each line of the file
@@ -83,7 +89,7 @@ void CClipboardListenerWayland::PollClipboard()
 
     std::ifstream f(m_path);
     if (!f.is_open())
-        die("temp file was deleted????");
+        die("temp file was deleted");
 
     CopyEvent copyEvent;
     std::string line;
@@ -125,11 +131,13 @@ end:
     truncate(m_path.c_str(), 0);
 }
 
-CClipboardListenerWayland::~CClipboardListenerWayland()
+/*void CClipboardListenerWayland::CopyToClipboard(const std::string& str) const
 {
-    wl_display_disconnect(m_display);
-    if (unlink(m_path.c_str()) == -1)
-        warn("Failed to remove temporary file '{}", m_path);
-}
+    ftruncate(m_fd, 0);
+    if (write(m_fd, str.c_str(), str.size()) < 0)
+        die("Failed to write to temporary file");
+
+    info("Copied into clipboard!");
+}*/
 
 #endif  // PLATFORM_WAYLAND

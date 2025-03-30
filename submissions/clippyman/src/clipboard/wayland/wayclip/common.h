@@ -21,7 +21,7 @@ void wc_die(const char *const error);
 void wc_warn(const char *const error);
 void copyfd(int in, int out);
 
-int main_waycopy(struct wl_display *display, struct wc_options options);
+int main_waycopy(struct wl_display *display, struct wc_options options, const int fd);
 void main_waypaste(struct wl_display *display, const int fd);
 
 #endif // !_WAYCLIP_SRC_COMMON_H_

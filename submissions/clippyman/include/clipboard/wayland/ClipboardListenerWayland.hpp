@@ -22,6 +22,7 @@ public:
 
     void AddCopyCallback(const std::function<void(const CopyEvent&)>& func) override;
     void PollClipboard() override;
+//    void CopyToClipboard(const std::string& str) const override;
 
 private:
 
@@ -34,6 +35,8 @@ private:
     const wc_options& m_options;
 
     unsigned int m_lastModifiedFileTime = 0;
+
+    int m_fd = 0;
 
     std::string m_LastClipboardContent;
 };
