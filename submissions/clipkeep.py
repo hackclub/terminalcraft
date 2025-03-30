@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-ClipKeep - P2P
+ClipKeep - P2P Clipboard Synchronization Tool
+
+This tool synchronizes your clipboard across devices on the same local network using UDP multicast.
+Optional encryption is available using the cryptography package.
 """
 
 import argparse
 import json
 import os
-import sys
 import time
 import logging
 import threading
@@ -22,7 +24,7 @@ except ImportError:
 
 # Constants for configuration and networking
 CONFIG_FILE = os.path.expanduser("~/.clipkeep_config.json")
-MULTICAST_GROUP = "224.0.0.251"  # multicast address for local networks
+MULTICAST_GROUP = "224.0.0.251"  # Multicast address for local networks
 MULTICAST_PORT = 5005
 BUFFER_SIZE = 4096
 
@@ -55,8 +57,8 @@ def encrypt_text(text, key):
     """Encrypt text using Fernet."""
     if not ENCRYPTION_AVAILABLE:
         return text
-    f = Fernet(key.encode())
     try:
+        f = Fernet(key.encode())
         return f.encrypt(text.encode()).decode()
     except Exception as e:
         logger.error("Encryption failed: %s", e)
@@ -67,8 +69,8 @@ def decrypt_text(text, key):
     """Decrypt text using Fernet."""
     if not ENCRYPTION_AVAILABLE:
         return text
-    f = Fernet(key.encode())
     try:
+        f = Fernet(key.encode())
         return f.decrypt(text.encode()).decode()
     except InvalidToken:
         logger.error("Invalid encryption key or corrupted text.")
@@ -92,12 +94,16 @@ class ClipKeep:
             logger.setLevel(logging.DEBUG)
         logger.debug("ClipKeep initialized.")
 
-    def set_encryption_key(self):
-        """Generate and save a new encryption key."""
+    def set_encryption_key(self, key=None):
+        """
+        Generate and save a new encryption key.
+        Optionally, you can specify a key (as a string) to be used.
+        """
         if not ENCRYPTION_AVAILABLE:
-            logger.error("Encryption not available. Install 'cryptography' package.")
+            logger.error("Encryption not available. Install the 'cryptography' package.")
             return
-        key = Fernet.generate_key().decode()
+        if key is None:
+            key = Fernet.generate_key().decode()
         self.config["encryption_key"] = key
         save_config(self.config)
         print("Encryption key set.")
@@ -147,21 +153,36 @@ class ClipKeep:
 
     def broadcast_clipboard(self, text):
         """Broadcast clipboard update to peers via UDP multicast."""
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
-        message = json.dumps({"clipboard": text})
-        sock.sendto(message.encode(), (MULTICAST_GROUP, MULTICAST_PORT))
-        sock.close()
-        logger.info("Broadcasted clipboard update.")
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+            message = json.dumps({"clipboard": text})
+            sock.sendto(message.encode(), (MULTICAST_GROUP, MULTICAST_PORT))
+            sock.close()
+            logger.info("Broadcasted clipboard update.")
+        except Exception as e:
+            logger.error("Error broadcasting clipboard: %s", e)
 
     def listen_for_peers(self):
         """Listen for clipboard updates from peers."""
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(("", MULTICAST_PORT))
+        try:
+            sock.bind(("", MULTICAST_PORT))
+        except Exception as e:
+            logger.error("Error binding socket: %s", e)
+            return
+
         group = socket.inet_aton(MULTICAST_GROUP)
-        mreq = group + socket.inet_aton("0.0.0.0")
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+        try:
+            # Use local IP for joining the multicast group (fixes issues on macOS)
+            local_ip = socket.gethostbyname(socket.gethostname())
+            mreq = group + socket.inet_aton(local_ip)
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+        except Exception as e:
+            logger.error("Error joining multicast group: %s", e)
+            return
+
         while True:
             try:
                 data, _ = sock.recvfrom(BUFFER_SIZE)
@@ -188,11 +209,14 @@ def main():
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    parser_daemon = subparsers.add_parser("daemon", help="Start clipboard sync in daemon mode")
+    subparsers.add_parser("daemon", help="Start clipboard sync in daemon mode")
     parser_add = subparsers.add_parser("add", help="Add a clipboard entry and broadcast it")
     parser_add.add_argument("text", help="Text to add to clipboard")
     subparsers.add_parser("paste", help="Show the current clipboard content")
-    subparsers.add_parser("setkey", help="Generate and set a new encryption key")
+    
+    # Allow setting encryption key with an optional argument.
+    parser_setkey = subparsers.add_parser("setkey", help="Generate and set a new encryption key or specify one")
+    parser_setkey.add_argument("key", nargs="?", help="Optional: specify an encryption key")
 
     args = parser.parse_args()
     clipkeep = ClipKeep(debug=args.debug)
@@ -210,7 +234,7 @@ def main():
     elif args.command == "paste":
         clipkeep.paste_latest()
     elif args.command == "setkey":
-        clipkeep.set_encryption_key()
+        clipkeep.set_encryption_key(args.key)
 
 if __name__ == "__main__":
     main()
