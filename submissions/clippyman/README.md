@@ -42,32 +42,26 @@ Remember that clippyman can be compiled with different binary names, depending o
 If you have compiled for either x11 or wayland, then when you run the binary without arguments,\
 it will listen in the background what you copy for then printing in the terminal and saving it in the clipboard history.
 
-If you run with `-i` then it will enter in terminal input mode, where you'll Type or Paste the text to save in the clipboard history, then press enter and CTRL+D to save and exit
-
-### Synopsis
+### Examples
 ```
-$ ./clippyman -h
-Usage: clippyman [OPTIONS]...
-    -i, --input                 Enter in terminal input mode (on by default for unix builds)
-    -p, --path <path>           Path to where we'll search/save the clipboard history
-    -P, --primary [<bool>]      Use the primary clipboard instead
-    -S, --silent [<bool>]       Print or Not an info message along the search content you selected
-    --wl-seat <name>            The seat for using in wayland (just leave it empty if you don't know what's this)
-    -s, --search                Delete/Search clipboard history. At the moment is not possible to search UTF-8 characters
-                                Press TAB to switch beetwen search bar and clipboard history.
-                                In clipboard history: press 'd' for delete, press enter for output selected text
-
-    -C, --config <path>         Path to the config file to use
-    --gen-config [<path>]       Generate default config file to config folder (if path, it will generate to the path)
-                                Will ask for confirmation if file exists already
-
-    -h, --help                  Print this help menu
-    -V, --version               Print the version along with the git branch it was built
-
-$ ./clippyman
+$ ./clippyman -i
 INFO: Type or Paste the text to save in the clipboard history, then press enter and CTRL+D to save and exit
 test
 $
+```
+
+If you run with `-i` then it will enter in terminal input mode, where you'll Type or Paste the text to save in the clipboard history, then press enter and CTRL+D to save and exit.
+It's also possibile to save or copy the output of a program by using pipes.
+E.g
+```bash
+# Save the output of a program
+$ echo "test-pipe" | clippyman -i
+
+# Copy the output of a program (x11 only)
+$ echo "test-pipe" | clippyman -c
+
+# Copy & Save the output of a program (x11 only)
+$ echo "test-pipe" | clippyman -ic
 ```
 
 There is also a config that gets generated automatically in `~/.config/clippyman/config.toml`

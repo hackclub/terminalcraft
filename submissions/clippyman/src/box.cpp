@@ -102,7 +102,8 @@ void delete_draw_confirm(const int seloption)
 
 // omfg too many args
 void draw_search_box(const std::string& query, const std::vector<std::string>& results, const size_t max_width,
-                            const size_t max_visible, const size_t selected, const size_t scroll_offset, const size_t cursor_x, bool is_search_tab)
+                     const size_t max_visible, const size_t selected, const size_t scroll_offset, const size_t cursor_x,
+                     bool is_search_tab)
 {
     erase();
     box(stdscr, 0, 0);  // Draw the root box
@@ -111,9 +112,9 @@ void draw_search_box(const std::string& query, const std::vector<std::string>& r
     mvprintw(1, 2, "Search: %s", query.c_str());
     attroff(A_BOLD);
     if (results.size() == 1)
-         mvprintw(2, 2, "(1 result)");
-     else
-         mvprintw(2, 2, "(%zu results)", results.size());
+        mvprintw(2, 2, "(1 result)");
+    else
+        mvprintw(2, 2, "(%zu results)", results.size());
 
     size_t row             = 2;  // Start drawing items from row 2
     size_t items_displayed = 0;  // Track the number of items displayed
@@ -144,7 +145,7 @@ void draw_search_box(const std::string& query, const std::vector<std::string>& r
     if (is_search_tab)
         move(1, cursor_x);
     else
-        move(3 + selected - scroll_offset, 6);  // Move to the selected result
-    
+        move(3 + selected - scroll_offset, 6);
+
     refresh();
 }

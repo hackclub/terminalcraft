@@ -1,4 +1,5 @@
 CXX       	?= g++
+CC		?= gcc
 PREFIX	  	?= /usr
 MANPREFIX	?= $(PREFIX)/share/man
 APPPREFIX 	?= $(PREFIX)/share/applications
@@ -76,7 +77,7 @@ wayclip:
 ifeq ($(PLATFORM),wayland)
 ifeq ($(wildcard $(BUILDDIR)/wayclip/libwayclip.a),)
 	mkdir -p $(BUILDDIR)/wayclip
-	make -C src/clipboard/wayland/wayclip BUILDDIR=$(BUILDDIR)/wayclip DEBUG=$(DEBUG)
+	make -C src/clipboard/wayland/wayclip BUILDDIR=$(BUILDDIR)/wayclip CC=$(CC) DEBUG=$(DEBUG)
 endif
 endif
 

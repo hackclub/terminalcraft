@@ -9,7 +9,7 @@
 class CClipboardListenerUnix : public CClipboardListener
 {
 public:
-    CClipboardListenerUnix() = default;
+    CClipboardListenerUnix()  = default;
     ~CClipboardListenerUnix() = default;
 
     /*
@@ -18,6 +18,9 @@ public:
     void AddCopyCallback(const std::function<void(const CopyEvent&)>& func) override;
 
     void PollClipboard() override;
+
+    std::string getLastClipboardContent()
+    { return m_LastClipboardContent; }
 
 private:
     std::vector<std::function<void(const CopyEvent&)>> m_CopyEventCallbacks;

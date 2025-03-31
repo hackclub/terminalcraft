@@ -31,10 +31,9 @@ void Config::loadConfigFile(const std::string_view filename)
     catch (const toml::parse_error& err)
     {
         die("Parsing config file '{}' failed:\n"
-              "{}\n"
-              "\t(error occurred at line {} column {})",
-            filename, err.description(),
-            err.source().begin.line, err.source().begin.column);
+            "{}\n"
+            "\t(error occurred at line {} column {})",
+            filename, err.description(), err.source().begin.line, err.source().begin.column);
     }
 
     this->path         = getValue<std::string>("config.path", "~/.cache/clippyman/history.json");

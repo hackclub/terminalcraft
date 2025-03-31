@@ -1,8 +1,11 @@
 #include "util.hpp"
+
 #include <cstdlib>
 #include <filesystem>
-#include <istream>
+#include <iostream>
+#include <vector>
 #include <string>
+#include "fmt/ranges.h"
 
 bool hasStart(const std::string_view fullString, const std::string_view start)
 {
@@ -52,6 +55,22 @@ std::string expandVar(std::string ret, bool dont)
     }
 
     return ret;
+}
+
+std::string getin()
+{
+    std::vector<std::string> lines;
+    std::string              line;
+
+    while (std::getline(std::cin, line))
+    {
+        if (std::cin.eof())
+            break;
+
+        lines.push_back(line);
+    }
+
+    return fmt::format("{}", fmt::join(lines, "\n"));
 }
 
 std::string getHomeConfigDir()

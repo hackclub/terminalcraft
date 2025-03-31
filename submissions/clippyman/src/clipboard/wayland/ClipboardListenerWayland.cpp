@@ -8,8 +8,8 @@
 #include <unistd.h>
 
 #include <cerrno>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <string>
 
@@ -17,14 +17,13 @@
 
 const char* const tempname = "/clippyman-buffer-XXXXXX";
 
-CClipboardListenerWayland::CClipboardListenerWayland(const wc_options& options)
-    : m_options(options)
+CClipboardListenerWayland::CClipboardListenerWayland(const wc_options& options) : m_options(options)
 {
     m_display = wl_display_connect(NULL);
     if (!m_display)
         die("Failed to connect to wayland display!");
 
-    const char *env = getenv("TMPDIR");
+    const char* env = getenv("TMPDIR");
     if (env != NULL)
     {
         if (strlen(env) > PATH_MAX - strlen(tempname))
@@ -78,7 +77,7 @@ void CClipboardListenerWayland::PollClipboard()
      * -----------------------------------------------------
      *  stat              844 ns          842 ns       827300
      *  fstream          2199 ns         2193 ns       318829
-    */
+     */
     struct stat attrib;
     if (stat(m_path.c_str(), &attrib) != 0)
         return;
@@ -91,7 +90,7 @@ void CClipboardListenerWayland::PollClipboard()
     if (!f.is_open())
         die("temp file was deleted");
 
-    CopyEvent copyEvent;
+    CopyEvent   copyEvent;
     std::string line;
     while (std::getline(f, line))
     {
@@ -111,7 +110,7 @@ void CClipboardListenerWayland::PollClipboard()
 
     if (copyEvent.content[0] == '\0')
     {
-        std::string tmp{copyEvent.content};
+        std::string tmp{ copyEvent.content };
         copyEvent.content.clear();
         for (char c : tmp)
         {
