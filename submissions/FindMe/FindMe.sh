@@ -274,12 +274,13 @@ break
     results=$(eval "$find_command")
     echo "$results" > /tmp/find_results.txt
     results_file="/tmp/find_results.txt"
-    
+    sed -i -e '$a\' "$results_file"
+
     selected_file=$(mktemp)
     
-    cat "$results_file" | while read -r path; do
-    echo -e "\033]8;;file://$path\a$path\033]8;;\a"
-    done | gum choose --no-limit --header="Select files to open (Space to select, Enter to confirm)" > "$selected_file" 
+    while read -r path; do
+   printf '\e]8;;file://%s\a%s\e]8;;\a\n' "$path" "$path"
+    done < <(cat "$results_file") | gum choose --no-limit --header="Select files to open (Space to select, Enter to confirm)" > "$selected_file" 
 
 
     
@@ -288,25 +289,41 @@ break
         if [[ -e "$path" ]]; then
             case "$(uname -s)" in
                 Darwin*)  # macOS
-                    open -R "$path"  # Reveal in Finder
+                    open -R "$path" 
                     ;;
                 Linux*)   # Linux
-                    xdg-open "$(dirname "$path")" &  # Open containing folder
+                    xdg-open "$(dirname "$path")"  &
                     ;;
                 *)
                     echo "Unsupported OS"
                     ;;
             esac
+
+
         else
             gum style --foreground 196 "Path not found: $path"
         fi
     done < "$selected_file"
+    last_file=$(tail -n 1 "$selected_file")
+if [[ -e "$last_file" ]]; then
+    parent_dir=$(dirname "$last_file")  
+    echo "Opening folder: $parent_dir"
+    case "$(uname -s)" in
+        Darwin*) open "$parent_dir" ;;  
+        Linux*)  xdg-open "$parent_dir" ;;
+    esac
+else
+    gum style --foreground 196 "File not found: $last_file"
+fi
+    
     
     rm "$selected_file"
 
    
     clear
-    elif [[ $che = "invaild PATH" ]]; then
+
+
+elif [[ $che = "invaild PATH" ]]; then
     echo $che
     sleep 2
     continue
@@ -455,6 +472,18 @@ fi
             gum style --foreground 196 "Path not found: $path"
         fi
     done < "$selected_file"
+        last_file=$(tail -n 1 "$selected_file")
+if [[ -e "$last_file" ]]; then
+    parent_dir=$(dirname "$last_file")  
+    echo "Opening folder: $parent_dir"
+    case "$(uname -s)" in
+        Darwin*) open "$parent_dir" ;;  
+        Linux*)  xdg-open "$parent_dir" ;;
+    esac
+else
+    gum style --foreground 196 "File not found: $last_file"
+fi
+    
     
     rm "$selected_file"
 
