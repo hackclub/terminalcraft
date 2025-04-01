@@ -1,0 +1,23 @@
+Metadata-Version: 2.2
+Name: clitunes
+Version: 0.1.0
+Summary: A Terminal-Based Music Player with ASCII Visualizer
+Author: Your Name
+Author-email: your.email@example.com
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console :: Curses
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Multimedia :: Sound/Audio :: Players
+Requires-Python: >=3.7
+Requires-Dist: numpy
+Requires-Dist: pygame
+Requires-Dist: requests
+Requires-Dist: spotipy
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

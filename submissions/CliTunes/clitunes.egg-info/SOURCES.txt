@@ -1,0 +1,10 @@
+README.md
+setup.py
+clitunes/__init__.py
+clitunes/main.py
+clitunes.egg-info/PKG-INFO
+clitunes.egg-info/SOURCES.txt
+clitunes.egg-info/dependency_links.txt
+clitunes.egg-info/entry_points.txt
+clitunes.egg-info/requires.txt
+clitunes.egg-info/top_level.txt
