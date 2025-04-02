@@ -29,8 +29,6 @@ void
 data_source_cancelled(void *data, struct zwlr_data_control_source_v1 *source)
 {
 	running = 0;
-        zwlr_data_control_source_v1_destroy(source);
-        close(temp);
 }
 
 static const struct zwlr_data_control_source_v1_listener data_source_listener = {
@@ -78,7 +76,10 @@ main_waycopy(struct wl_display *display, struct wc_options options, const int fd
 		wc_die("failed to bind to seat interface");
 
 	if (data_control_manager == NULL)
-		wc_die("failed to bind to data_control_manager interface");
+		wc_die("failed to bind to data_control_manager interface\n"
+                        "Looks like you are using GNOME/KDE or a compositor that doesn't have the interface \"zwlr_data_control_manager_v1\"\n"
+                        "Please either use 'clippyman' or 'clippyman-x11' if you have Xwayland working.\n"
+                        "If not, just install 'wl-clipboard' and pipe the clipboard like \"wl-paste | clippyman -i\"");
 
 	struct zwlr_data_control_device_v1 *device = zwlr_data_control_manager_v1_get_data_device(data_control_manager, seat);
 	if (device == NULL)

@@ -1,8 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <wayland-client.h>
 #include <unistd.h>
@@ -99,7 +97,10 @@ main_waypaste(struct wl_display *display, const int fd)
 		wc_die("failed to bind to seat interface");
 
 	if (data_control_manager == NULL)
-		wc_die("failed to bind to data_control_manager interface");
+		wc_die("failed to bind to data_control_manager interface\n"
+                        "Looks like you are using GNOME/KDE or a compositor that doesn't have the interface \"zwlr_data_control_manager_v1\"\n"
+                        "Please either use 'clippyman' or 'clippyman-x11' if you have Xwayland working.\n"
+                        "If not, just install 'wl-clipboard' and pipe the clipboard like \"wl-paste | clippyman -i\"");
 
 	if (pipe(pipes) == -1)
 		wc_die("failed to create pipe");
