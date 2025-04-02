@@ -13,7 +13,7 @@ export const DownloadPage = ({ args }: { args: string[] }) => {
   useEffect(() => {
     console.clear();
   }, []);
-  if (!args[0]) {
+  if (!args.length) {
     return <Alert variant="error">Please provide the meta file url</Alert>;
   }
   const [{ step, name }, setStep] = useState({
@@ -29,11 +29,11 @@ export const DownloadPage = ({ args }: { args: string[] }) => {
   const [metaFile, setMetaFile] = useState<{ [key: string]: any }>({});
   const [log, setLog] = useState<string[]>([]);
 
-  if (error) return <Alert variant="error">{error}</Alert>;
+  if (error) return <Alert variant="error">{error}. <Newline></Newline> Checking your network and please use help command bruh</Alert>;
   if (step === 1) {
     readFile("./component.config.json", (err, data) => {
       if (err) {
-        console.error(err);
+        console.error(`Error reading config file: ${err}. Are you run helper.exe components init before`);
         process.exit(1);
       }
       const config = JSON.parse(data.toString());
