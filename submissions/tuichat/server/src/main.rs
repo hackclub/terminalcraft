@@ -105,7 +105,7 @@ async fn handle_user(
                     None => break Ok(()),
                 };
                 let decoded_message = handle!(decode_message(&user_msg));
-                let message_contents = decoded_message.contents;
+                let message_contents = decoded_message.contents.clone();
 
                 if message_contents.starts_with("/help") {
                     handle!(sink.send(encoded_server_message(HELP_MESSAGE)).await);
@@ -154,12 +154,13 @@ async fn handle_user(
 
                             handle!(tx.send(encoded_server_message(&format!("{name} joined #{channel_name}"))));
                 } else {
-                    // This way we ensure that the message is not impersonating anyone
-                    if message_contents.len() > 0 && decoded_message.user.username == name {
+                    // FIXME: we should check if the username is what we think it is.
+                    // For now, though, we just pretend that it is what we think it is
+                    let mut message_to_send = decoded_message;
+                    message_to_send.user.username = name.clone();
                         handle!(tx.send(
-                            user_msg
+                            encode_message(&message_to_send)
                         ));
-                    }
                 }
             },
             remote_message = rx.recv() => {
