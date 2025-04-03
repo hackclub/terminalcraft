@@ -1,0 +1,2 @@
+[console_scripts]
+Start_2PlayerGames = TwoPlayerGamesCLI.Multiplayer_CLI:main
