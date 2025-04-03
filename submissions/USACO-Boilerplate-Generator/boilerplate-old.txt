@@ -1,0 +1,13 @@
+### Use this for old (file based input) files!!! ###
+
+
+# {contest_name}
+# {contest_link}
+
+with open("{filename}.in", "r") as f:
+    map(int, f.readline().split())  # READ FILE
+
+### FUNCTIONS HERE ###
+
+with open("{filename}.out", "w") as f:
+    f.write("result")
