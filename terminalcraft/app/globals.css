@@ -122,3 +122,15 @@ body {
   60% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+.terminal-output {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.terminal-output pre {
+  display: inline-block;
+  min-width: min-content;
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
