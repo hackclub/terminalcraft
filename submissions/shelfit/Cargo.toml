@@ -1,0 +1,23 @@
+[package]
+name = "shelfit"
+version = "0.1.0"
+edition = "2024"
+authors = ["SpeedyGo55 <speedygo55@outlook.com>"]
+description = "A lightweight CLI tool for storing and retrieving notes, links, and code snippets."
+license = "MIT"
+repository = "https://github.com/speedygo55/shelf"
+homepage = "https://speedygo55.com/"
+readme = "README.md"
+exclude = [
+]
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+directories = "6.0.0"
+rusqlite = { version = "0.34.0", features = ["chrono"] }
+chrono = { version = "0.4.0", features = ["serde"] }
+arboard = "3.0"
+thiserror = "2.0.12"
+colored = "3.0.0"
