@@ -7,7 +7,25 @@ import os
 # Initial score
 score = 0
 # List of possible weapons
-random_weapon = []
+inventory = []
+
+
+def mission_failed():
+        print("Your mission failed andrew!")
+        print("---------------------------------------------")
+        time.sleep(2)
+        print("You are forced to the historia again!")
+        time.sleep(2)
+        print("The historia box turned red color and the unknown voice said:")
+        time.sleep(2)
+        print("Unknown: Are you Idiot Andrew?, You were going to do a special mission and you failed in it.")
+        start_again = input("start again?? (y/n)")
+        if start_again == "y":
+            os.system('cls' if os.name == 'nt' else 'clear')
+            instructions()
+        elif start_again == "n":
+            sys.exit()
+
 def mission_succeed():
     print("You returned back to the historia again")
     time.sleep(2)
@@ -26,33 +44,21 @@ def bussiness_towers_bomb():
     print("Ran Away andrew!!!")
     time.sleep(1)
     print("booom! (The plane has crashed into the towers)")
-    print("Your mission failed andrew!")
-    print("---------------------------------------------")
-    time.sleep(2)
-    print("You are forced to the historia again!")
-    time.sleep(2)
-    print("The historia box turned red color and the unknown voice said:")
-    time.sleep(2)
-    print("Unknown: Are you Idiot Andrew?, You were going to do a special mission and you failed in it.")
-    start_again = input("start again?? (y/n)")
-    if start_again == "y":
-        os.system('cls' if os.name == 'nt' else 'clear')
-        instructions()
-    elif start_again == "n":
-        sys.exit()
-
+    mission_failed()
 
 
 
 
 def chyrnobel_mission():
+    global saved_remote
+    saved_remote = ""
     print("============ Chyrnobel Mission! ============")
     time.sleep(2)
     print("You chose to enter the chyrnobel mission portal.....Goodluck")
     time.sleep(2)
     print("-----------------------------------------------------")
     time.sleep(2)
-    print("You found yourself in chyrnobel powerstation before the disaster bi 1hour only!!")
+    print("You found yourself in chyrnobel powerstation before the disaster by 1 hour only!!")
     time.sleep(2)
     print("You must to stop them frommaking the simulation in the station 4")
     time.sleep(2)
@@ -62,7 +68,7 @@ def chyrnobel_mission():
         time.sleep(2)
         print("you saw the workers in the station trying to operate the station and start the simulation")
         time.sleep(2)
-        alert_workers = input("choose 1 to alert them to do not start or choose 2 to neglict them")
+        alert_workers = input("choose 1 to alert them to do not start or choose 2 to try to turn on the reactor's cooling system or choose 3 to neglict them")
         if alert_workers == "1":
             print("The head worker: You are honest man! ,You have succeed in saving the chyrnobel station number 4")
             time.sleep(2)
@@ -71,10 +77,11 @@ def chyrnobel_mission():
             print("Will you hide it?")
             time.sleep(2)
             hide_remote = input("Enter 1 to hide the remote inside your bag or enter 2 to save it in your hand")
-            global saved_remote
             saved_remote = ""
             if hide_remote == "1":
                 print("The remote is now more safe")
+                saved_remote = "saved"
+                inventory.append(saved_remote)
             elif hide_remote == "2":
                 print("Ok, no problem. Take care of it")
             else:
@@ -95,6 +102,7 @@ def chyrnobel_mission():
             def first_return():
                 if hide_remote == "1":
                     print("The remote is now more safe")
+                    saved_remote = "saved"
                 elif hide_remote == "2":
                     print("Ok, no problem. Take care of it")
             mission_succeed()
@@ -121,6 +129,20 @@ def chyrnobel_mission():
                     print("invalid input!")
                     Enter_Second_Portal = input("Enter 1 to jump into the portal or enter 2 to stay in the historia")
         elif alert_workers == "2":
+            print("You decided to try to cool the nuclear reactor's cooling system, but you didn't have any nuclear suit to save you")
+            get_suit = input("choose 1 to search for suit or choose 2 to enter without any suit")
+            if get_suit == "1":
+                print("you decided to search for a suit!")
+                time.sleep(2)
+                print("You have succeed to get a suit to ear it!")
+                wear_the_suit = input("choose 1 to wear it or choose 2 to leave it")
+                if wear_the_suit == "1":
+                    print("You decided to wear the suit")
+                    enter_the_reactor = input("choose 1 to enter the reactor or choose 2 to leave it and go back with the suit")
+            elif get_suit == "2":
+                print("You decided to enter without any suit")
+
+        elif alert_workers == "3":
             print("booom! (The 4th station was destroyed)")
             time.sleep(2)
             print("You fainted!")
@@ -143,14 +165,13 @@ def chyrnobel_mission():
                 start_again = input("start again?? (y/n)")
 
         else:
-            print("invalid input")
-            alert_workers = input("choose 1 to alert them to do not start or choose 2 to neglict them")
+            while alert_workers not in ["1", "2"]:
+                alert_workers = input("Invalid input! Choose 1 to alert them or 2 to neglect them: ")
             
 
             
 
     elif enter_chyrnobel == "2":
-        #going_away()
         print("you decided to go away")
         time.sleep(2)
         print("---------------------------------------------")
@@ -166,6 +187,8 @@ def chyrnobel_mission():
             instructions()
         elif start_again == "n":
             sys.exit()
+        else:
+            start_again = input("start again?? (y/n)")
 
 
 def september_11_attack():
@@ -190,6 +213,7 @@ def september_11_attack():
             print("You decided to fight the man!")
             time.sleep(2)
             print("You killed the man and got the remote back again!")
+            mission_succeed()
         elif fight_man == "2":
             print("You decided to call the cops!")
             time.sleep(2)
@@ -197,8 +221,26 @@ def september_11_attack():
             time.sleep(2)
             print("You started running after him!")
             time.sleep(2)
-            print("Oh shit! he reached the bussiness towers")
-
+            print("Oh shit! he reached the twin towers")
+            time.sleep(2)
+            print("the plane is going toward the twin towers")
+            use_remote = input("choose 1 to use the remote to stop the bomb from working or choose 2 to ignore the using of the remote and watch the plane")
+            if use_remote == "1":
+                print("you decided to use the remote")
+                time.sleep(2)
+                print("you have succeeded in stopping the bomb and the mission completed!")
+                mission_succeed()
+            elif use_remote == "2":
+                print("you decided to ignore the using of the remote")
+                time.sleep(2)
+                print("the plane reached the twin towers and bombed them")
+                mission_failed()
+            else:
+                use_remote = input("choose 1 to use the remote to stop the bomb from working or choose 2 to ignore the using of the remote and watch the plane")
+        else:
+            fight_man = input("enter1 to fight the man or enter 2 to call the cops")
+    else:
+        run_towards_the_man = input("Enter 1 to run behined the man or enter 2 to neglict him and buy an icecream")
             
 
 
@@ -224,13 +266,7 @@ def instructions():
     elif portal_choice == "2":
         september_11_attack()
     else: 
-        print("not work")
-
-
-
-
-
-
+        portal_choice = input("Please choose 1 portal from 1 to 2")
 
 def chyrnobel():
     saved_remote = ""
