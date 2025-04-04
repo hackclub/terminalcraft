@@ -1,0 +1,7 @@
+pillow
+ffpyplayer
+textualize
+rich-pixels
+yt_dlp
+httpx
+numpy
