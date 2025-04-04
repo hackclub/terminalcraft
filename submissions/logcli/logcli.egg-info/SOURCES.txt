@@ -1,0 +1,13 @@
+setup.py
+logcli/__init__.py
+logcli/main.py
+logcli.egg-info/PKG-INFO
+logcli.egg-info/SOURCES.txt
+logcli.egg-info/dependency_links.txt
+logcli.egg-info/entry_points.txt
+logcli.egg-info/requires.txt
+logcli.egg-info/top_level.txt
+logcli/utils/__init__.py
+logcli/utils/auth.py
+logcli/utils/config.py
+logcli/utils/logs.py
