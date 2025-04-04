@@ -1,0 +1,16 @@
+[package]
+name = "cgol-tui"
+version = "0.6.9"
+authors = ["Jeromos Kovacs <iitsnotme214@proton.me>"]
+edition = "2021"
+description = "Conway's Game of Life implementation with a TUI"
+license = "MIT OR Apache-2.0"
+documentation = "https://docs.rs/cgol-tui"
+repository = "https://github.com/JeromeSchmied/cgol-tui-rs"
+keywords = ["conway", "game-of-life", "tui"]
+categories = ["games"]
+
+[dependencies]
+crossterm = { version = "0.28.1", features = ["use-dev-tty"] }
+fastrand = "2.3.0"
+ratatui = "0.29.0"
