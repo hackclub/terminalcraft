@@ -1,0 +1,67 @@
+Task Manager Documentation
+=========================
+
+Overview
+--------
+The Task Manager is a tool for managing tasks with due dates. It provides a calendar view for task visualization and allows users to create, complete, and delete tasks with proper date validation.
+
+Features
+--------
+1. Create tasks with due dates
+2. Mark tasks as completed
+3. Delete tasks
+4. Calendar view for task visualization
+5. Date validation
+6. Persistent storage
+7. Visual completion status indicators
+
+Usage
+-----
+1. Launch the Task Manager from the main menu
+2. Enter a task name in the first input field
+3. Enter a due date in YYYY-MM-DD format in the second input field
+4. Click "Add Task" to create a new task
+5. Use "Complete Task" to mark tasks as done
+6. Use "Delete Task" to remove tasks
+7. Navigate months using "Previous Month" and "Next Month" buttons
+8. Click "Back" to return to the main menu
+
+Interface Elements
+----------------
+- Task Input Field: Enter task descriptions
+- Due Date Input Field: Enter due dates (YYYY-MM-DD)
+- Add Task Button: Creates a new task
+- Complete Task Button: Marks selected task as done
+- Delete Task Button: Removes selected task
+- Previous/Next Month Buttons: Navigate calendar view
+- Task Table: Displays all tasks and their status
+- Calendar View: Visual representation of tasks by date
+- Back Button: Returns to the main menu
+
+Technical Details
+---------------
+- Tasks are stored in a JSON file
+- Status is indicated with checkmark (✔) or cross (✘)
+- Calendar view shows task completion status
+- Tasks persist between sessions
+- Each task includes:
+  - Description
+  - Completion status
+  - Due date
+  - Creation timestamp
+
+Data Storage
+-----------
+- Tasks are stored in data/tasks.json
+- Data structure includes:
+  - task: Task description
+  - completed: Boolean completion status
+  - added: Creation timestamp
+  - due: Due date in YYYY-MM-DD format
+
+Date Validation
+-------------
+- Dates must be in YYYY-MM-DD format
+- Invalid dates trigger error notifications
+- Empty dates are stored as "N/A"
+- Calendar view handles invalid dates gracefully
