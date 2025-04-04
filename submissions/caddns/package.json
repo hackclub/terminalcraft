@@ -1,0 +1,25 @@
+{
+  "name": "caddns",
+  "version": "1.0.1",
+  "description": "An automation app that updates your Cloudflare records' IPs to match your machine's IP daily.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "bin": "./index.js",
+  "keywords": ["cloudflare", "ddns", "cronjob", "automatic" ],
+  "author": "rocristoi",
+  "license": "ISC",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rocristoi/caDDNS"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "chalk-animation": "^2.0.3",
+    "fs": "^0.0.1-security",
+    "inquirer": "^12.5.0",
+    "nanospinner": "^1.2.2"
+  }
+}
