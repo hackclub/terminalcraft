@@ -1,0 +1,32 @@
+Screen {
+    background: black;
+    color: white;
+}
+
+
+Header {
+    background: blue;
+    color: white;
+    text-align: center;
+}
+
+
+Footer {
+    background: gray;
+    color: black;
+    text-align: center;
+}
+
+
+ListView {
+    border: round gray;
+    padding: 1;
+    height: auto;
+}
+
+
+ListItem.-selected {
+    background: cyan;
+    color: black;
+    text-style: bold;
+}
