@@ -15,9 +15,6 @@
 #include "config.hpp"
 #include "util.hpp"
 
-namespace
-{
-
 xcb_atom_t getAtom(xcb_connection_t* connection, const std::string& name)
 {
     xcb_intern_atom_cookie_t cookie = xcb_intern_atom(connection, 0, name.size(), name.c_str());
@@ -28,8 +25,6 @@ xcb_atom_t getAtom(xcb_connection_t* connection, const std::string& name)
 
     return reply->atom;
 }
-
-}  // namespace
 
 CClipboardListenerX11::CClipboardListenerX11()
 {
@@ -121,13 +116,35 @@ void CClipboardListenerX11::PollClipboard()
     free(event);
 }
 
-static void runInBg(xcb_connection_t* m_XCBConnection, xcb_atom_t target, xcb_atom_t property, const std::string& str)
+static void runInBg(xcb_connection_t* m_XCBConnection, xcb_atom_t selection, xcb_atom_t target, xcb_atom_t property, const std::string& str)
 {
     // handle selection requests in event loop
-    xcb_generic_event_t* event;
-    if ((event = xcb_wait_for_event(m_XCBConnection)))
+    while (true)
     {
-        if ((event->response_type & ~0x80) == XCB_SELECTION_REQUEST)
+        xcb_generic_event_t* event = xcb_wait_for_event(m_XCBConnection);
+        if (!event)
+        {
+            free(event);
+            continue;
+        }
+
+        if ((event->response_type & ~0x80) == XCB_SELECTION_CLEAR)
+        {
+            // someone else took ownership of the clipboard, we should exit
+            free(event);
+            break;
+        }
+        else if ((event->response_type & ~0x80) == XCB_SELECTION_NOTIFY)
+        {
+            // check if we lost ownership
+            xcb_selection_notify_event_t* notify = reinterpret_cast<xcb_selection_notify_event_t*>(event);
+            if (notify->selection == selection && notify->property == XCB_NONE)
+            {
+                free(event);
+                break;
+            }
+        }
+        else if ((event->response_type & ~0x80) == XCB_SELECTION_REQUEST)
         {
             xcb_selection_request_event_t* request = reinterpret_cast<xcb_selection_request_event_t*>(event);
             if (request->target == target)
@@ -154,9 +171,9 @@ static void runInBg(xcb_connection_t* m_XCBConnection, xcb_atom_t target, xcb_at
 
 void CClipboardListenerX11::CopyToClipboard(const std::string& str) const
 {
-    xcb_intern_atom_cookie_t cookie_selection = xcb_intern_atom(m_XCBConnection, 0, 9, "CLIPBOARD");
-    xcb_intern_atom_cookie_t cookie_target    = xcb_intern_atom(m_XCBConnection, 0, 11, "UTF8_STRING");
-    xcb_intern_atom_cookie_t cookie_property  = xcb_intern_atom(m_XCBConnection, 0, 8, "XCB_CLIPBOARD");
+    xcb_intern_atom_cookie_t cookie_selection = xcb_intern_atom(m_XCBConnection, 1, 9, "CLIPBOARD");
+    xcb_intern_atom_cookie_t cookie_target    = xcb_intern_atom(m_XCBConnection, 1, 11, "UTF8_STRING");
+    xcb_intern_atom_cookie_t cookie_property  = xcb_intern_atom(m_XCBConnection, 1, 9, "XSEL_DATA");
 
     xcb_intern_atom_reply_t* reply_selection = xcb_intern_atom_reply(m_XCBConnection, cookie_selection, NULL);
     xcb_intern_atom_reply_t* reply_target    = xcb_intern_atom_reply(m_XCBConnection, cookie_target, NULL);
@@ -182,14 +199,14 @@ void CClipboardListenerX11::CopyToClipboard(const std::string& str) const
     xcb_set_selection_owner(m_XCBConnection, m_Window, selection, XCB_CURRENT_TIME);
     xcb_flush(m_XCBConnection);
     if (!config.silent)
-        info("Copied to clipboard!");
+        info("Copied to clipboard! (maybe)");
 
     // run the task in the background, waiting for any event
     pid_t pid = fork();
     if (pid < 0)
         die("failed to fork(): {}", strerror(errno));
     else if (pid == 0)
-        runInBg(m_XCBConnection, target, property, str);
+        runInBg(m_XCBConnection, selection, target, property, str);
     else
         exit(0);
 }

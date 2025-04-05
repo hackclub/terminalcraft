@@ -1,12 +1,13 @@
 #ifndef _CONFIG_HPP_
 #define _CONFIG_HPP_
 
-#define TOML_IMPLEMENTATION
+#include <vector>
 #include <string>
 #include <string_view>
-
-#include "toml++/toml.hpp"
 #include "util.hpp"
+
+#define TOML_IMPLEMENTATION
+#include "toml++/toml.hpp"
 
 class Config
 {
@@ -17,6 +18,7 @@ public:
     bool arg_search         = false;
     bool arg_terminal_input = false;
     bool arg_copy_input     = false;
+    std::vector<std::string> arg_entries, arg_entries_delete;
 
     std::string path;
     std::string wl_seat;
