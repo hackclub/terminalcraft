@@ -1,0 +1,9 @@
+selenium
+webdriver_manager
+requests
+beautifulsoup4
+readability-lxml
+textwrap
+random
+re
+PyInstaller
