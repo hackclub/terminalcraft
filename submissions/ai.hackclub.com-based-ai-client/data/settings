@@ -1,0 +1,4 @@
+{
+    "min_messages_to_save": "3",
+    "system_messages": "You are a terminal assitant that helps the user get what they want done in the terminal."
+}
