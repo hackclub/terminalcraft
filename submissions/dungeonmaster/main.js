@@ -67,21 +67,30 @@ async function callGroqAPI(userInput) {
       { role: "user", content: userInput }
     ];
 
-    const response = await axios.post(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        model: GROQ_MODEL,
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 1024
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
+    let response;
+    if (GROQ_API_KEY) {
+      response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: GROQ_MODEL,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 1024
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
         }
-      }
-    );
+      );
+    } else {
+      response = await axios.post(
+        'https://ai.hackclub.com/chat/completions',
+        { messages },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     const aiResponse = response.data.choices[0].message.content;
     
@@ -97,7 +106,6 @@ async function callGroqAPI(userInput) {
     return "The arcane connection wavers... (Temporary disturbance)";
   }
 }
-
 function updateGameState(response) {
   const damageMatch = response.match(/lose (\d+) health/i);
   if (damageMatch) {
@@ -200,11 +208,6 @@ async function startGame() {
 
 function askQuestion(prompt) {
   return new Promise(resolve => rl.question(prompt, resolve));
-}
-
-if (!GROQ_API_KEY) {
-  console.log(theme.alert("ERROR: Missing GROQ_API_KEY in .env"));
-  process.exit();
 }
 
 
