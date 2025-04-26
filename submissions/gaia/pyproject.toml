@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "gaia-browser"
+version = "0.3.5"
+description = "the terminal-living library genesis browser"
+authors = ["fwyr <fwyr@proton.me>"]
+maintainers = ["fwyr <fwyr@proton.me"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/fwyr/gaia"
+repository = "https://github.com/fwyr/gaia"
+exclude = ["imgs"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+rich = "^13.9.2"
+pyfiglet = "^1.0.2"
+beautifulsoup4 = "^4.13.3"
+fake-useragent = "^2.1.0"
+
+[tool.poetry.dev-dependencies]
+twine = "^6.1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+gaia = 'gaia.cli:start'
