@@ -1,0 +1,64 @@
+# Etool
+
+`etool` is a command-line utility written in Node.js for encrypting and decrypting text and files using AES-256-CBC encryption. It can also encrypt and decrypt all files in a specified folder.
+
+## Features
+
+- Encrypt and decrypt text
+- Encrypt and decrypt all files in a folder
+- Set a custom password for encryption and decryption
+
+## Usage
+
+### Installation
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/aleyhany9/terminalcraft.git
+   ```
+2. Navigate to the `submissions/etool` directory:
+   ```sh
+   cd submissions/etool
+   ```
+3. Install the dependencies:
+   ```sh
+   npm install
+   ```
+
+### Command-line Options
+
+- `-e, --encrypt <text>`: Encrypt the given text
+- `-d, --decrypt <text>`: Decrypt the given text
+- `-p, --password <pass>`: Set the encryption password
+- `-n, --folder-encrypt <path>`: Encrypt all files in a folder
+- `-f, --folder-decrypt <path>`: Decrypt all files in a folder
+
+### Examples
+
+#### Encrypting Text
+
+```sh
+node index.js -e "Hello, World!" -p "password123"
+```
+
+#### Decrypting Text
+
+```sh
+node index.js -d "encryptedTextHere" -p "password123"
+```
+
+#### Encrypting a Folder
+
+```sh
+node index.js -n /path/to/folder -p "password123"
+```
+
+#### Decrypting a Folder
+
+```sh
+node index.js -f /path/to/folder -p "password123"
+```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
