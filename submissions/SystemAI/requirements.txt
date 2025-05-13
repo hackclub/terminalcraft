@@ -1,0 +1,8 @@
+psutil
+speedtest-cli
+rich
+matplotlib
+numpy
+requests
+GPUtil
+ollama  # Only if you have Ollama installed, otherwise you do not need this.
