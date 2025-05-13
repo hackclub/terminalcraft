@@ -1,0 +1,27 @@
+Metadata-Version: 2.4
+Name: CliTunesGithub
+Version: 0.1.1
+Summary: Terminal Music Player
+Author: Ye Gao
+Author-email: ye.gao@student.tdsb.on.ca
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console :: Curses
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Multimedia :: Sound/Audio :: Players
+Requires-Python: >=3.7
+Requires-Dist: numpy
+Requires-Dist: pygame
+Requires-Dist: requests
+Requires-Dist: spotipy
+Requires-Dist: mutagen
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+CliTunes is a terminal music player that supports playing local music files and streaming from Spotify.
