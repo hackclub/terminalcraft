@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "TerminalCraft",
-  description: "Create a Terminal Application, get a Raspberry Pi",
+  description: "Create your Terminal Application",
 };
 
 export default function RootLayout({
