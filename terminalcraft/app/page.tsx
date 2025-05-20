@@ -240,7 +240,7 @@ Keep hacking and building awesome things! 🚀</p>
               <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F] shadow-inner"></div>
             </div>
           </div>
-          <div className="flex-1 text-center text-sm text-[#808080] font-medium">user@user-mac — terminalcraft</div>
+          <div className="flex-1 text-center text-sm text-[#808080] font-medium">you@hackclub — terminalcraft</div>
         </div>
         
         {/* Terminal Content */}
