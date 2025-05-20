@@ -94,14 +94,19 @@ export default function Home() {
       case "about.md":
         return `# TerminalCraft YSWS
 
-Get ready to build and publish your own terminal program and earn a **Raspberry Pi 4**! 🎉 This is your chance to create something useful, learn new skills, and get a cool prize.
+Get ready to build and publish your own terminal program and earn a **Raspberry Pi 4**! or $55 for hardware 🎉 This is your chance to create something useful, learn new skills, and get a cool prize.
 
-## What You Need to Do:
-1. **Build a Terminal App** that solves a problem or improves your workflow.
-2. **Get 10 Users** to use your program.
-3. **Make It Open-Source** so others can learn from it.
-4. **Support Both Unix (MacOS, Linux) and Windows** platforms.
-5. **Provide Clear Instructions** on how to build and run your app.
+## What you need to do
+1. 🔧 Build a terminal application that solves a real problem or improves your workflow
+2. 👥 Get at least 10 users to use and test your app
+3. 🌍 Make your project open-source so others can learn from it
+4. 💻 Support both Unix (macOS, Linux) and Windows platforms
+5. 📸 Include screenshots or demos showing your app in action
+6. 📦 The app must be self-contained — no reliance on pre-installed tools
+7. 📝 Provide clear, step-by-step instructions to build and run your app on all platforms
+8. 🚫 Do not remake an existing tool with only minor changes
+9. 🚫 Do not build just a wrapper around another tool
+
 
 ### Tools You Can Use:
 - **Textualize** (Recommended for web sharing)
@@ -111,14 +116,14 @@ Get ready to build and publish your own terminal program and earn a **Raspberry 
 1. Join the #terminal-craft channel on Slack to ask questions, share progress, or just vibe
 2. Build something sick & ship it!
 3. Submit your project via **Airtable** for review!
-4. Claim your Raspberry Pi 4
+4. Claim your $55 / Raspberry Pi 4
 
 ### Prize:
-- **Raspberry Pi 4** 🖥️ 
+- **Raspberry Pi 4** 🖥️  (or $55 for hardware)
 
 Let's build some awesome terminal apps and hack the world together! 🌟`;
       case "prizes.md":
-        return "You will get a Raspberry Pi 4 and bragging rights ;)";
+        return "You will get a Raspberry Pi 4 (or $55 for hardware) and bragging rights ;)";
       case "faq.md":
         return `# Frequently Asked Questions
 
@@ -131,7 +136,7 @@ A: Join the <a href="https://hackclub.slack.com/archives/C08F58MT3GV" target="_b
 Q: What programming language should I use?
 A: You can use any programming language you're comfortable with! The only requirements are:
    - Include clear build/installation instructions
-   - Provide either a runnable binary or detailed setup guide
+   - Provide either a runnable binary and detailed setup guide
    - Ensure it works across different platforms
 
 Q: How do I share my terminal program?
@@ -142,7 +147,7 @@ A: You have several options:
    Make sure your distribution method is easily accessible!
 
 Q: When's the deadline?
-A: March 19th! Make sure to submit before 11:59 PM in your local timezone.
+A: June 19th! Make sure to submit before 11:59 PM in your local timezone.
 
 Q: Can my project be a game?
 A: Absolutely! Games are welcome and encouraged. The terminal is your canvas - create anything from text adventures to multiplayer games. Go wild with your creativity!
