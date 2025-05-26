@@ -1,0 +1,122 @@
+# https://textual.textualize.io/guide/styles/
+
+Screen {
+	layout: horizontal;
+	# layers: above middle below;
+}
+
+#icons {
+	layers: below above;
+	align: center middle;
+}
+
+#tux_icon {
+	content-align: center middle;
+	# text-align: center;
+	# border: solid yellow;
+	width: 1fr;
+	height: 1fr;
+	layer: above;
+}
+
+#dollar_icon {
+	content-align: center middle;
+	# border: solid yellow;
+	# height: 1fr;
+	layer: below;
+}
+
+.welcome {
+	&.label {
+		height: 4;
+		width: 100%;
+		text-align: center;
+	}
+	&.rule {
+		color: green;
+	}
+}
+
+.counter {
+	align: center middle;
+	&.digits {
+		content-align: center middle;
+		text-align: center;
+		height: 5;
+		width: 100%;
+	}
+}
+
+
+.box {
+	height: 100%;
+	width: 1fr;
+	border: solid green;
+	.label {
+		text-align: center;
+	}
+
+	&.counterpane {
+		border: panel green;
+	}
+
+	&.display {
+		width: 1.5fr;
+		border: solid blue;
+		content-align: center middle;
+	}
+
+	&.shop {
+		width: 1fr;
+		border: solid yellow;
+		border: none;
+		#label {
+			# border: solid yellow;
+			# border: none;
+			# margin: 0;
+			height: 7;
+			width: 100%;
+			text-align: center;
+		}
+		#shop {
+			border: solid yellow;
+			# border: none;
+		}
+		#rule {
+			color: yellow;
+		}
+	}
+}
+
+#spidspod {
+	border: solid red;
+}
+
+.purchasable {
+	height: 7;
+	background: $boost;
+	margin: 1;
+	padding: 0;
+	align-vertical: middle;
+	border: outer cadetblue;
+	.label {
+		height: 100%;
+		width: 80%;
+		text-align: left;
+	}
+	.button {
+		height: 1fr;
+		# width: 4;
+		min-width: 11;
+		dock: right;
+		# border: solid red;
+		text-align: center;
+		content-align: center middle;
+		&.buy {
+			background: $success-muted;
+		}
+	}
+}
+
+#tuxminer {
+}
