@@ -57,8 +57,9 @@ export default function Home() {
         return hackclubFlag();
       }
       case "submit": {
-        window.open('https://airtable.com/appzR6MIcj5G9A2Fa/pag8jn2axMXOB2lid/form', '_blank');
-        return "Opening submission form in new tab...";
+        return "Create a pull request with your project to <a style=\"text-decoration: underline\" target=\"_blank\" href=\"https://github.com/hackclub/terminalcraft\">hackclub/terminalcraft </a> and wait for review."
+        // window.open('https://airtable.com/appzR6MIcj5G9A2Fa/pag8jn2axMXOB2lid/form', '_blank');
+        // return "Opening submission form in new tab...";
       }
       case "slack": {
         window.open('https://hackclub.slack.com/archives/C08F58MT3GV', '_blank');
@@ -193,7 +194,7 @@ Available commands:
     Example: help
 
   submit
-    Opens the project submission form in a new tab
+    Shows instructions on how to submit your project
     Example: submit
 
   slack
