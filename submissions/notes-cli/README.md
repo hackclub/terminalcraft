@@ -99,8 +99,3 @@ Example entry:
 Built with:
 - [Go](https://golang.org/)
 - [Cobra](https://github.com/spf13/cobra)
-
----
-
-## 🌍 Contributing
-Pull requests welcome! If you have suggestions, features, or bug reports, please open an issue.
