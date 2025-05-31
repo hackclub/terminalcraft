@@ -1,8 +1,10 @@
-# THIS PROJECT LIVES AT https://github.com/spjoes/notes-cli AND MADE FOR TERMINAL-CRAFT
+# THIS PROJECT OFFICIALLY LIVES AT https://github.com/spjoes/notes-cli AND MADE FOR TERMINAL-CRAFT
 
 # 📝 Contextual Notes CLI (`notes`)
 
 A terminal-based contextual note-taking app that links your thoughts directly to the files and projects you're working on. Easily add, view, and manage notes scoped to your current directory, specific files, or even line numbers - all from the command line.
+
+> ⚡ Perfect for developers, engineers, and tinkerers who live in the terminal.
 
 ---
 
@@ -99,3 +101,5 @@ Example entry:
 Built with:
 - [Go](https://golang.org/)
 - [Cobra](https://github.com/spf13/cobra)
+- [Bubble Tea](https://github.com/charmbracelet/bubbletea)
+- [Lipgloss](https://github.com/charmbracelet/lipgloss)
