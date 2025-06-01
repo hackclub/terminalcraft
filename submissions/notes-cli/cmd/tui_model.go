@@ -19,9 +19,11 @@ type model struct {
 	confirmingDelete bool
 	deleteIndex      int
 	addStage         int
+	editStage        int
+	editItem         NoteItem
 	textInput        textinput.Model
-	newMsg           string
 	fileList         list.Model
+	newMsg           string
 	selectedFile     string
 	newTags          []string
 	width            int
@@ -108,6 +110,8 @@ func initialModel() (model, error) {
 		confirmingDelete: false,
 		deleteIndex:      -1,
 		addStage:         0,
+		editStage:        0,
+		editItem:         NoteItem{},
 		textInput:        ti,
 		newMsg:           "",
 		fileList:         emptyList,
@@ -213,6 +217,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		h := max(1, m.height-4)
 		m.notesList.SetSize(w, h)
 		m.textInput.Width = max(1, m.width-6)
+		if m.addStage == 2 {
+			m.fileList.SetSize(w, h)
+		}
+		if m.editStage == 2 {
+			m.fileList.SetSize(w, h)
+		}
 		return m, nil
 
 	case tea.KeyMsg:
@@ -270,7 +280,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						}
 						m.newTags = parts
 					}
-					_ = SaveNote(m.newMsg, m.selectedFile, 0, m.newTags)
+					if err := SaveNote(m.newMsg, m.selectedFile, 0, m.newTags); err != nil {
+						return m, tea.Printf("failed to save note: %v", err)
+					}
 					newModel, _ := initialModel()
 					newModel.width, newModel.height = m.width, m.height
 					w := max(1, m.width-2)
@@ -296,6 +308,120 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput, cmd = m.textInput.Update(msg)
 			return m, cmd
 
+		}
+
+		if m.editStage > 0 {
+			switch key {
+			case "enter":
+				value := strings.TrimSpace(m.textInput.Value())
+				switch m.editStage {
+				case 1:
+					m.editItem.Message = value
+					m.editStage = 2
+
+					var items []list.Item
+					root, _ := os.Getwd()
+					filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+						if err != nil {
+							return err
+						}
+						if info.IsDir() && strings.HasPrefix(info.Name(), ".") {
+							return filepath.SkipDir
+						}
+						if !info.IsDir() {
+							rel, _ := filepath.Rel(root, path)
+							items = append(items, NoteItem{Message: rel})
+						}
+						return nil
+					})
+
+					items = append([]list.Item{NoteItem{Message: "(No File)"}}, items...)
+					w := max(1, m.width-2)
+					h := max(1, m.height-4)
+					m.fileList = list.New(items, list.NewDefaultDelegate(), w, h)
+					m.fileList.Title = "Step 2/3: Select file (Enter to choose, Esc to skip)"
+
+					if m.editItem.File != "" {
+						m.fileList.Select(0)
+					} else {
+						for i := 1; i < len(items); i++ {
+							if items[i].(NoteItem).Message == m.editItem.File {
+								m.fileList.Select(i)
+								break
+							}
+						}
+					}
+
+					return m, nil
+
+				case 2:
+					sel := m.fileList.SelectedItem().(NoteItem).Message
+					if sel == "(No File)" {
+						m.editItem.File = ""
+					} else {
+						m.editItem.File = sel
+					}
+					m.editStage = 3
+					m.textInput.SetValue(strings.Join(m.editItem.Tags, ", "))
+					m.textInput.Placeholder = "Edit tags (comma-separated, Esc to skip)"
+					m.textInput.Focus()
+					return m, nil
+
+				case 3:
+					rawTags := strings.TrimSpace(m.textInput.Value())
+					if rawTags != "" {
+						parts := strings.Split(rawTags, ",")
+						for i := range parts {
+							parts[i] = strings.TrimSpace(parts[i])
+						}
+						m.editItem.Tags = parts
+					} else {
+						m.editItem.Tags = []string{}
+					}
+
+					root, _ := os.Getwd()
+					notesPath := filepath.Join(root, ".notes", "notes.json")
+					bytes, _ := os.ReadFile(notesPath)
+					var allNotes []Note
+					_ = json.Unmarshal(bytes, &allNotes)
+
+					for i := range allNotes {
+						if allNotes[i].ID == m.editItem.ID {
+							allNotes[i].Message = m.editItem.Message
+							allNotes[i].File = m.editItem.File
+							allNotes[i].Tags = m.editItem.Tags
+							allNotes[i].CreatedAt = m.editItem.CreatedAt
+							break
+						}
+					}
+
+					out, _ := json.MarshalIndent(allNotes, "", "  ")
+					_ = os.WriteFile(notesPath, out, 0644)
+
+					newModel, _ := initialModel()
+					newModel.width, newModel.height = m.width, m.height
+					w := max(1, m.width-2)
+					h := max(1, m.height-4)
+					newModel.notesList.SetSize(w, h)
+					newModel.editStage = 0
+					return newModel, nil
+				}
+
+			case "esc", "ctrl+c":
+				m.editStage = 0
+				m.textInput.Blur()
+				return m, nil
+			}
+
+			if m.editStage == 2 {
+				updatedList, cmd := m.fileList.Update(msg)
+				m.fileList = updatedList
+				return m, cmd
+			}
+
+			var cmd tea.Cmd
+			m.textInput, cmd = m.textInput.Update(msg)
+			return m, cmd
 		}
 
 		if m.confirmingDelete {
@@ -336,6 +462,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Width = max(1, m.width-6)
 			return m, nil
 
+		case "ctrl+e":
+			idx := m.notesList.Index()
+			if idx >= 0 && idx < len(m.notesList.Items()) {
+				selected := m.notesList.Items()[idx].(NoteItem)
+				m.editItem = selected
+				m.editStage = 1
+				m.textInput.SetValue(selected.Message)
+				m.textInput.Placeholder = "Edit message (Enter to continue, Esc to cancel)"
+				m.textInput.Focus()
+				m.textInput.Width = max(1, m.width-6)
+			}
+			return m, nil
+
 		case "delete", "ctrl+d":
 			idx := m.notesList.Index()
 			if idx >= 0 && idx < len(m.notesList.Items()) {
@@ -352,50 +491,68 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 
-	if m.addStage > 0 {
-		var prompt string
-		switch m.addStage {
-		case 1:
-			prompt := "Step 1/3: Enter note message (Enter to continue, Esc to cancel)\n\n"
-			raw := prompt + m.textInput.View()
-			wrap := lipgloss.NewStyle().MaxWidth(m.width - 6).Render(raw)
-			box := lipgloss.NewStyle().
-				Border(lipgloss.RoundedBorder(), true).
-				BorderForeground(lipgloss.Color("#5DAFF4")).
-				Foreground(lipgloss.Color("#FFFFFF")).
-				Background(lipgloss.Color("#333333")).
-				Padding(1, 2).
-				Render(wrap)
-			return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
-		case 2:
-			return "\n" + m.fileList.View() + "\n\n(Use ↑/↓, Enter to pick, Esc to cancel)"
-		case 3:
-			prompt := "Step 3/3: Enter tags comma-separated (or leave blank) (Enter to save, Esc to cancel)\n\n"
-			raw := prompt + m.textInput.View()
-			wrap := lipgloss.NewStyle().MaxWidth(m.width - 6).Render(raw)
-			box := lipgloss.NewStyle().
-				Border(lipgloss.RoundedBorder(), true).
-				BorderForeground(lipgloss.Color("#5DAFF4")).
-				Foreground(lipgloss.Color("#FFFFFF")).
-				Background(lipgloss.Color("#333333")).
-				Padding(1, 2).
-				Render(wrap)
-			return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
+	if m.addStage > 0 || m.editStage > 0 {
+		if m.addStage > 0 {
+			switch m.addStage {
+			case 1:
+				prompt := "Step 1/3: Enter note message (Enter to continue, Esc to cancel)\n\n"
+				raw := prompt + m.textInput.View()
+				wrap := lipgloss.NewStyle().MaxWidth(m.width - 6).Render(raw)
+				box := lipgloss.NewStyle().
+					Border(lipgloss.RoundedBorder(), true).
+					BorderForeground(lipgloss.Color("#5DAFF4")).
+					Foreground(lipgloss.Color("#FFFFFF")).
+					Background(lipgloss.Color("#333333")).
+					Padding(1, 2).
+					Render(wrap)
+				return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
+			case 2:
+				return "\n" + m.fileList.View() + "\n\n(Use ↑/↓, Enter to pick, Esc to cancel)"
+			case 3:
+				prompt := "Step 3/3: Enter tags (comma-separated, leave blank) (Enter to save, Esc to cancel)\n\n"
+				raw := prompt + m.textInput.View()
+				wrap := lipgloss.NewStyle().MaxWidth(m.width - 6).Render(raw)
+				box := lipgloss.NewStyle().
+					Border(lipgloss.RoundedBorder(), true).
+					BorderForeground(lipgloss.Color("#5DAFF4")).
+					Foreground(lipgloss.Color("#FFFFFF")).
+					Background(lipgloss.Color("#333333")).
+					Padding(1, 2).
+					Render(wrap)
+				return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
+			}
 		}
 
-		raw := prompt + m.textInput.View()
-		wrapStyle := lipgloss.NewStyle().MaxWidth(m.width - 6)
-		wrapped := wrapStyle.Render(raw)
-
-		inputBox := lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder(), true).
-			BorderForeground(lipgloss.Color("#5DAFF4")).
-			Foreground(lipgloss.Color("#FFFFFF")).
-			Background(lipgloss.Color("#333333")).
-			Padding(1, 2).
-			Render(wrapped)
-
-		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, inputBox)
+		if m.editStage > 0 {
+			switch m.editStage {
+			case 1:
+				prompt := "Edit message (Enter to continue, Esc to cancel)\n\n"
+				raw := prompt + m.textInput.View()
+				wrap := lipgloss.NewStyle().MaxWidth(m.width - 6).Render(raw)
+				box := lipgloss.NewStyle().
+					Border(lipgloss.RoundedBorder(), true).
+					BorderForeground(lipgloss.Color("#5DAFF4")).
+					Foreground(lipgloss.Color("#FFFFFF")).
+					Background(lipgloss.Color("#333333")).
+					Padding(1, 2).
+					Render(wrap)
+				return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
+			case 2:
+				return "\n" + m.fileList.View() + "\n\n(Use ↑/↓, Enter to choose, Esc to cancel)"
+			case 3:
+				prompt := "Edit tags (comma-separated, leave blank) (Enter to save, Esc to cancel)\n\n"
+				raw := prompt + m.textInput.View()
+				wrap := lipgloss.NewStyle().MaxWidth(m.width - 6).Render(raw)
+				box := lipgloss.NewStyle().
+					Border(lipgloss.RoundedBorder(), true).
+					BorderForeground(lipgloss.Color("#5DAFF4")).
+					Foreground(lipgloss.Color("#FFFFFF")).
+					Background(lipgloss.Color("#333333")).
+					Padding(1, 2).
+					Render(wrap)
+				return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, box)
+			}
+		}
 	}
 
 	if m.confirmingDelete {
