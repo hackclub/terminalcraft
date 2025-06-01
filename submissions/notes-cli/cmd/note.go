@@ -72,5 +72,4 @@ func SaveNote(message string, file string, line int, tags []string) error {
 	}
 
 	return os.WriteFile(notesPath, updatedData, 0644)
-
 }

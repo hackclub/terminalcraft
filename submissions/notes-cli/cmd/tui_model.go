@@ -28,6 +28,9 @@ type model struct {
 	newTags          []string
 	width            int
 	height           int
+	searchMode       bool
+	searchInput      textinput.Model
+	allItems         []NoteItem
 }
 
 type NoteItem struct {
@@ -75,8 +78,9 @@ func initialModel() (model, error) {
 	}
 
 	items := make([]list.Item, len(notes))
+	all := make([]NoteItem, len(notes))
 	for i, n := range notes {
-		items[i] = NoteItem{
+		ni := NoteItem{
 			ID:        n.ID,
 			Message:   n.Message,
 			File:      n.File,
@@ -84,6 +88,8 @@ func initialModel() (model, error) {
 			CreatedAt: n.CreatedAt,
 			Tags:      n.Tags,
 		}
+		items[i] = ni
+		all[i] = ni
 	}
 
 	const listWidth = 20
@@ -102,6 +108,11 @@ func initialModel() (model, error) {
 	ti.CharLimit = 256
 	ti.Width = listWidth - 2
 
+	si := textinput.New()
+	si.Placeholder = "Search (use # to search by tag)"
+	si.CharLimit = 256
+	si.Width = listWidth - 2
+
 	emptyList := list.New([]list.Item{}, list.NewDefaultDelegate(), listWidth, listHeight)
 	emptyList.Title = "Select a file..."
 
@@ -119,7 +130,71 @@ func initialModel() (model, error) {
 		newTags:          []string{},
 		width:            0,
 		height:           0,
+		searchMode:       false,
+		searchInput:      si,
+		allItems:         all,
 	}, nil
+}
+
+func filterItems(all []NoteItem, rawQuery string) []list.Item {
+	raw := strings.TrimSpace(rawQuery)
+	if raw == "" {
+		out := make([]list.Item, len(all))
+		for i, n := range all {
+			out[i] = n
+		}
+		return out
+	}
+
+	terms := strings.Fields(raw)
+	var tagFilters []string
+	var textFilters []string
+	for _, t := range terms {
+		if strings.HasPrefix(t, "#") && len(t) > 1 {
+			tagFilters = append(tagFilters, strings.ToLower(t[1:]))
+		} else {
+			textFilters = append(textFilters, strings.ToLower(t))
+		}
+	}
+
+	var filtered []list.Item
+	for _, ni := range all {
+		matches := true
+		lowMsg := strings.ToLower(ni.Message)
+		lowFile := strings.ToLower(ni.File)
+
+		for _, tf := range textFilters {
+			if !strings.Contains(lowMsg, tf) && !strings.Contains(lowFile, tf) {
+				matches = false
+				break
+			}
+		}
+
+		if !matches {
+			continue
+		}
+
+		for _, tg := range tagFilters {
+			foundTag := false
+			for _, noteTag := range ni.Tags {
+				if strings.ToLower(noteTag) == tg {
+					foundTag = true
+					break
+				}
+			}
+			if !foundTag {
+				matches = false
+				break
+			}
+		}
+		if !matches {
+			continue
+		}
+
+		filtered = append(filtered, ni)
+	}
+
+	return filtered
 }
 
 func LoadAllNotes() ([]Note, error) {
@@ -223,10 +298,33 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.editStage == 2 {
 			m.fileList.SetSize(w, h)
 		}
+		if m.searchMode {
+			m.searchInput.Width = max(1, m.width-2)
+		}
 		return m, nil
 
 	case tea.KeyMsg:
 		key := msg.String()
+
+		if m.searchMode {
+			switch key {
+			case "esc", "ctrl+c":
+				m.searchMode = false
+				items := make([]list.Item, len(m.allItems))
+				for i, ni := range m.allItems {
+					items[i] = ni
+				}
+				m.notesList.SetItems(items)
+				return m, nil
+			}
+
+			var cmd tea.Cmd
+			m.searchInput, cmd = m.searchInput.Update(msg)
+			query := m.searchInput.Value()
+			items := filterItems(m.allItems, query)
+			m.notesList.SetItems(items)
+			return m, cmd
+		}
 
 		if m.addStage > 0 {
 			switch key {
@@ -481,6 +579,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.confirmingDelete = true
 				m.deleteIndex = idx
 			}
+
+		case "/", "ctrl+f":
+			m.searchMode = true
+			m.searchInput.SetValue("")
+			m.searchInput.Focus()
+			m.searchInput.Width = max(1, m.width-2)
 			return m, nil
 		}
 	}
@@ -490,6 +594,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+
+	if m.searchMode {
+		bar := "Search: " + m.searchInput.View()
+		return fmt.Sprintf("%s\n\n%s\n\n(Enter to filter, Esc to clear)", bar, m.notesList.View())
+	}
 
 	if m.addStage > 0 || m.editStage > 0 {
 		if m.addStage > 0 {
@@ -578,5 +687,5 @@ func (m model) View() string {
 		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, modal)
 	}
 
-	return "\n" + m.notesList.View() + "\n\n(Use Ctrl+D to remove, Ctrl+E to edit, Ctrl+A to add, Ctrl+Q to quit)"
+	return "\n" + m.notesList.View() + "\n\n(Use Ctrl+D to remove, Ctrl+E to edit, Ctrl+A to add, Ctrl+F to search, Ctrl+Q to quit)"
 }
