@@ -341,7 +341,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.fileList = list.New(items, list.NewDefaultDelegate(), w, h)
 					m.fileList.Title = "Step 2/3: Select file (Enter to choose, Esc to skip)"
 
-					if m.editItem.File != "" {
+					if m.editItem.File == "" {
 						m.fileList.Select(0)
 					} else {
 						for i := 1; i < len(items); i++ {
