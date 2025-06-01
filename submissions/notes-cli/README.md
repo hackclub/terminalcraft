@@ -53,18 +53,28 @@ notes list
 ## 📚 Commands
 ### Add a Note
 ```bash
-note add "Your message here" [--file path/to/file] [--line 42] [--tags tag1,tag2]
+notes add "Your message here" [--file path/to/file] [--line 42] [--tags tag1,tag2]
 ```
 
 ### List Notes
 ```bash
-note list [--file filename] [--tag tag]
+notes list [--file filename] [--tag tag]
 ```
 
 ### Delete Note
 ```bash
-note delete <note-id> [--yes]
-note delete --tag <tag> [--yes]
+notes delete <note-id> [--yes]
+notes delete --tag <tag> [--yes]
+```
+
+### Edit Note
+```bash
+notes edit <note-id> [--message message] [--file filename] [--tags tag1,tag2]
+```
+
+### Open TUI
+```bash
+notes tui
 ```
 
 ---

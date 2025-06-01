@@ -426,7 +426,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if m.confirmingDelete {
 			switch key {
-			case "y", "yes", "Y":
+			case "y", "yes", "Y", "enter":
 				item := m.notesList.Items()[m.deleteIndex].(NoteItem)
 				if err := DeleteNoteByID(item.ID); err != nil {
 					fmt.Fprintf(os.Stderr, "Error deleting note: %v\n", err)
@@ -448,7 +448,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		switch key {
-		case "q", "esc", "ctrl+c":
+		case "q", "esc", "ctrl+c", "ctrl+q":
 			return m, tea.Quit
 
 		case "ctrl+a":
@@ -570,7 +570,7 @@ func (m model) View() string {
 			lines = append(lines, fmt.Sprintf("Tags: %s", strings.Join(item.Tags, ", ")))
 		}
 
-		lines = append(lines, "", "Press Y to confirm, any other key to cancel")
+		lines = append(lines, "", "Press Y/Enter to confirm, any other key to cancel")
 
 		content := strings.Join(lines, "\n")
 
@@ -578,5 +578,5 @@ func (m model) View() string {
 		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, modal)
 	}
 
-	return "\n" + m.notesList.View() + "\n\n(Use Delete to remove, q to quit)"
+	return "\n" + m.notesList.View() + "\n\n(Use Ctrl+D to remove, Ctrl+E to edit, Ctrl+A to add, Ctrl+Q to quit)"
 }
