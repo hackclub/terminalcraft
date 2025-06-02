@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "textual>=0.47.1",
-        "requests==2.31.0",
+        "requests==2.32.2",
     ],
     entry_points={
         "console_scripts": [
