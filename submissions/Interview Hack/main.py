@@ -1,3 +1,12 @@
+import pyfiglet
+import time
+from colorama import init
+from termcolor import colored
+from rich.console import Console
+from rich.table import Table
+
+console = Console()
+
 class InterviewSimulator:
 
     def __init__(self):
@@ -15,17 +24,46 @@ class InterviewSimulator:
         ]
         self.score = 0
 
+    def display_title(self):
+        title = pyfiglet.figlet_format('Interview\n Simulator')
+        console.print(f'[bold cyan]{title}[/bold cyan]')
+
     def run(self):
-        print('Welcome to the Interview Simulator!\n')
+        self.display_title()
+        console.print('Welcome To The [bold yellow]Interview Simulator[/bold yellow]!\n', style='bold green')
+        time.sleep(1)
+
         for i, (question, correct_answer) in enumerate(self.questions, start=1):
-            print(f'Q{i}: {question}')
-            answer = input('Your answer: ').strip()
+            console.rule(f'[bold blue]Question {i}[/bold blue]')
+            print(colored(f'{question}', 'cyan'))
+            answer = input(colored('Your answer: ', 'yellow')).strip()
+
             if answer.lower() == correct_answer.lower():
-                print('Correct! ✅\n')
+                console.print('✅ [green]Correct![/green]\n')
                 self.score += 1
             else:
-                print(f'Incorrect. The correct answer is: {correct_answer}\n')
-        print(f'Interview Completed! Your score: {self.score}/{len(self.questions)}')
+                console.print(f'❌ [red]Incorrect[/red]. The correct answer is: [bold white]{correct_answer}[/bold white]\n')
+
+            time.sleep(0.5)
+
+        console.rule('[bold magenta]Results[/bold magenta]')
+        table = Table(title='Interview Summary')
+        table.add_column('Total Questions', justify='center')
+        table.add_column('Correct Answers', justify='center')
+        table.add_column('Score (%)', justify='center')
+
+        percentage = (self.score / len(self.questions)) * 100
+        table.add_row(str(len(self.questions)), str(self.score), f'{percentage:.1f}%')
+        console.print(table)
+
+        if self.score == len(self.questions):
+            console.print('🎉 [bold green]Perfect Score! You nailed it![/bold green]')
+        elif self.score >= 7:
+            console.print('👏 [bold yellow]Good job! Keep it up![/bold yellow]')
+        else:
+            console.print('💡 [bold red]Keep practicing. You\'ll improve![/bold red]')
+
+
 
 if __name__ == '__main__':
     sim = InterviewSimulator()
