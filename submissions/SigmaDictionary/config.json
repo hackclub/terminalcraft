@@ -1,0 +1,4 @@
+{
+  "setup": "uv install",
+  "run": "uv run main.py"
+}
