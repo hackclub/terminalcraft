@@ -1,0 +1,6 @@
+[setup]
+cmd = "uv install"
+# the setup command above is not being used at the moment
+
+[run]
+cmd = "uv run main.py"
