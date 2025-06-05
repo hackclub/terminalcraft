@@ -1,6 +1,5 @@
 import pyfiglet
 import time
-from colorama import init
 from termcolor import colored
 from rich.console import Console
 from rich.table import Table
@@ -25,7 +24,7 @@ class InterviewSimulator:
         self.score = 0
 
     def display_title(self):
-        title = pyfiglet.figlet_format('Interview\n Simulator')
+        title = pyfiglet.figlet_format('Interview\nSimulator')
         console.print(f'[bold cyan]{title}[/bold cyan]')
 
     def run(self):
@@ -62,8 +61,6 @@ class InterviewSimulator:
             console.print('👏 [bold yellow]Good job! Keep it up![/bold yellow]')
         else:
             console.print('💡 [bold red]Keep practicing. You\'ll improve![/bold red]')
-
-
 
 if __name__ == '__main__':
     sim = InterviewSimulator()
