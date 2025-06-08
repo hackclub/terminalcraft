@@ -31,3 +31,5 @@ Next you can navigate to the directory that you downloaded and run the program w
 `about` - get information about the author (me!).
 
 If you ever do something wrong or want to change some data around, all of your events are stored in `data.csv`
+
+Original Repo can be found [Here](https://github.com/ojsrb/TerminalCalendar)
