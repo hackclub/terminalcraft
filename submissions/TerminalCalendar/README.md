@@ -6,18 +6,17 @@
 - View upcoming events this week, month, year, and all time, sorted by due date.
 - Delete and edit events
 
-Overall this project is supposed to be simplistic and minimal to maximize ease of use.
-
 ## Installation
-Begin with downloading the repository, and ensure you have python installed.
+Begin with downloading the repository and unzipping it, and ensure you have python installed.
 
 Enter the repository folder with a terminal and run 
 
 `pip install -r requirements.txt`
 
-This will install all of TerminalCalender's dependencies. (It has a lot)
+This will install all of TerminalCalender's dependencies. (It has a lot, mostly preinstalled python libraries that I don't want to risk removing.)
+You may need to use a virtual environment, or if you want to install these packages globally, you may need to use the flag `--break-system-packages`.
 
-Next you can run the program with
+Next you can navigate to the directory that you downloaded and run the program with
 
 `python3 calendar.py [ARGUMENTS]` or
 `python calendar.py [ARGUMENTS]`
