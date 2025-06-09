@@ -739,19 +739,6 @@ def interactive_mode():
     else:
         print(colored("Cancelled.", "yellow"))
 
-def template_save(name, method, url, headers, data, **kwargs):
-    templates = load_templates()
-    template = {
-        "method": method,
-        "url": url,
-        "headers": headers,
-        "data": data,
-        "flags": kwargs  # Save all additional flags as a dictionary
-    }
-    templates[name] = template
-    save_templates(templates)
-    print(colored(f"Template '{name}' saved with all details.", "green"))
-
 def template_list():
     templates = load_templates()
     if not templates:
@@ -764,13 +751,6 @@ def template_list():
         print(colored(f"    URL: {tpl['url']}", "yellow"))
         print(colored(f"    Headers: {json.dumps(tpl.get('headers', {}))}", "white"))
         print(colored(f"    Data: {json.dumps(tpl.get('data', {}))}", "white"))
-
-def template_use(name):
-    templates = load_templates()
-    tpl = templates.get(name)
-    if not tpl:
-        print(colored(f"Template '{name}' not found.", "yellow"))
-        return
 
     # Extract saved details
     method = tpl.get('method')
@@ -786,7 +766,7 @@ def template_use(name):
             url,
             headers,
             data,
-            **flags  # Pass all saved flags to the request function
+            **flags,  # Pass all saved flags to the request function
         )
     else:
         print(colored("Cancelled.", "yellow"))
@@ -1561,6 +1541,7 @@ def main():
                                 output_file=output_file,
                                 only=only,
                                 auth=auth,
+                                fill_vars=True,  # Always fill vars for templates
                                 no_history=no_history,
                                 dry_run=dry_run,
                                 mock=mock,
