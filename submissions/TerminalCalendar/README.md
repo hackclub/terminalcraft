@@ -5,6 +5,7 @@
 - Add New Events and Reminders to your calendar
 - View upcoming events this week, month, year, and all time, sorted by due date.
 - Delete and edit events
+- Create tags to easily find events you are looking for
 
 ## Installation
 Begin with downloading the repository and unzipping it, and ensure you have python installed.
@@ -29,6 +30,10 @@ Next you can navigate to the directory that you downloaded and run the program w
 `edit` - edit an event on your calendar.
 
 `about` - get information about the author (me!).
+
+`tags` - add a now sorting tag.
+
+`viewtags` - view your calendar by tag.
 
 If you ever do something wrong or want to change some data around, all of your events are stored in `data.csv`
 
