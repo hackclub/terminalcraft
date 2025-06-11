@@ -1,0 +1,11 @@
+Requirements:
+
+Python 3.6 or higher
+cryptography library
+pyperclip library (optional, for clipboard functionality)
+
+Installation
+To install the required libraries, run the following commands in your terminal or command prompt:
+
+pip install cryptography
+pip install pyperclip
