@@ -35,3 +35,7 @@ A simple terminal-based flashcard application to help you study.
 ## Usage
 
 Navigate the application using the arrow keys and Enter. Press 'q' or Esc to exit menus or the application.
+
+
+# AI Usage
+* Generating README.MD
