@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peeky"
+version = "0.1.2"
+description = "A Minimal Port & Process Inspector"
+readme = "README.md"
+authors = [
+    {name = "Amogh Agrawal", email = "amogh.ggn@gmail.com"}
+]
+requires-python = ">=3.7"
+license = {text = "MIT"}
+keywords = ["network", "ports", "process", "monitoring", "cli", "system", "utilities"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Monitoring",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "rich>=14.0.0",
+    "typer>=0.16.0",
+    "psutil>=7.0.0",
+    "click>=8.2.1",
+    "requests>=2.25.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/amogh-agrawal/peeky"
+"Bug Tracker" = "https://github.com/amogh-agrawal/peeky/issues"
+"Documentation" = "https://github.com/amogh-agrawal/peeky#readme"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+]
+
+[project.scripts]
+peeky = "peeky.main:main"
+
+[tool.setuptools]
+packages = ["peeky", "peeky.cli", "peeky.core", "peeky.formatters"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
