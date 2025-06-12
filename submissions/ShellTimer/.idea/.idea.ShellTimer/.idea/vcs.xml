@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+<<<<<<< HEAD:.idea/vcs.xml
+    <mapping directory="" vcs="Git" />
+=======
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+>>>>>>> 4e3592580ddd2a49b2f786599780fde46c81edba:submissions/ShellTimer/.idea/.idea.ShellTimer/.idea/vcs.xml
+  </component>
+</project>

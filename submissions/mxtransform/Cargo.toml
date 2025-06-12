@@ -1,0 +1,29 @@
+[package]
+name = "mxtransform"
+version = "1.2.0"
+authors = ["GGORG <GGORG0@protonmail.com>"]
+license = "GPL-3.0-or-later"
+description = "A CLI tool to transform images using matrix operations"
+repository = "https://github.com/GGORG0/mxtransform"
+categories = ["command-line-utilities", "multimedia::images"]
+edition = "2021"
+
+exclude = [
+    # Nix-related files
+    "flake.*",
+    ".envrc",
+
+    # GitHub Actions, etc.
+    ".github",
+]
+
+[dependencies]
+clap = { version = "4.5.31", features = ["derive"] }
+color-eyre = "0.6.3"
+image = "0.25.5"
+indicatif = "0.17.11"
+ndarray = "0.16.1"
+owo-colors = "4.2.0"
+
+[profile.release]
+strip = true

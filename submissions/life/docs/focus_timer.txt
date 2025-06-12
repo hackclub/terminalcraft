@@ -1,0 +1,37 @@
+Documentation for focus timer
+=============================
+
+Overview
+--------
+The focus timer is a tool that can help you time your tasks, making sure that you dont burn out, it is a clean interface for you to be able to easily set limits on your breaks and productivity
+
+Features
+--------
+1. Set custom timer duration in minutes
+2. Start, pause, and reset the timer
+3. Visual countdown display
+4. Notification when the timer completes
+5. Error handling for invalid inputs
+
+Usage
+-----
+1. Launch the Focus Timer from the main menu
+2. Enter the desired duration in minutes in the input field
+3. Click "Start" to begin the timer
+4. Use "Pause" to temporarily stop the timer
+5. Use "Reset" to clear the timer
+6. Click "Back" to return to the main menu
+
+Interface Elements
+------------------
+- Timer updates every second
+- Time is displayed in MM:SS format
+- Invalid inputs will cause error notification
+- Timer completion causes a notification
+- The timer can be paused at any time
+
+Error Handling
+--------------
+- Invalid input validation
+- Error notification for non-numeric inputs
+- Graceful handling of timer completion

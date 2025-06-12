@@ -1,0 +1,91 @@
+#app {
+    layout: vertical;
+    padding: 1;
+}
+
+#home {
+    width: 1fr;
+    height: 1fr;
+}
+
+#search {
+    padding: 1
+}
+
+#player {
+    layout: horizontal;
+    padding: 1;
+}
+
+#video-pane {
+    width: 1fr;
+    column-span: 2;
+}
+
+#suggestions-pane {
+    width: 40;
+    height: 100%;
+}
+
+.centered-text {
+    width: 100%;
+    text-align: center;
+    padding: 2;
+}
+
+.suggested-video-result {
+    layout: vertical;
+    width: 100%;
+    height: 14;
+    padding: 1;
+    margin-bottom: 1;
+}
+
+.suggested-video-result:hover {
+    background: rgb(50, 50, 50)
+}
+
+.video-result {
+    layout: grid;
+    width: 100%;
+    height: 12;
+    grid-rows: 1;
+    padding: 1;
+    margin-bottom: 1;
+}
+
+.video-result:hover {
+    background: rgb(50, 50, 50)
+}
+
+.video-player {
+    height: 30;
+    margin-bottom: 1;
+}
+
+.video-player-static {
+    text-align: center;
+    width: 100%;
+}
+
+# .video-title {
+#     height: 1;
+# }
+
+.thumbnail {
+    row-span: 2;
+    width: 35;
+    height: 12;
+    dock: left;
+    margin-right: 2;
+}
+
+
+.suggested-thumbnail {
+    width: 35;
+    height: 10;
+}
+
+.details {
+    color: rgb(150, 150, 150);
+}

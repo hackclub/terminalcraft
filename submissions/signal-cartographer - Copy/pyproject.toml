@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "signal-cartographer"
+version = "1.0.1"
+authors = [
+    {name = "Maverick"},
+]
+description = "A sci-fi terminal-based signal analysis game with beautiful TUI interface"
+readme = "README.md"
+license = "MIT"
+keywords = ["game", "sci-fi", "terminal", "tui", "textual", "signal-analysis"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment",
+    "Topic :: Terminals",
+    "Topic :: Software Development :: User Interfaces",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "textual>=0.20.0",
+    "rich>=13.0.0",
+    "click>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/maverickkamal/signal-cartographer"
+Repository = "https://github.com/maverickkamal/signal-cartographer.git"
+Documentation = "https://github.com/maverickkamal/signal-cartographer#readme"
+"Bug Tracker" = "https://github.com/maverickkamal/signal-cartographer/issues"
+
+[project.scripts]
+signal-cartographer = "signal_cartographer.main:main"
+aethertap = "signal_cartographer.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["signal_cartographer*"]
+
+[tool.setuptools.package-data]
+signal_cartographer = [
+    "data/*",
+    "saves/*",
+    "*.md",
+    "*.txt",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"] 
