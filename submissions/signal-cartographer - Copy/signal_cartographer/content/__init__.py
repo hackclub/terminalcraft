@@ -1,3 +1,0 @@
-"""
-Game content management package
-"""
