@@ -1,0 +1,9 @@
+tests/test.py
+tests/test.txt
+test*
+output.txt
+venv
+dist
+build
+__pycache__
+*.spec
