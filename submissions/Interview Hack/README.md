@@ -1,6 +1,7 @@
 Hack Interview is a program in which you can answer questions asked in programming interviews.
 
-![Captura de pantalla 2025-06-03 174403](https://github.com/user-attachments/assets/1fb55b4d-dfac-4d3c-91da-d80653b99fa7)
+![Captura de pantalla 2025-06-11 203241](https://github.com/user-attachments/assets/bbd3834e-d8ed-4c52-b4c1-db5eea31fb11)
+
 
 
 
