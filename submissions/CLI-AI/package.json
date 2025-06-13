@@ -1,0 +1,33 @@
+{
+  "name": "cli-ai-chat",
+  "version": "1.0.0",
+  "description": "CLI tool for chatting with various AI providers",
+  "main": "index.js",
+  "bin": {
+    "ai-chat": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "build": "echo \"No build step defined\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cli",
+    "ai",
+    "chat",
+    "tui"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.10.2",
+    "@google/generative-ai": "^0.1.3",
+    "@iarna/toml": "^2.2.5",
+    "axios": "^1.9.0",
+    "blessed": "^0.1.81",
+    "commander": "^11.1.0",
+    "dotenv": "^16.5.0",
+    "openai": "^4.104.0"
+  }
+}
