@@ -170,7 +170,6 @@ logs/
 termicast.log
 
 # Data files (user-specific or large datasets)
-data/sensor_data.json
 data/weather_cache.json
 data/user_locations.json
 
