@@ -11,21 +11,21 @@ Create your own levels by reading /WorseTerminal/bughunt_level_guide.md
 
 # Previews
 ## Windows
-<img src="images/win1.png" />
-<img src="images/win2.png" />
-<img src="images/win3.png" />
-<img src="images/win4.png" />
-<img src="images/win5.png" />
+<img src="images/win1.png" width="500"/>
+<img src="images/win2.png" width="500"/>
+<img src="images/win3.png" width="500"/>
+<img src="images/win4.png" width="500"/>
+<img src="images/win5.png" width="500"/>
 
 ## Linux
-<img src="images/linux1.png" />
-<img src="images/linux2.png" />
-<img src="images/linux3.png" />
+<img src="images/linux1.png" width="500"/>
+<img src="images/linux2.png" width="500"/>
+<img src="images/linux3.png" width="500"/>
 
 ## MacOS
-<img src="images/mac1.png" />
-<img src="images/mac2.png" />
-<img src="images/mac3.png" />
+<img src="images/mac1.png" width="500"/>
+<img src="images/mac2.png" width="500"/>
+<img src="images/mac3.png" width="500"/>
 
 # Installing
 
