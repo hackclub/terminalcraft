@@ -1,0 +1,102 @@
+name: Build Binaries
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build binary with PyInstaller (Windows)
+        if: runner.os == 'Windows'
+        run: pyinstaller --onefile -n sumsnap-windows src/main.py
+
+      - name: Build binary with PyInstaller (macOS)
+        if: runner.os == 'macOS'
+        run: pyinstaller --onefile -n sumsnap-macos src/main.py
+
+      - name: Build binary with PyInstaller (Linux)
+        if: runner.os == 'Linux'
+        run: pyinstaller --onefile -n sumsnap-linux src/main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sumsnap-${{ runner.os }}
+          path: |
+            dist/sumsnap-*
+
+  release:
+    name: Create Pre-release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for changelog
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Set Release Version
+        id: version
+        run: |
+          echo "RELEASE_VERSION=pre-release-$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+      - name: Get commit messages since last release
+        id: changelog
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s")
+          else
+            CHANGELOG=$(git log "$LAST_TAG"..HEAD --pretty=format:"- %s")
+          fi
+
+          # Write multiline changelog to GITHUB_OUTPUT using <<EOF syntax
+          {
+            echo "body<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release (pre-release)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          name: "Pre-release ${{ env.RELEASE_VERSION }}"
+          prerelease: true
+          body: ${{ steps.changelog.outputs.body }}
+          files: |
+            dist/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
