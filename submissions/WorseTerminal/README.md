@@ -11,21 +11,21 @@ Create your own levels by reading /WorseTerminal/bughunt_level_guide.md
 
 # Previews
 ## Windows
-![](/images/win1.png)
-![](/images/win2.png)
-![](/images/win3.png)
-![](/images/win4.png)
-![](/images/win5.png)
+<img src="images/win1.png" />
+<img src="images/win2.png" />
+<img src="images/win3.png" />
+<img src="images/win4.png" />
+<img src="images/win5.png" />
 
 ## Linux
-![](/images/linux1.png)
-![](/images/linux2.png)
-![](/images/linux3.png)
+<img src="images/linux1.png" />
+<img src="images/linux2.png" />
+<img src="images/linux3.png" />
 
 ## MacOS
-![](/images/mac1.png)
-![](/images/mac2.png)
-![](/images/mac3.png)
+<img src="images/mac1.png" />
+<img src="images/mac2.png" />
+<img src="images/mac3.png" />
 
 # Installing
 
@@ -35,7 +35,7 @@ Create your own levels by reading /WorseTerminal/bughunt_level_guide.md
 
 * Next click on Download ZIP
 
-![](/images/download.png "Download ZIP Button")
+<img src="images/download.png">
 
 * Unzip the downloaded ZIP file
 
