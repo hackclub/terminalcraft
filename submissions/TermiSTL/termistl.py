@@ -1,0 +1,283 @@
+import sys
+from pathlib import Path
+
+import numpy as np
+from stl import mesh
+
+from textual.app import App, ComposeResult
+from textual.widgets import Header, Footer, Static
+from textual.containers import Container
+from textual.events import MouseDown, MouseMove, MouseUp
+
+from numba import njit, prange
+
+ASCII_SHADING_CHARACTERS = " ░▒▓█"
+
+@njit(parallel=True)
+def rasterize_triangles_to_depth_buffer(
+    triangle_vertices_2d: np.ndarray,
+    triangle_vertices_z_depth: np.ndarray,
+    canvas_width: int,
+    canvas_height: int,
+    model_min_coord_x: float,
+    model_min_coord_y: float,
+    model_scale_x: float,
+    model_scale_y: float,
+    model_offset_x: float,
+    model_offset_y: float
+) -> np.ndarray:
+    depth_buffer = np.full((canvas_height, canvas_width), -1e20, dtype=np.float64)
+
+    for tri_idx in prange(triangle_vertices_2d.shape[0]):
+        current_tri_vx_2d = triangle_vertices_2d[tri_idx, :, 0]
+        current_tri_vy_2d = triangle_vertices_2d[tri_idx, :, 1]
+        current_tri_vz_depth = triangle_vertices_z_depth[tri_idx]
+
+        pixel_coords_x = (current_tri_vx_2d - model_min_coord_x) * model_scale_x + model_offset_x
+        pixel_coords_y = (current_tri_vy_2d - model_min_coord_y) * model_scale_y + model_offset_y
+        pixel_coords_y = (canvas_height - 1) - pixel_coords_y
+
+        bbox_min_x = max(0, int(np.floor(pixel_coords_x.min())))
+        bbox_max_x = min(canvas_width - 1, int(np.ceil(pixel_coords_x.max())))
+        bbox_min_y = max(0, int(np.floor(pixel_coords_y.min())))
+        bbox_max_y = min(canvas_height - 1, int(np.ceil(pixel_coords_y.max())))
+
+        v0x, v0y = pixel_coords_x[0], pixel_coords_y[0]
+        v1x, v1y = pixel_coords_x[1], pixel_coords_y[1]
+        v2x, v2y = pixel_coords_x[2], pixel_coords_y[2]
+        
+        barycentric_denominator = (v1y - v2y) * (v0x - v2x) + (v2x - v1x) * (v0y - v2y)
+        if abs(barycentric_denominator) < 1e-6:
+            continue
+
+        for y_pixel in range(bbox_min_y, bbox_max_y + 1):
+            for x_pixel in range(bbox_min_x, bbox_max_x + 1):
+                weight_v0 = ((v1y - v2y) * (x_pixel - v2x) + (v2x - v1x) * (y_pixel - v2y)) / barycentric_denominator
+                weight_v1 = ((v2y - v0y) * (x_pixel - v2x) + (v0x - v2x) * (y_pixel - v2y)) / barycentric_denominator
+                weight_v2 = 1.0 - weight_v0 - weight_v1
+                
+                if weight_v0 >= 0 and weight_v1 >= 0 and weight_v2 >= 0:
+                    interpolated_z_at_pixel = weight_v0 * current_tri_vz_depth[0] + weight_v1 * current_tri_vz_depth[1] + weight_v2 * current_tri_vz_depth[2]
+                    if interpolated_z_at_pixel > depth_buffer[y_pixel, x_pixel]:
+                        depth_buffer[y_pixel, x_pixel] = interpolated_z_at_pixel
+    return depth_buffer
+
+class TermiSTL(App):
+    CSS_PATH = "termistl.css"
+    BINDINGS = [
+        ("f", "set_view('front')", "Front"),
+        ("t", "set_view('top')", "Top"),
+        ("s", "set_view('side')", "Side"),
+        ("up", "rotate_x(-0.1)", "Rot X-"),
+        ("down", "rotate_x(0.1)", "Rot X+"),
+        ("left", "rotate_y(-0.1)", "Rot Y-"),
+        ("right", "rotate_y(0.1)", "Rot Y+"),
+        ("u", "rotate_z(0.1)", "Roll CCW"),
+        ("o", "rotate_z(-0.1)", "Roll CW"),
+        ("pageup", "adjust_zoom_level(1.2)", "Zoom In"),
+        ("pagedown", "adjust_zoom_level(0.83333)", "Zoom Out"),
+        ("q", "quit_application", "Quit"),
+    ]
+
+    def __init__(self, stl_file_path: Path):
+        super().__init__()
+        self.stl_file_path = stl_file_path
+        self.stl_mesh_data = None
+        self.information_panel_text = "Loading STL file..."
+        
+        self.camera_rotation_x_radians = 0.0
+        self.camera_rotation_y_radians = 0.0
+        self.camera_rotation_z_radians = 0.0
+        
+        self.model_center_of_gravity = np.zeros(3)
+        self.current_zoom_level = 1.0
+        self._apply_view_preset('front')
+
+        self.dragging = False
+        self.last_mouse_x = 0
+        self.last_mouse_y = 0
+        self._throttle_active = False
+
+    def _apply_view_preset(self, view: str):
+        if view == 'front':
+            self.camera_rotation_x_radians = np.deg2rad(-90)
+            self.camera_rotation_y_radians = 0.0
+            self.camera_rotation_z_radians = 0.0
+        elif view == 'top':
+            self.camera_rotation_x_radians = 0.0
+            self.camera_rotation_y_radians = 0.0
+            self.camera_rotation_z_radians = 0.0
+        elif view == 'side':
+            self.camera_rotation_x_radians = np.deg2rad(-90)
+            self.camera_rotation_y_radians = np.deg2rad(-90)
+            self.camera_rotation_z_radians = 0.0
+
+    def compose(self) -> ComposeResult:
+        yield Header("TermiSTL – ASCII Preview")
+        with Container(id="app-grid"):
+            yield Static(self.information_panel_text, id="stats")
+            yield Static(id="preview")
+        yield Footer()
+
+    def on_mount(self):
+        stl_load_modes = [("auto_detect", {}), ("binary", {"mode": 2}), ("ascii", {"mode": 1})]
+        mesh_loaded_successfully = False
+        for mode_name, mode_params in stl_load_modes:
+            try:
+                loaded_mesh = mesh.Mesh.from_file(self.stl_file_path, **mode_params)
+                self.stl_mesh_data = loaded_mesh
+                
+                model_dimensions_xyz = loaded_mesh.max_ - loaded_mesh.min_
+                volume_mm3, center_of_gravity, _ = loaded_mesh.get_mass_properties()
+                self.model_center_of_gravity = center_of_gravity
+                total_surface_area_mm2 = loaded_mesh.areas.sum()
+                
+                self.information_panel_text = (
+                    f"[bold]File:[/bold] {self.stl_file_path.name}\n"
+                    f"[bold]Triangles:[/bold] {len(loaded_mesh.vectors):,}\n"
+                    f"[bold]Dimensions (mm):[/bold] X:{model_dimensions_xyz[0]:.2f} Y:{model_dimensions_xyz[1]:.2f} Z:{model_dimensions_xyz[2]:.2f}\n"
+                    f"[bold]Volume:[/bold] {volume_mm3 / 1000:.2f} cm³  [bold]Area:[/bold] {total_surface_area_mm2:.2f} mm²"
+                )
+                self.query_one("#stats", Static).update(self.information_panel_text)
+                mesh_loaded_successfully = True
+                break
+            except Exception:
+                continue
+        
+        if not mesh_loaded_successfully:
+            self.query_one("#stats", Static).update("[red]Error: Failed to load STL file.[/red]")
+            return
+        
+    async def on_ready(self) -> None:
+        if self.stl_mesh_data:
+            self.update_ascii_preview()
+
+    def render_model_to_ascii(self, canvas_width: int, canvas_height: int) -> str:
+        cos_rot_x, sin_rot_x = np.cos(self.camera_rotation_x_radians), np.sin(self.camera_rotation_x_radians)
+        cos_rot_y, sin_rot_y = np.cos(self.camera_rotation_y_radians), np.sin(self.camera_rotation_y_radians)
+        cos_rot_z, sin_rot_z = np.cos(self.camera_rotation_z_radians), np.sin(self.camera_rotation_z_radians)
+
+        rotation_matrix_x_axis = np.array([[1, 0, 0], [0, cos_rot_x, -sin_rot_x], [0, sin_rot_x, cos_rot_x]])
+        rotation_matrix_y_axis = np.array([[cos_rot_y, 0, sin_rot_y], [0, 1, 0], [-sin_rot_y, 0, cos_rot_y]])
+        rotation_matrix_z_axis = np.array([[cos_rot_z, -sin_rot_z, 0], [sin_rot_z, cos_rot_z, 0], [0, 0, 1]])
+        
+        combined_rotation_matrix = rotation_matrix_z_axis @ rotation_matrix_y_axis @ rotation_matrix_x_axis
+
+        centered_mesh_triangles = self.stl_mesh_data.vectors - self.model_center_of_gravity
+        rotated_mesh_triangles = centered_mesh_triangles @ combined_rotation_matrix.T
+
+        projected_triangles_xy_coords = rotated_mesh_triangles[:, :, :2]
+        projected_triangles_z_values = rotated_mesh_triangles[:, :, 2]
+
+        all_projected_xy_vertices = projected_triangles_xy_coords.reshape(-1, 2)
+        overall_min_xy_projected = all_projected_xy_vertices.min(axis=0)
+        overall_max_xy_projected = all_projected_xy_vertices.max(axis=0)
+        
+        projected_xy_span = np.where(overall_max_xy_projected - overall_min_xy_projected == 0, 1.0, overall_max_xy_projected - overall_min_xy_projected)
+
+        CHARACTER_ASPECT_RATIO_CORRECTION = 2.0 
+        scale_x_to_fit_canvas = (canvas_width - 1) / (projected_xy_span[0] * CHARACTER_ASPECT_RATIO_CORRECTION) * self.current_zoom_level
+        scale_y_to_fit_canvas = (canvas_height - 1) / projected_xy_span[1] * self.current_zoom_level
+        
+        uniform_scale_to_fit = min(scale_x_to_fit_canvas, scale_y_to_fit_canvas)
+        
+        offset_x_to_center = (canvas_width - projected_xy_span[0] * uniform_scale_to_fit * CHARACTER_ASPECT_RATIO_CORRECTION) / 2
+        offset_y_to_center = (canvas_height - projected_xy_span[1] * uniform_scale_to_fit) / 2
+
+        depth_buffer_result = rasterize_triangles_to_depth_buffer(
+            projected_triangles_xy_coords, projected_triangles_z_values, 
+            canvas_width, canvas_height,
+            overall_min_xy_projected[0], overall_min_xy_projected[1],
+            uniform_scale_to_fit * CHARACTER_ASPECT_RATIO_CORRECTION, uniform_scale_to_fit,
+            offset_x_to_center, offset_y_to_center
+        )
+
+        output_ascii_canvas = np.full((canvas_height, canvas_width), ' ', dtype='<U1')
+        pixels_with_depth_info_mask = depth_buffer_result > -1e19
+        
+        if pixels_with_depth_info_mask.any():
+            min_rendered_depth = depth_buffer_result[pixels_with_depth_info_mask].min()
+            max_rendered_depth = depth_buffer_result[pixels_with_depth_info_mask].max()
+            rendered_depth_range = max_rendered_depth - min_rendered_depth if max_rendered_depth > min_rendered_depth else 1.0
+            
+            available_shading_chars = np.array(list(ASCII_SHADING_CHARACTERS[1:]))
+            
+            for y in range(canvas_height):
+                for x in range(canvas_width):
+                    if pixels_with_depth_info_mask[y, x]:
+                        normalized_pixel_depth = (depth_buffer_result[y, x] - min_rendered_depth) / rendered_depth_range
+                        selected_shading_char_index = int(np.clip(normalized_pixel_depth * (available_shading_chars.size - 1), 0, available_shading_chars.size - 1))
+                        output_ascii_canvas[y, x] = available_shading_chars[selected_shading_char_index]
+                        
+        return "\n".join("".join(row) for row in output_ascii_canvas)
+
+    def update_ascii_preview(self):
+        preview_widget = self.query_one("#preview", Static)
+        width, height = preview_widget.content_size
+        if width > 1 and height > 1:
+            preview_widget.update(self.render_model_to_ascii(width, height))
+
+    def request_throttled_update(self):
+        if not self._throttle_active:
+            self._throttle_active = True
+            self.set_timer(0.05, self._execute_update_and_reset_throttle)
+
+    def _execute_update_and_reset_throttle(self):
+        self.update_ascii_preview()
+        self._throttle_active = False
+
+    def action_adjust_zoom_level(self, zoom_factor: float):  
+        self.current_zoom_level *= zoom_factor
+        self.request_throttled_update()
+
+    def action_set_view(self, view: str):
+        self._apply_view_preset(view)
+        self.request_throttled_update()
+
+    def action_rotate_x(self, delta_radians: float):
+        self.camera_rotation_x_radians += delta_radians
+        self.request_throttled_update()
+
+    def action_rotate_y(self, delta_radians: float):
+        self.camera_rotation_y_radians += delta_radians
+        self.request_throttled_update()
+
+    def action_rotate_z(self, delta_radians: float):
+        self.camera_rotation_z_radians += delta_radians
+        self.request_throttled_update()
+        
+    def action_quit_application(self):
+        self.exit()
+
+    def on_mouse_down(self, event: MouseDown) -> None:
+        if self.query_one("#preview", Static).region.contains(event.x, event.y):
+            self.dragging = True
+            self.last_mouse_x = event.x
+            self.last_mouse_y = event.y
+
+    def on_mouse_move(self, event: MouseMove) -> None:
+        if self.dragging:
+            delta_x = event.x - self.last_mouse_x
+            delta_y = event.y - self.last_mouse_y
+            self.last_mouse_x = event.x
+            self.last_mouse_y = event.y
+
+            self.camera_rotation_y_radians += delta_x * 0.01
+            self.camera_rotation_x_radians += delta_y * 0.01
+            self.request_throttled_update()
+
+    def on_mouse_up(self, event: MouseUp) -> None:
+        self.dragging = False
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python termistl.py <path_to_model.stl>")
+        sys.exit(1)
+    
+    input_file_path = Path(sys.argv[1])
+    if not input_file_path.is_file():
+        print(f"Error: File not found at '{input_file_path}'")
+        sys.exit(1)
+        
+    app = TermiSTL(input_file_path)
+    app.run()
