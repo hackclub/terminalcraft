@@ -1,0 +1,19 @@
+#app-grid {
+    layout: horizontal;
+    grid-size: 2;
+    grid-gutter: 1;
+}
+
+#stats {
+    width: 30%;
+    height: 100%;
+    border: round white;
+    padding: 1;
+}
+
+#preview {
+    width: 70%;
+    height: 100%;
+    border: round white;
+    content-align: center middle;
+}
