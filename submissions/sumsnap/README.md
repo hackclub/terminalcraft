@@ -35,12 +35,6 @@ curl -fsSL https://raw.githubusercontent.com/frinshhd/sumsnap/main/install/insta
 irm https://raw.githubusercontent.com/frinshhd/sumsnap/main/install/install-windows.ps1 | iex
 ```
 
-#### macOS
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/frinshhd/sumsnap/main/install/install-macos.sh | bash
-```
-
 #### Install Pre-release
 
 To install the latest pre-release version:
@@ -55,12 +49,6 @@ curl -fsSL https://raw.githubusercontent.com/frinshhd/sumsnap/main/install/insta
 
 ```powershell
 $env:SUMSNAP_PRERELEASE="1"; irm https://raw.githubusercontent.com/frinshhd/sumsnap/main/install/install-windows.ps1 | iex
-```
-
-**macOS:**
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/frinshhd/sumsnap/main/install/install-macos.sh | bash -s -- --prerelease
 ```
 
 ---
@@ -130,7 +118,7 @@ Your `sumsnap` configuration, including API keys and model settings, is stored i
 **Typical locations:**
 
 - **Windows:** `C:\Users\<YourUsername>\AppData\Roaming\sumsnap\config.ini`
-- **Linux/macOS:** `~/.config/sumsnap/config.ini`
+- **Linux:** `~/.config/sumsnap/config.ini`
 
 **CLI commands for configuration:**
 
