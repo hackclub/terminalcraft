@@ -1,10 +1,9 @@
 import os, configparser, sys, threading, time, subprocess, urllib.request, random, base64, hashlib, string
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
-from colorama import init
 
 try:
-    from cryptography.fernet import Fernet
+    from colorama import init
     from termcolor import colored
 except Exception:
     print("Please run requirements.py first", "yellow")
