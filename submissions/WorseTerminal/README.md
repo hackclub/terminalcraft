@@ -7,7 +7,6 @@ Create your own levels by reading /WorseTerminal/bughunt_level_guide.md
 
 * Colorama
 * Termcolor
-* Cryptography
 
 # Previews
 ## Windows
