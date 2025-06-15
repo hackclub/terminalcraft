@@ -2,8 +2,7 @@ import subprocess, sys, time, os
 
 PACKAGES = {
     "termcolor": "termcolor",
-    "colorama": "colorama",
-    "cryptography": "cryptography"
+    "colorama": "colorama"
 }
 
 def install_package(package_name):
