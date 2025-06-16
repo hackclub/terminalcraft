@@ -1,12 +1,14 @@
 import sys
 from pathlib import Path
+import os
+from typing import Iterable
 
 import numpy as np
 from stl import mesh
 
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Static
-from textual.containers import Container
+from textual.widgets import Header, Footer, Static, DirectoryTree
+from textual.containers import Container, Horizontal
 from textual.events import MouseDown, MouseMove, MouseUp
 
 from numba import njit, prange
@@ -62,6 +64,14 @@ def rasterize_triangles_to_depth_buffer(
                         depth_buffer[y_pixel, x_pixel] = interpolated_z_at_pixel
     return depth_buffer
 
+class FilteredDirectoryTree(DirectoryTree):
+    def filter_paths(self, paths: Iterable[Path]) -> Iterable[Path]:
+        filtered = []
+        for path_object in paths:
+            if path_object.is_dir() or path_object.suffix.lower() == ".stl":
+                filtered.append(path_object)
+        return filtered
+
 class TermiSTL(App):
     CSS_PATH = "termistl.css"
     BINDINGS = [
@@ -76,15 +86,23 @@ class TermiSTL(App):
         ("o", "rotate_z(-0.1)", "Roll CW"),
         ("pageup", "adjust_zoom_level(1.2)", "Zoom In"),
         ("pagedown", "adjust_zoom_level(0.83333)", "Zoom Out"),
+        ("a", "previous_stl", "Previous STL"),
+        ("d", "next_stl", "Next STL"),
+        ("delete", "delete_current_stl", "Delete STL"),
         ("q", "quit_application", "Quit"),
     ]
 
-    def __init__(self, stl_file_path: Path):
+    def __init__(self, start_path: Path):
         super().__init__()
-        self.stl_file_path = stl_file_path
+        self.start_path = start_path
+        self.current_stl_file_path: Path | None = None
         self.stl_mesh_data = None
-        self.information_panel_text = "Loading STL file..."
+        self.information_panel_text = "Loading..."
         
+        self.current_directory: Path | None = None
+        self.stl_files_in_directory: list[Path] = []
+        self.current_stl_index_in_dir: int = -1
+
         self.camera_rotation_x_radians = 0.0
         self.camera_rotation_y_radians = 0.0
         self.camera_rotation_z_radians = 0.0
@@ -97,6 +115,9 @@ class TermiSTL(App):
         self.last_mouse_x = 0
         self.last_mouse_y = 0
         self._throttle_active = False
+
+        self.file_pending_deletion_confirmation: Path | None = None
+        self.delete_confirmation_timer_object = None
 
     def _apply_view_preset(self, view: str):
         if view == 'front':
@@ -114,17 +135,71 @@ class TermiSTL(App):
 
     def compose(self) -> ComposeResult:
         yield Header("TermiSTL – ASCII Preview")
-        with Container(id="app-grid"):
-            yield Static(self.information_panel_text, id="stats")
-            yield Static(id="preview")
+        with Horizontal(id="main-container"):
+            yield FilteredDirectoryTree("", id="file-explorer")
+            with Container(id="app-grid"):
+                yield Static(self.information_panel_text, id="stats")
+                yield Static(id="preview")
         yield Footer()
 
-    def on_mount(self):
+    def _update_stl_files_in_current_directory(self, directory_to_scan: Path | None = None):
+        scan_dir = directory_to_scan if directory_to_scan else self.current_directory
+        if scan_dir and scan_dir.is_dir():
+            self.current_directory = scan_dir
+            self.stl_files_in_directory = sorted(
+                [f for f in scan_dir.glob('*.stl') if f.is_file()]
+            )
+            if self.current_stl_file_path in self.stl_files_in_directory:
+                self.current_stl_index_in_dir = self.stl_files_in_directory.index(self.current_stl_file_path)
+            else:
+                self.current_stl_index_in_dir = -1
+        else:
+            self.stl_files_in_directory = []
+            self.current_stl_index_in_dir = -1
+        
+        dt_widget = self.query_one(FilteredDirectoryTree)
+        if scan_dir and Path(dt_widget.path) != scan_dir:
+             dt_widget.path = str(scan_dir)
+
+
+    def load_stl_file(self, file_to_load: Path | None):
+        if file_to_load is None or not file_to_load.is_file():
+            self.current_stl_file_path = None
+            self.stl_mesh_data = None
+            self.information_panel_text = "No STL file selected or file not found."
+            if self.current_directory:
+                 self.information_panel_text += f"\nDirectory: {self.current_directory}"
+            else:
+                 self.information_panel_text += "\nNo directory selected."
+            self.query_one("#stats", Static).update(self.information_panel_text)
+            self.query_one("#preview", Static).update("")
+            self.current_stl_index_in_dir = -1
+            return
+
+        self.current_stl_file_path = file_to_load
+        if self.current_directory != file_to_load.parent:
+            self._update_stl_files_in_current_directory(file_to_load.parent)
+
+        if file_to_load in self.stl_files_in_directory:
+            self.current_stl_index_in_dir = self.stl_files_in_directory.index(file_to_load)
+        else:
+            self._update_stl_files_in_current_directory(file_to_load.parent)
+            if file_to_load in self.stl_files_in_directory:
+                self.current_stl_index_in_dir = self.stl_files_in_directory.index(file_to_load)
+            else:
+                self.current_stl_index_in_dir = -1
+
+
+        self.information_panel_text = f"Loading {file_to_load.name}..."
+        self.query_one("#stats", Static).update(self.information_panel_text)
+        self.query_one("#preview", Static).update("Rendering...")
+
         stl_load_modes = [("auto_detect", {}), ("binary", {"mode": 2}), ("ascii", {"mode": 1})]
         mesh_loaded_successfully = False
+        
         for mode_name, mode_params in stl_load_modes:
             try:
-                loaded_mesh = mesh.Mesh.from_file(self.stl_file_path, **mode_params)
+                loaded_mesh = mesh.Mesh.from_file(file_to_load, **mode_params)
                 self.stl_mesh_data = loaded_mesh
                 
                 model_dimensions_xyz = loaded_mesh.max_ - loaded_mesh.min_
@@ -133,26 +208,82 @@ class TermiSTL(App):
                 total_surface_area_mm2 = loaded_mesh.areas.sum()
                 
                 self.information_panel_text = (
-                    f"[bold]File:[/bold] {self.stl_file_path.name}\n"
+                    f"[bold]File:[/bold] {file_to_load.name}\n"
                     f"[bold]Triangles:[/bold] {len(loaded_mesh.vectors):,}\n"
                     f"[bold]Dimensions (mm):[/bold] X:{model_dimensions_xyz[0]:.2f} Y:{model_dimensions_xyz[1]:.2f} Z:{model_dimensions_xyz[2]:.2f}\n"
                     f"[bold]Volume:[/bold] {volume_mm3 / 1000:.2f} cm³  [bold]Area:[/bold] {total_surface_area_mm2:.2f} mm²"
                 )
                 self.query_one("#stats", Static).update(self.information_panel_text)
                 mesh_loaded_successfully = True
+                self.update_ascii_preview()
                 break
-            except Exception:
+            except Exception as e:
                 continue
         
         if not mesh_loaded_successfully:
-            self.query_one("#stats", Static).update("[red]Error: Failed to load STL file.[/red]")
+            self.stl_mesh_data = None
+            error_message = f"[red]Error: Failed to load STL file '{file_to_load.name}'.[/red]"
+            self.query_one("#stats", Static).update(error_message)
+            self.query_one("#preview", Static).update("")
+
+    def on_mount(self):
+        initial_dir_for_explorer = Path(".")
+
+        if self.start_path.is_file() and self.start_path.suffix.lower() == ".stl":
+            initial_dir_for_explorer = self.start_path.parent
+            self.current_stl_file_path = self.start_path
+        elif self.start_path.is_dir():
+            initial_dir_for_explorer = self.start_path
+            self.current_stl_file_path = None 
+        else:
+            self.query_one("#stats", Static).update(f"[red]Error: Invalid start path '{self.start_path}'.[/red]")
+        
+        self.current_directory = initial_dir_for_explorer.resolve()
+
+        try:
+            dt_widget = self.query_one(FilteredDirectoryTree)
+            dt_widget.path = str(self.current_directory)
+            self.query_one("#preview", Static).can_focus = True
+        except Exception as e:
+            self.query_one("#stats", Static).update(f"[red]Error setting up file explorer: {e}[/red]")
             return
+
+        self._update_stl_files_in_current_directory()
+
+        if self.current_stl_file_path:
+            self.load_stl_file(self.current_stl_file_path)
+        elif self.stl_files_in_directory:
+            self.load_stl_file(self.stl_files_in_directory[0])
+            self.current_stl_index_in_dir = 0
+        else:
+            self.load_stl_file(None)
+            self.query_one("#stats", Static).update(
+                f"No STL files found in '{self.current_directory}'.\nSelect an STL file or directory."
+            )
+            self.stl_mesh_data = None
+
+    async def on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected):
+        self._clear_pending_deletion_confirmation()
+        selected_path = Path(event.path)
+        if selected_path.is_file() and selected_path.suffix.lower() == ".stl":
+            self._update_stl_files_in_current_directory(selected_path.parent)
+            self.load_stl_file(selected_path)
+            self.query_one("#preview", Static).focus()
+        elif selected_path.is_dir():
+            self._update_stl_files_in_current_directory(selected_path)
+            if self.stl_files_in_directory:
+                self.load_stl_file(self.stl_files_in_directory[0])
+            else:
+                self.load_stl_file(None)
+            self.query_one("#preview", Static).focus()
         
     async def on_ready(self) -> None:
-        if self.stl_mesh_data:
-            self.update_ascii_preview()
+        pass
 
     def render_model_to_ascii(self, canvas_width: int, canvas_height: int) -> str:
+        if not self.stl_mesh_data:
+            return ""
+        
         cos_rot_x, sin_rot_x = np.cos(self.camera_rotation_x_radians), np.sin(self.camera_rotation_x_radians)
         cos_rot_y, sin_rot_y = np.cos(self.camera_rotation_y_radians), np.sin(self.camera_rotation_y_radians)
         cos_rot_z, sin_rot_z = np.cos(self.camera_rotation_z_radians), np.sin(self.camera_rotation_z_radians)
@@ -202,12 +333,12 @@ class TermiSTL(App):
             
             available_shading_chars = np.array(list(ASCII_SHADING_CHARACTERS[1:]))
             
-            for y in range(canvas_height):
-                for x in range(canvas_width):
-                    if pixels_with_depth_info_mask[y, x]:
-                        normalized_pixel_depth = (depth_buffer_result[y, x] - min_rendered_depth) / rendered_depth_range
+            for y_val in range(canvas_height):
+                for x_val in range(canvas_width):
+                    if pixels_with_depth_info_mask[y_val, x_val]:
+                        normalized_pixel_depth = (depth_buffer_result[y_val, x_val] - min_rendered_depth) / rendered_depth_range
                         selected_shading_char_index = int(np.clip(normalized_pixel_depth * (available_shading_chars.size - 1), 0, available_shading_chars.size - 1))
-                        output_ascii_canvas[y, x] = available_shading_chars[selected_shading_char_index]
+                        output_ascii_canvas[y_val, x_val] = available_shading_chars[selected_shading_char_index]
                         
         return "\n".join("".join(row) for row in output_ascii_canvas)
 
@@ -215,7 +346,10 @@ class TermiSTL(App):
         preview_widget = self.query_one("#preview", Static)
         width, height = preview_widget.content_size
         if width > 1 and height > 1:
-            preview_widget.update(self.render_model_to_ascii(width, height))
+            if self.stl_mesh_data:
+                preview_widget.update(self.render_model_to_ascii(width, height))
+            else:
+                preview_widget.update("")
 
     def request_throttled_update(self):
         if not self._throttle_active:
@@ -231,29 +365,108 @@ class TermiSTL(App):
         self.request_throttled_update()
 
     def action_set_view(self, view: str):
+        self._clear_pending_deletion_confirmation()
         self._apply_view_preset(view)
         self.request_throttled_update()
 
     def action_rotate_x(self, delta_radians: float):
+        self._clear_pending_deletion_confirmation()
         self.camera_rotation_x_radians += delta_radians
         self.request_throttled_update()
 
     def action_rotate_y(self, delta_radians: float):
+        self._clear_pending_deletion_confirmation()
         self.camera_rotation_y_radians += delta_radians
         self.request_throttled_update()
 
     def action_rotate_z(self, delta_radians: float):
+        self._clear_pending_deletion_confirmation()
         self.camera_rotation_z_radians += delta_radians
         self.request_throttled_update()
         
     def action_quit_application(self):
         self.exit()
 
+    def action_next_stl(self) -> None:
+        self._clear_pending_deletion_confirmation()
+        if not self.stl_files_in_directory:
+            return
+        
+        num_files = len(self.stl_files_in_directory)
+        if num_files < 2:
+            return 
+        self.current_stl_index_in_dir = (self.current_stl_index_in_dir + 1) % num_files
+        next_file_to_load = self.stl_files_in_directory[self.current_stl_index_in_dir]
+        self.load_stl_file(next_file_to_load)
+
+    def action_previous_stl(self) -> None:
+        self._clear_pending_deletion_confirmation()
+        if not self.stl_files_in_directory:
+            return
+
+        num_files = len(self.stl_files_in_directory)
+        if num_files < 2:
+            return
+
+        self.current_stl_index_in_dir = (self.current_stl_index_in_dir - 1 + num_files) % num_files
+        prev_file_to_load = self.stl_files_in_directory[self.current_stl_index_in_dir]
+        self.load_stl_file(prev_file_to_load)
+
+    def action_delete_current_stl(self) -> None:
+        if not self.current_stl_file_path or not self.current_stl_file_path.is_file():
+            self.notify("No STL file is currently loaded to delete.", severity="error")
+            self._clear_pending_deletion_confirmation() 
+            return
+
+        file_to_delete = self.current_stl_file_path
+        file_name = file_to_delete.name
+
+        if self.file_pending_deletion_confirmation == file_to_delete:
+            self._clear_pending_deletion_confirmation() 
+            try:
+                os.remove(file_to_delete)
+                self.notify(f"File '{file_name}' deleted successfully.", severity="information")
+                
+                original_index = self.current_stl_index_in_dir
+                self._update_stl_files_in_current_directory()
+
+                if not self.stl_files_in_directory:
+                    self.load_stl_file(None)
+                else:
+                    new_index = min(original_index, len(self.stl_files_in_directory) - 1)
+                    if new_index >= 0 :
+                        self.load_stl_file(self.stl_files_in_directory[new_index])
+                    else: 
+                        self.load_stl_file(None)
+                self.query_one(FilteredDirectoryTree).reload()
+            except OSError as e:
+                self.notify(f"Error deleting file '{file_name}': {e}", severity="error")
+            except Exception as e:
+                self.notify(f"An unexpected error occurred during deletion: {e}", severity="error")
+        else:
+            self._clear_pending_deletion_confirmation() 
+            self.file_pending_deletion_confirmation = file_to_delete
+            self.notify(f"Press Delete again to confirm deletion of '{file_name}'. (5s)", severity="warning", timeout=5.5)
+            
+            self.delete_confirmation_timer_object = self.set_timer(5.0, self._clear_pending_deletion_confirmation)
+
+    def _clear_pending_deletion_confirmation(self) -> None:
+        if self.delete_confirmation_timer_object:
+            try:
+                self.delete_confirmation_timer_object.stop()
+            except Exception: 
+                pass 
+            self.delete_confirmation_timer_object = None
+        if self.file_pending_deletion_confirmation:
+            self.file_pending_deletion_confirmation = None
+
     def on_mouse_down(self, event: MouseDown) -> None:
+        self._clear_pending_deletion_confirmation()
         if self.query_one("#preview", Static).region.contains(event.x, event.y):
             self.dragging = True
             self.last_mouse_x = event.x
             self.last_mouse_y = event.y
+            self.query_one("#preview", Static).focus()
 
     def on_mouse_move(self, event: MouseMove) -> None:
         if self.dragging:
@@ -271,13 +484,13 @@ class TermiSTL(App):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python termistl.py <path_to_model.stl>")
+        print("Usage: python termistl.py <path_to_model.stl_or_directory>")
         sys.exit(1)
     
-    input_file_path = Path(sys.argv[1])
-    if not input_file_path.is_file():
-        print(f"Error: File not found at '{input_file_path}'")
+    input_path = Path(sys.argv[1])
+    if not input_path.exists():
+        print(f"Error: Path not found at '{input_path}'")
         sys.exit(1)
         
-    app = TermiSTL(input_file_path)
+    app = TermiSTL(input_path)
     app.run()

@@ -1,19 +1,48 @@
-#app-grid {
+Screen {
+    layout: vertical;
+}
+
+#main-container {
     layout: horizontal;
-    grid-size: 2;
-    grid-gutter: 1;
+    height: 1fr;
+}
+
+DirectoryTree {
+    width: 30%;
+    min-width: 20;
+    height: 100%;
+    border: round $primary;
+    background: $panel;
+}
+
+#app-grid {
+    layout: vertical;
+    width: 70%;
+    height: 100%;
 }
 
 #stats {
-    width: 30%;
-    height: 100%;
-    border: round white;
+    height: auto;
     padding: 1;
+    border: round $primary;
+    background: $panel;
 }
 
 #preview {
-    width: 70%;
-    height: 100%;
-    border: round white;
-    content-align: center middle;
+    width: 100%;
+    height: 1fr;
+    border: round $primary;
+    background: $panel;
+}
+
+Header {
+    dock: top;
+    background: $primary;
+    color: $text;
+}
+
+Footer {
+    dock: bottom;
+    background: $primary;
+    color: $text;
 }
