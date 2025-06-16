@@ -1,0 +1,24 @@
+{
+  "name": "mock_interview_preparor",
+  "version": "1.1.0",
+  "description": "Helps you prepare for interviews in any topic field.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "interview": "node index.js"
+  },
+  "bin": {
+    "interview": "./index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^18.0.6",
+    "cohere-ai": "^7.16.0",
+    "dotenv": "^16.4.7",
+    "mock_interview_preparor": "^1.0.3",
+    "readline": "^1.3.0",
+    "zymono_cli": "^1.0.1"
+  }
+}
