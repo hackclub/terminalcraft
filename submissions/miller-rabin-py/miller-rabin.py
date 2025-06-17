@@ -109,9 +109,9 @@ while True:
         while base < 2:
             base = digits(input("what base?: "))
         
-        prime = digits(input("what prime?: "))
+        prime = digits(input("what number?: "))
         while prime < 2:
-            prime = digits(input("what prime?: "))
+            prime = digits(input("what number?: "))
 
         a = mil_rab(prime, base)
         print("")
@@ -135,9 +135,9 @@ while True:
                 input("how many times (its enough to test 1+prime//4 times): "))
         
         
-        prime = digits(input("what prime?: "))
+        prime = digits(input("what number?: "))
         while prime < 2:
-            prime = digits(input("what prime?: "))
+            prime = digits(input("what number?: "))
         
         print("")
 
@@ -203,10 +203,10 @@ while True:
                           str(witnesses) + " are the witnesses for the compositeness.\n")
 
     if test == "2" or test == "2f":
-        prime = digits(input("what prime?: "))
+        prime = digits(input("what number?: "))
 
         while prime < 2:
-            prime = digits(input("what prime?: "))
+            prime = digits(input("what number?: "))
         
         print("")
 
