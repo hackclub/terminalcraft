@@ -28,4 +28,5 @@ python miller-rabin.py
 ```
 or:
 ```bash
-py miller-rabin.py```
+py miller-rabin.py
+```
