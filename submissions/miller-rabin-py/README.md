@@ -109,4 +109,5 @@ what prime?: 1522605027922533360535618378132637429718068114961380688657908494580
     chances of it being composite are: 1/256
 ```
 As we see there is 1/256 chance that this number is strong probable liar to those randomly chosen bases. (this test took less than a second)
+
 The dots that showed up show progress (each dot is a base checked).
