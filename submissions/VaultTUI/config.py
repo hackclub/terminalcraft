@@ -1,4 +1,3 @@
-# config.py
 from pathlib import Path
 
 VAULT_DIR = Path.home() / ".vaulttui"
