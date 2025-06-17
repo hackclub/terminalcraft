@@ -1,6 +1,6 @@
 # miller-rabin-py
 
-A comprehensive terminal-based implementation of the Miller-Rabin primality test in Python. This tool allows you to determine whether a given number is prime, calculate value of pi(x) function, and find next prime to a natural number, without requiring any additional Python packages.
+A terminal-based implementation of the Miller-Rabin primality test in Python. This tool allows you to determine whether a given number is prime, calculate value of pi(x) function, and find next prime to a natural number, without requiring any additional Python packages.
 
 ## What is Miller-Rabin Primality Test?
 
