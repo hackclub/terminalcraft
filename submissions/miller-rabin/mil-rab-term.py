@@ -114,6 +114,8 @@ while True:
             prime = digits(input("what prime?: "))
 
         a = mil_rab(prime, base)
+        print("")
+        
         if a[0] == False:
             if a[1] > 1:
                 print(str(prime) + " is composite, multiple of: " +
