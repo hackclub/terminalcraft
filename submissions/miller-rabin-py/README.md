@@ -57,7 +57,7 @@ py miller-rabin.py <mode> [options]
 ### Examples:
 
 Test if 997 is a prime using deterministic testing:
-```bash
+```
 python miller-rabin.py 2 -f
 what prime?: 99991
 
@@ -65,7 +65,7 @@ what prime?: 99991
 ```
 
 Find 3 next primes after 69420:
-```bash
+```
 python miller-rabin.py 4 -f
 find next prime from: 69420
 how many primes(1): 3
@@ -75,7 +75,7 @@ how many primes(1): 3
 ```
 
 Probabilistically test if 3141592653589793238462643383279502884197169 (which is 3 and 42 numbers of decimal expansion of pi) is prime with 8 tries:
-```bash
+```
 python miller-rabin.py 1
 how many times (its enough to test 1+prime//4 times): 8
 what prime?: 31415926535897932384626433832795028841971693
