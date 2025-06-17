@@ -304,7 +304,9 @@ class Game:
         else:
             console.print("Unknown command. Type 'help' for a list of commands.")
 if __name__ == "__main__":
-    game = Game(test_mode=True)
+    import sys
+    test_mode = "--test" in sys.argv
+    game = Game(test_mode=test_mode)
     try:
         game.run()
     except (KeyboardInterrupt, EOFError):
