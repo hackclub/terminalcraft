@@ -64,7 +64,7 @@ Or on Linux you can run the miller-rabin file located in executable folder (requ
 Test if 997 is a prime using deterministic testing:
 ```
 python miller-rabin.py 2 -f
-what prime?: 99991
+what number?: 99991
 
 99991 is prime
 ```
@@ -83,7 +83,7 @@ Probabilistically test if 3141592653589793238462643383279502884197169 (which is 
 ```
 python miller-rabin.py 1
 how many times (its enough to test 1+prime//4 times): 8
-what prime?: 31415926535897932384626433832795028841971693
+what number?: 31415926535897932384626433832795028841971693
 
 ........
 
@@ -106,7 +106,7 @@ Now check if it is prime with probabilistic test:
 ```
 python miller-rabin.py
 how many times (its enough to test 1+prime//4 times): 4
-what prime?: 1522605027922533360535618378132637429718068114961380688657908494580122963258952897654000350692006379
+what number?: 1522605027922533360535618378132637429718068114961380688657908494580122963258952897654000350692006379
 
 ....
 
