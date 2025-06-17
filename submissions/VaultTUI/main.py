@@ -13,6 +13,7 @@ from utils import (
     get_entry,
     delete_entry_manual,
     search_entries_manual,
+    export_vault_to_csv  # Added export
 )
 
 
@@ -23,15 +24,17 @@ class Sidebar(Vertical):
         yield Button("\U0001F441\uFE0F View", id="view")
         yield Button("\U0001F5D1\uFE0F Delete", id="delete")
         yield Button("\U0001F50D Search", id="search")
+        yield Button("\U0001F4BE Export", id="export")
         yield Button("\U0001F3E0 Home", id="home")
 
 
 class AddEntryForm(Container):
     class Submit(Message):
-        def __init__(self, sender, name, username, password) -> None:
+        def __init__(self, sender, name, url, username, password) -> None:
             super().__init__()
             self.sender = sender
             self.name = name
+            self.url = url
             self.username = username
             self.password = password
 
@@ -39,6 +42,7 @@ class AddEntryForm(Container):
         self.password_input = Input(placeholder="Password", password=True, id="entry-password")
         yield Label("\U0001F510 Add New Entry", id="form-title")
         yield Input(placeholder="Entry name", id="entry-name")
+        yield Input(placeholder="Website URL (optional)", id="entry-url")
         yield Input(placeholder="Username", id="entry-username")
         yield self.password_input
         yield Button("\U0001F441 Show", id="toggle-password")
@@ -50,9 +54,10 @@ class AddEntryForm(Container):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "submit":
             name = self.query_one("#entry-name", Input).value
+            url = self.query_one("#entry-url", Input).value
             username = self.query_one("#entry-username", Input).value
             password = self.query_one("#entry-password", Input).value
-            self.post_message(self.Submit(self, name, username, password))
+            self.post_message(self.Submit(self, name, url, username, password))
         elif event.button.id == "toggle-password":
             self.password_input.password = not self.password_input.password
 
@@ -97,7 +102,8 @@ class VaultApp(App):
                 Button("\u2795 Add Entry", id="add"),
                 Button("\U0001F441\uFE0F View Entry", id="view"),
                 Button("\U0001F5D1\uFE0F Delete Entry", id="delete"),
-                Button("\U0001F50D Search Entry", id="search")
+                Button("\U0001F50D Search Entry", id="search"),
+                Button("\U0001F4BE Export Vault", id="export")
             )
         )
 
@@ -151,6 +157,16 @@ class VaultApp(App):
             self.show_delete_form()
         elif btn_id == "search":
             self.show_search_form()
+        elif btn_id == "export":
+            vault = load_vault(self.key)
+            export_vault_to_csv(vault)
+            self.query_one("#main-content", Container).remove_children()
+            self.query_one("#main-content", Container).mount(
+                Vertical(
+                    Static("\U0001F4BE Vault exported to vault_export.csv."),
+                    Button("\U0001F3E0 Home", id="home")
+                )
+            )
         elif btn_id == "home":
             self.show_welcome()
         elif btn_id == "view-submit":
@@ -161,7 +177,7 @@ class VaultApp(App):
             if entry:
                 self.query_one("#main-content", Container).mount(
                     Vertical(
-                        Static(f"\U0001F510 {name}:\nUsername: {entry['username']}\nPassword: {entry['password']}"),
+                        Static(f"\U0001F510 {name}:\nURL: {entry.get('url', '')}\nUsername: {entry['username']}\nPassword: {entry['password']}"),
                         Button("\U0001F3E0 Home", id="home")
                     )
                 )
@@ -224,6 +240,7 @@ class VaultApp(App):
             )
         else:
             vault[msg.name] = {
+                "url": msg.url,
                 "username": msg.username,
                 "password": msg.password
             }

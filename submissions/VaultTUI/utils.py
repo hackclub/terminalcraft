@@ -8,8 +8,20 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
-
+import csv
 from config import VAULT_FILE, VAULT_DIR, BACKUP_DIR
+
+def export_vault_to_csv(vault: dict, filename: str = "vault_export.csv"):
+    with open(filename, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["name", "url", "username", "password"])
+        writer.writeheader()
+        for name, entry in vault.items():
+            writer.writerow({
+                "name": name,
+                "url": entry.get("url", ""),
+                "username": entry.get("username", ""),
+                "password": entry.get("password", "")
+            })
 
 # === Key Derivation ===
 
