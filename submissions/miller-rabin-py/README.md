@@ -64,4 +64,14 @@ what prime?: 99991
 99991 is prime
 ```
 
+Find 3 next primes after 69420:
+```bash
+python miller-rabin.py 4 -f
+find next prime from: 69420
+how many primes(1): 3
+
+
+[69427, 69431, 69439]  are the next primes
+```
+
 
