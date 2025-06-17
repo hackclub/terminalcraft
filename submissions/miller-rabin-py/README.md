@@ -116,3 +116,6 @@ what number?: 152260502792253336053561837813263742971806811496138068865790849458
 As we see there is 1/256 chance that this number is strong probable liar to those randomly chosen bases. (this test took less than a second)
 
 The dots that showed up show progress (each dot is a base checked).
+
+# Motivations
+I created this program because I needed reliable way of checking primeness of numbers offline without online tools like wolfram-alfa.
