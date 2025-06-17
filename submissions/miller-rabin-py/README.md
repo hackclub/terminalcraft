@@ -46,6 +46,7 @@ It is also possible to compile the program into executable file using pyinstalle
 ```bash
 pyinstaller miller-rabin.py
 ```
+Or on Linux you can run the miller-rabin file located in executable folder (requires _internal folder in the same directory)
 ### Available Modes:
 
 - `0`: Manual base testing - Test a specific number with a manually chosen base
