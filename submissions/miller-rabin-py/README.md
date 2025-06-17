@@ -29,6 +29,7 @@ The Miller-Rabin primality test is a probabilistic algorithm used to determine i
 ## Requirements
 
 - Python 3.x (no additional libraries needed)
+- pyinstaller (if you want to compile the program)
 
 ## Usage
 
@@ -41,7 +42,10 @@ or:
 ```bash
 py miller-rabin.py <mode> [options]
 ```
-
+It is also possible to compile the program into executable file using pyinstaller:
+```bash
+pyinstaller miller-rabin.py
+```
 ### Available Modes:
 
 - `0`: Manual base testing - Test a specific number with a manually chosen base
