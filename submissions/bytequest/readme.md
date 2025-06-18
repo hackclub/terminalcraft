@@ -62,6 +62,6 @@ Navigate to the directory where you saved the file.
 
 Run the following command:
 
-python bytequest.py
+** python bytequest.py **
 
 The game will start, and you can begin your quest
