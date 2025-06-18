@@ -1,0 +1,224 @@
+{
+    "name": "1",
+    "game_date": "2024-01-02",
+    "finance": {
+        "money": 8390,
+        "daily_income": {},
+        "daily_expenses": {
+            "Habitat Construction": 2000.0
+        },
+        "history": [
+            {
+                "date": "2024-01-02",
+                "income": {
+                    "Tickets": 390.0
+                },
+                "expenses": {
+                    "Animal Food": 0.0,
+                    "Staff Salaries": 0.0
+                },
+                "net_profit": 390.0
+            }
+        ]
+    },
+    "animals": [],
+    "habitats": [
+        {
+            "name": "1",
+            "species_type": "Savannah",
+            "capacity": 4,
+            "cleanliness": 100,
+            "temperature": 25,
+            "enrichment": 40,
+            "security": 50
+        }
+    ],
+    "staff": [],
+    "visitors": [
+        {
+            "type": "Animal Enthusiast",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Student",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Student",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Family",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Regular",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Student",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Student",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Family",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Animal Enthusiast",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Family",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Family",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Student",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Regular",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Regular",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Animal Enthusiast",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Animal Enthusiast",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Animal Enthusiast",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Family",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Student",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Animal Enthusiast",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Student",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Regular",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Animal Enthusiast",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Regular",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Family",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        },
+        {
+            "type": "Animal Enthusiast",
+            "satisfaction": 20,
+            "thoughts": [
+                "There was nothing to see at this zoo!"
+            ]
+        }
+    ],
+    "research": [],
+    "visitor_boost": null,
+    "reputation_penalty": null
+}
