@@ -2,6 +2,15 @@ import os
 import random
 import time
 
+# --- Platform-specific imports for single-key input ---
+try:
+    # For Unix-like systems (Linux, macOS)
+    import sys
+    import tty
+    import termios
+except ImportError:
+    # For Windows
+    import msvcrt
 
 # --- Game Configuration ---
 WIDTH = 30
@@ -55,7 +64,24 @@ VICTORY_ART = """
 # --- Helper Functions ---
 def clear_screen():
     """Clears the terminal screen"""
-    os.system('clear')
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def get_single_char():
+    """Gets a single character from standard input without requiring Enter."""
+    if 'msvcrt' in sys.modules:
+        # Windows implementation
+        return msvcrt.getch().decode('utf-8')
+    else:
+        # Unix/Linux/macOS implementation
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
 
 def show_title_screen():
     """Displays the title screen and waits for the user to press Enter."""
@@ -112,7 +138,7 @@ class Enemy(Entity):
         if steps == 0: return True
         
         x_inc, y_inc = dx / steps, dy / steps
-        for i in range(1, steps):
+        for i in range(1, steps + 1):
             if [round(x1 + i * x_inc), round(y1 + i * y_inc)] in walls:
                 return False
         return True
@@ -138,13 +164,10 @@ class Game:
         self.walls = [[x, 5] for x in range(5, 25)] + [[12, y] for y in range(6, 10)]
         self.message_log = []
 
-        # Create a list of all possible spawn points (not walls or the player's start)
         self._setup_level(difficulty)
 
     def _setup_level(self, difficulty):
         """Generates and places level objects without overlap based on difficulty."""
-        
-        # Define difficulty settings
         settings = {
             'easy': {'health': 15, 'enemies': 1, 'traps': 3},
             'hard': {'health': 10, 'enemies': 2, 'traps': 5},
@@ -155,7 +178,6 @@ class Game:
         num_enemies = settings[difficulty]['enemies']
         num_traps = settings[difficulty]['traps']
         
-        # Get all valid spots for items to spawn
         spawn_points = []
         for y in range(HEIGHT):
             for x in range(WIDTH):
@@ -165,7 +187,6 @@ class Game:
         
         random.shuffle(spawn_points)
         
-        # Place key, enemies, and traps in unique positions
         self.key_pos = spawn_points.pop()
         
         self.enemies = []
@@ -204,7 +225,8 @@ class Game:
         key_status = '🔑 Key Collected' if self.player.has_key else '   No Key   '
         print(f"\n\x1b[1m❤️  Health: {self.player.health:<5} {key_status}\x1b[0m")
         print("\x1b[1mLegend: @-Player E-Enemy K-Key O-Portal ^-Trap ■-Wall\x1b[0m")
-        
+        print("\n\x1b[1mControls: W/A/S/D to move, Q to quit.\x1b[0m")
+
         for msg in self.message_log: print(msg)
         self.message_log.clear()
 
@@ -246,7 +268,7 @@ class Game:
                 self.display_art_screen(VICTORY_ART, "\x1b[1m\x1b[92m🚪 You have successfully escaped! Victory is yours.\x1b[0m")
                 break
 
-            move = input("\nYour move: ").upper()
+            move = get_single_char().upper()
             if move == 'Q':
                 print("\n\x1b[90m👋 Fleeing the dungeon... for now.\x1b[0m")
                 break
