@@ -15,6 +15,17 @@ I recently spent a couple of weeks converting an old 3D printer into a pen-plott
 - **Auto-Centering**: Automatically center files on the print bed
 - **Legacy Mode**: Simple scale and offset operations for backward compatibility
 
+## Example Usage & Images
+
+Original GCode (Visualized)
+![OriginalGCodeExample](https://github.com/user-attachments/assets/82814f8c-d90e-4210-a068-e898a32c47fc)
+
+GCode With Transformations Applied Using CodePlotter (Visualized)
+![ModifiedGCodeExample](https://github.com/user-attachments/assets/a9c43cc7-767c-4828-b6b9-faf77a5ca2f6)
+
+CodePlotter Terminal Usage Example
+![CodePlotterUsageExample](https://github.com/user-attachments/assets/52f905f0-5cb4-4f6b-8c10-14ef8971c106)
+
 ## Requirements
 
 - Python 3.6 or higher
@@ -25,7 +36,7 @@ I recently spent a couple of weeks converting an old 3D printer into a pen-plott
 Run the script and choose from three operation modes:
 On Unix, run:
 ```bash
-./CodePlotter
+./CodePlotter_Unix
 ```
 On Windows, run CodePlotter.exe
 
