@@ -1,0 +1,3 @@
+textual
+psutil
+rich
