@@ -13,832 +13,528 @@ import math
 import os
 import itertools
 
-# --- Constants ---
-GCODE_TOLERANCE = 1e-6 # For comparing float coordinates
+G_TOL = 1e-6
 
-def parse_gcode_for_xy(gcode_lines):
-    """
-    Extracts X, Y coordinates and command type (G0/G1) for bounds calculation.
-    Returns segments and the final X,Y position relative to the file's start.
-    """
-    path_segments = []
-    current_segment = []
-    last_x, last_y = 0.0, 0.0
-    in_segment = False
+def parse_xy(g_lns):
+    segs = []
+    curr_seg = []
+    lx, ly = 0.0, 0.0
+    in_s = False
 
-    for line_num, line in enumerate(gcode_lines):
-        line = line.strip().upper().split(';')[0]
-        if not line: continue
+    for idx, l in enumerate(g_lns):
+        l = l.strip().upper().split(';')[0]
+        if not l: continue
 
-        parts = line.split()
-        command = None
-        x_coord, y_coord = None, None
-        z_present = False
-        xy_present = False
-        is_g0_g1 = False
-        is_g92 = False
+        pts = l.split()
+        cmd = None
+        xc, yc = None, None
+        zp = False
+        xyp = False
+        g01 = False
+        g92 = False
 
-        temp_x, temp_y = last_x, last_y
+        tx, ty = lx, ly
 
-        for part in parts:
-            if not part: continue
-            char = part[0]
+        for p_item in pts:
+            if not p_item: continue
+            ch = p_item[0]
             try:
-                val_str = part[1:]
-                if char == 'G':
-                    g_val = int(float(val_str))
-                    if g_val == 0 or g_val == 1:
-                        command = f"G{g_val}"
-                        is_g0_g1 = True
-                    elif g_val == 92:
-                        is_g92 = True
-                elif char == 'X':
-                    x_coord = float(val_str)
-                    temp_x = x_coord
-                    xy_present = True
-                elif char == 'Y':
-                    y_coord = float(val_str)
-                    temp_y = y_coord
-                    xy_present = True
-                elif char == 'Z':
-                    z_present = True
+                v_str = p_item[1:]
+                if ch == 'G':
+                    g_v = int(float(v_str))
+                    if g_v == 0 or g_v == 1:
+                        cmd = f"G{g_v}"
+                        g01 = True
+                    elif g_v == 92:
+                        g92 = True
+                elif ch == 'X':
+                    xc = float(v_str)
+                    tx = xc
+                    xyp = True
+                elif ch == 'Y':
+                    yc = float(v_str)
+                    ty = yc
+                    xyp = True
+                elif ch == 'Z':
+                    zp = True
             except (ValueError, IndexError):
                 continue
 
-        if is_g0_g1:
-            is_z_only_move = z_present and not xy_present
-            current_point_x = x_coord if x_coord is not None else last_x
-            current_point_y = y_coord if y_coord is not None else last_y
+        if g01:
+            z_om = zp and not xyp
+            cpx = xc if xc is not None else lx
+            cpy = yc if yc is not None else ly
 
-            current_point = {'x': current_point_x, 'y': current_point_y, 'cmd': command, 'z_only': is_z_only_move, 'line': line_num}
-            moved_xy = abs(last_x - current_point_x) > GCODE_TOLERANCE or abs(last_y - current_point_y) > GCODE_TOLERANCE
+            cp = {'x': cpx, 'y': cpy, 'cmd': cmd, 'z_only': z_om, 'line': idx}
+            mvd_xy = abs(lx - cpx) > G_TOL or abs(ly - cpy) > G_TOL
 
-            if command == "G0":
-                if current_segment:
-                    path_segments.append(list(current_segment))
-                if moved_xy:
-                    start_point_g0 = {'x': last_x, 'y': last_y, 'cmd': "G0_START", 'z_only': False, 'line': line_num}
-                    g0_segment = [start_point_g0, current_point]
-                    path_segments.append(g0_segment)
-                current_segment = []
-                in_segment = False
+            if cmd == "G0":
+                if curr_seg:
+                    segs.append(list(curr_seg))
+                if mvd_xy:
+                    sp_g0 = {'x': lx, 'y': ly, 'cmd': "G0_START", 'z_only': False, 'line': idx}
+                    g0_s = [sp_g0, cp]
+                    segs.append(g0_s)
+                curr_seg = []
+                in_s = False
 
-            elif command == "G1":
-                if not in_segment and moved_xy:
-                    start_point_g1 = {'x': last_x, 'y': last_y, 'cmd': "G1", 'z_only': False, 'line': line_num}
-                    current_segment.append(start_point_g1)
+            elif cmd == "G1":
+                if not in_s and mvd_xy:
+                    sp_g1 = {'x': lx, 'y': ly, 'cmd': "G1", 'z_only': False, 'line': idx}
+                    curr_seg.append(sp_g1)
 
-                if moved_xy:
-                    current_segment.append(current_point)
-                    in_segment = True
-                elif is_z_only_move and in_segment:
-                    path_segments.append(list(current_segment))
-                    current_segment = []
-                    in_segment = False
-
-            last_x, last_y = current_point_x, current_point_y
-
-        elif is_g92:
-            if in_segment:
-                path_segments.append(list(current_segment))
-                current_segment = []
-                in_segment = False
-            if x_coord is not None: last_x = x_coord
-            if y_coord is not None: last_y = y_coord
-
+                if mvd_xy:
+                    curr_seg.append(cp)
+                    in_s = True
+                elif z_om and in_s:
+                    segs.append(list(curr_seg))
+                    curr_seg = []
+                    in_s = False
+            lx, ly = cpx, cpy
+        elif g92:
+            if in_s:
+                segs.append(list(curr_seg))
+                curr_seg = []
+                in_s = False
+            if xc is not None: lx = xc
+            if yc is not None: ly = yc
         else:
-            if in_segment:
-                path_segments.append(list(current_segment))
-                current_segment = []
-                in_segment = False
-            if xy_present:
-                last_x, last_y = temp_x, temp_y
+            if in_s:
+                segs.append(list(curr_seg))
+                curr_seg = []
+                in_s = False
+            if xyp:
+                lx, ly = tx, ty
+    if curr_seg:
+        segs.append(curr_seg)
+    return [s for s in segs if len(s) >= 2], lx, ly
 
-    if current_segment:
-        path_segments.append(current_segment)
-
-    return [seg for seg in path_segments if len(seg) >= 2], last_x, last_y
-
-def calculate_bounds(segments):
-    """Calculate the bounding box of G-code segments."""
-    if not segments:
+def calc_bds(segs):
+    if not segs:
         return None
-    
-    min_x, min_y, max_x, max_y = float('inf'), float('inf'), float('-inf'), float('-inf')
-    has_points = False
-    
-    for segment in segments:
-        for point in segment:
-            has_points = True
-            min_x, max_x = min(min_x, point['x']), max(max_x, point['x'])
-            min_y, max_y = min(min_y, point['y']), max(max_y, point['y'])
-    
-    return {"min_x": min_x, "max_x": max_x, "min_y": min_y, "max_y": max_y} if has_points else None
+    mnx, mny, mxx, mxy_ = float('inf'), float('inf'), float('-inf'), float('-inf')
+    hp = False
+    for seg in segs:
+        for pt in seg:
+            hp = True
+            mnx, mxx = min(mnx, pt['x']), max(mxx, pt['x'])
+            mny, mxy_ = min(mny, pt['y']), max(mxy_, pt['y'])
+    return {"min_x": mnx, "max_x": mxx, "min_y": mny, "max_y": mxy_} if hp else None
 
-def generate_transformed_gcode(original_gcode_lines, x_scale=1.0, y_scale=1.0, z_scale=1.0, 
-                              x_offset=0.0, y_offset=0.0, z_offset=0.0, 
-                              pen_x_offset=0.0, pen_y_offset=0.0, rotation_angle=0.0):
-    """
-    Generates modified G-code lines applying all transformations including rotation.
-    
-    Args:
-        original_gcode_lines: List of original G-code lines
-        x_scale, y_scale, z_scale: Scaling factors
-        x_offset, y_offset, z_offset: Translation offsets
-        pen_x_offset, pen_y_offset: Pen offset for plotters
-        rotation_angle: Rotation angle in degrees
-    
-    Returns:
-        List of transformed G-code lines
-    """
-    modified_gcode = []
-    coord_pattern = re.compile(r"([XYZ])([-+]?\d*\.?\d*)")
-    
-    # Convert rotation to radians
-    rotation_rad = math.radians(rotation_angle)
-    cos_theta = math.cos(rotation_rad)
-    sin_theta = math.sin(rotation_rad)
+def gen_trans_gcode(og_lns, xs=1.0, ys=1.0, zs=1.0,
+                           xo=0.0, yo=0.0, zo=0.0,
+                           pxo=0.0, pyo=0.0, rot_a=0.0):
+    mod_gc = []
+    c_pat = re.compile(r"([XYZ])([-+]?\d*\.?\d*)")
+    rot_r = math.radians(rot_a)
+    ct = math.cos(rot_r)
+    st = math.sin(rot_r)
 
-    for line in original_gcode_lines:
-        parts = line.split(';', 1)
-        code_part = parts[0]
-        comment_part = f";{parts[1]}" if len(parts) > 1 else ""
+    for l in og_lns:
+        pts = l.split(';', 1)
+        cd_pt = pts[0]
+        cm_pt = f";{pts[1]}" if len(pts) > 1 else ""
+        ccu = cd_pt.strip().upper()
+        is_mv_cmd = ccu.startswith('G0') or ccu.startswith('G1')
+        is_set_cmd = ccu.startswith('G92')
 
-        cleaned_code_upper = code_part.strip().upper()
-        is_motion_cmd = cleaned_code_upper.startswith('G0') or cleaned_code_upper.startswith('G1')
-        is_set_coord_cmd = cleaned_code_upper.startswith('G92')
-
-        if is_motion_cmd or is_set_coord_cmd:
-            matches = list(coord_pattern.finditer(code_part))
-            if matches:
-                axes_values = {}
-                for match in matches:
-                    axis = match.group(1).upper()
+        if is_mv_cmd or is_set_cmd:
+            mchs = list(c_pat.finditer(cd_pt))
+            if mchs:
+                ax_v = {}
+                for m in mchs:
+                    ax = m.group(1).upper()
                     try:
-                        val = float(match.group(2))
-                        axes_values[axis] = val
+                        v = float(m.group(2))
+                        ax_v[ax] = v
                     except ValueError:
                         pass
-                
-                # Apply transformations to X and Y coordinates
-                if 'X' in axes_values and 'Y' in axes_values:
-                    # Apply scaling
-                    scaled_x = axes_values['X'] * x_scale
-                    scaled_y = axes_values['Y'] * y_scale
-                    
-                    # Apply rotation
-                    if rotation_angle != 0:
-                        rotated_x = scaled_x * cos_theta - scaled_y * sin_theta
-                        rotated_y = scaled_x * sin_theta + scaled_y * cos_theta
-                        scaled_x = rotated_x
-                        scaled_y = rotated_y
-                    
-                    # Apply offsets
-                    final_x = scaled_x + x_offset - pen_x_offset
-                    final_y = scaled_y + y_offset - pen_y_offset
-                    
-                    axes_values['X'] = final_x
-                    axes_values['Y'] = final_y
-                
-                # Handle Z separately (no rotation)
-                if 'Z' in axes_values:
-                    axes_values['Z'] = (axes_values['Z'] * z_scale) + z_offset
-                
-                # Rebuild the line
-                modified_code_part = cleaned_code_upper.split()[0]
-                for axis, value in sorted(axes_values.items()):
-                    modified_code_part += f" {axis}{value:.6f}"
-                
-                modified_line = modified_code_part + comment_part
+                if 'X' in ax_v and 'Y' in ax_v:
+                    sx = ax_v['X'] * xs
+                    sy = ax_v['Y'] * ys
+                    if rot_a != 0:
+                        rx = sx * ct - sy * st
+                        ry = sx * st + sy * ct
+                        sx, sy = rx, ry
+                    fx = sx + xo - pxo
+                    fy = sy + yo - pyo
+                    ax_v['X'] = fx
+                    ax_v['Y'] = fy
+                if 'Z' in ax_v:
+                    ax_v['Z'] = (ax_v['Z'] * zs) + zo
+                mod_cd_pt = ccu.split()[0]
+                for ax, v_val in sorted(ax_v.items()):
+                    mod_cd_pt += f" {ax}{v_val:.6f}"
+                mod_l = mod_cd_pt + cm_pt
             else:
-                modified_line = code_part + comment_part
+                mod_l = cd_pt + cm_pt
         else:
-            modified_line = code_part + comment_part
-        
-        modified_gcode.append(modified_line)
+            mod_l = cd_pt + cm_pt
+        mod_gc.append(mod_l)
+    return mod_gc
 
-    return modified_gcode
+def crop_gcode(og_lns, bw, bh, xs=1.0, ys=1.0, zs=1.0,
+                  xo=0.0, yo=0.0, zo=0.0, pxo=0.0, pyo=0.0, rot_a=0.0):
+    mod_gc = []
+    c_pat = re.compile(r"([XYZ])([-+]?\d*\.?\d*)")
+    rot_r = math.radians(rot_a)
+    ct = math.cos(rot_r)
+    st = math.sin(rot_r)
+    lx, ly = 0.0, 0.0
 
-def crop_gcode_to_bed(original_gcode_lines, bed_width, bed_height, x_scale=1.0, y_scale=1.0, z_scale=1.0,
-                     x_offset=0.0, y_offset=0.0, z_offset=0.0, pen_x_offset=0.0, pen_y_offset=0.0, rotation_angle=0.0):
-    """
-    Generates G-code with coordinates cropped to stay within bed boundaries.
-    """
-    modified_gcode = []
-    coord_pattern = re.compile(r"([XYZ])([-+]?\d*\.?\d*)")
-    
-    rotation_rad = math.radians(rotation_angle)
-    cos_theta = math.cos(rotation_rad)
-    sin_theta = math.sin(rotation_rad)
-    
-    last_x, last_y = 0.0, 0.0
-    
-    modified_gcode.append("; Note: G-code has been cropped to stay within bed boundaries")
+    for l in og_lns:
+        pts = l.split(';', 1)
+        cd_pt = pts[0]
+        cm_pt = f";{pts[1]}" if len(pts) > 1 else ""
+        ccu = cd_pt.strip().upper()
+        is_mv_cmd = ccu.startswith('G0') or ccu.startswith('G1')
 
-    for line in original_gcode_lines:
-        parts = line.split(';', 1)
-        code_part = parts[0]
-        comment_part = f";{parts[1]}" if len(parts) > 1 else ""
-
-        cleaned_code_upper = code_part.strip().upper()
-        is_motion_cmd = cleaned_code_upper.startswith('G0') or cleaned_code_upper.startswith('G1')
-
-        if is_motion_cmd:
-            matches = list(coord_pattern.finditer(code_part))
-            if matches:
-                axes_values = {}
-                for match in matches:
-                    axis = match.group(1).upper()
+        if is_mv_cmd:
+            mchs = list(c_pat.finditer(cd_pt))
+            if mchs:
+                ax_v = {}
+                for m in mchs:
+                    ax = m.group(1).upper()
                     try:
-                        val = float(match.group(2))
-                        axes_values[axis] = val
+                        v = float(m.group(2))
+                        ax_v[ax] = v
                     except ValueError:
                         pass
-                
-                if 'X' in axes_values and 'Y' in axes_values:
-                    # Apply transformations
-                    scaled_x = axes_values['X'] * x_scale
-                    scaled_y = axes_values['Y'] * y_scale
+                if 'X' in ax_v and 'Y' in ax_v:
+                    sx = ax_v['X'] * xs
+                    sy = ax_v['Y'] * ys
+                    if rot_a != 0:
+                        rx = sx * ct - sy * st
+                        ry = sx * st + sy * ct
+                        sx, sy = rx, ry
+                    fx = sx + xo - pxo
+                    fy = sy + yo - pyo
+                    fx_clamped = max(0, min(fx, bw))
+                    fy_clamped = max(0, min(fy, bh))
                     
-                    if rotation_angle != 0:
-                        rotated_x = scaled_x * cos_theta - scaled_y * sin_theta
-                        rotated_y = scaled_x * sin_theta + scaled_y * cos_theta
-                        scaled_x = rotated_x
-                        scaled_y = rotated_y
-                    
-                    final_x = scaled_x + x_offset - pen_x_offset
-                    final_y = scaled_y + y_offset - pen_y_offset
-                    
-                    # Crop to bed boundaries
-                    final_x = max(0, min(final_x, bed_width))
-                    final_y = max(0, min(final_y, bed_height))
-                    
-                    if final_x != scaled_x + x_offset - pen_x_offset or final_y != scaled_y + y_offset - pen_y_offset:
-                        comment_part += " ;CLIPPED to bed boundary"
-                    
-                    axes_values['X'] = final_x
-                    axes_values['Y'] = final_y
-                    last_x, last_y = final_x, final_y
-                
-                if 'Z' in axes_values:
-                    axes_values['Z'] = (axes_values['Z'] * z_scale) + z_offset
-                
-                modified_code_part = cleaned_code_upper.split()[0]
-                for axis, value in sorted(axes_values.items()):
-                    modified_code_part += f" {axis}{value:.6f}"
-                
-                modified_line = modified_code_part + comment_part
-                modified_gcode.append(modified_line)
+                    ax_v['X'] = fx_clamped
+                    ax_v['Y'] = fy_clamped
+                    lx, ly = fx_clamped, fy_clamped
+                if 'Z' in ax_v:
+                    ax_v['Z'] = (ax_v['Z'] * zs) + zo
+                mod_cd_pt = ccu.split()[0]
+                for ax, v_val in sorted(ax_v.items()):
+                    mod_cd_pt += f" {ax}{v_val:.6f}"
+                mod_l = mod_cd_pt + cm_pt
+                mod_gc.append(mod_l)
             else:
-                modified_gcode.append(code_part + comment_part)
+                mod_gc.append(cd_pt + cm_pt)
         else:
-            modified_gcode.append(code_part + comment_part)
+            mod_gc.append(cd_pt + cm_pt)
+    return mod_gc
 
-    return modified_gcode
+def apply_trans_coords(ocs, tp):
+    ts = []
+    xs = tp['x_scale']
+    ys = tp['y_scale']
+    xo = tp['x_offset']
+    yo = tp['y_offset']
+    rot_a = math.radians(tp.get('rotation_angle', 0))
 
-def apply_transformations_to_coords(original_coords_segments, transform_params):
-    """Applies scale, offset, and rotation from a transform dict to coordinate segments."""
-    transformed_segments = []
-    x_scale = transform_params['x_scale']
-    y_scale = transform_params['y_scale']
-    x_offset = transform_params['x_offset']
-    y_offset = transform_params['y_offset']
-    
-    # Get rotation angle in radians if it exists, otherwise default to 0
-    rotation_angle = math.radians(transform_params.get('rotation_angle', 0))
-
-    for segment in original_coords_segments:
-        new_segment = []
-        for point in segment:
-            # Apply scale to original relative coords
-            scaled_x = point['x'] * x_scale
-            scaled_y = point['y'] * y_scale
-            
-            # Apply rotation if needed (rotate around origin before translation)
-            if rotation_angle != 0:
-                # Rotation formula: x' = x*cos(θ) - y*sin(θ), y' = x*sin(θ) + y*cos(θ)
-                cos_theta = math.cos(rotation_angle)
-                sin_theta = math.sin(rotation_angle)
-                rotated_x = scaled_x * cos_theta - scaled_y * sin_theta
-                rotated_y = scaled_x * sin_theta + scaled_y * cos_theta
-                transformed_x = rotated_x + x_offset
-                transformed_y = rotated_y + y_offset
+    for seg in ocs:
+        ns = []
+        for pt in seg:
+            sx = pt['x'] * xs
+            sy = pt['y'] * ys
+            if rot_a != 0:
+                ct = math.cos(rot_a)
+                st = math.sin(rot_a)
+                rx = sx * ct - sy * st
+                ry = sx * st + sy * ct
+                tx_ = rx + xo
+                ty_ = ry + yo
             else:
-                # No rotation, just apply offset
-                transformed_x = scaled_x + x_offset
-                transformed_y = scaled_y + y_offset
-            
-            # Copy other info
-            new_segment.append({**point, 'x': transformed_x, 'y': transformed_y})
-        transformed_segments.append(new_segment)
-    return transformed_segments
+                tx_ = sx + xo
+                ty_ = sy + yo
+            ns.append({**pt, 'x': tx_, 'y': ty_})
+        ts.append(ns)
+    return ts
 
-def clip_line_to_bed(x1, y1, x2, y2, bed_width, bed_height):
-    """
-    Clips a line segment to stay within the bed boundaries using Cohen-Sutherland algorithm.
-    """
-    # Define region codes
-    INSIDE = 0  # 0000
-    LEFT = 1    # 0001
-    RIGHT = 2   # 0010
-    BOTTOM = 4  # 0100
-    TOP = 8     # 1000
-    
-    # Calculate region code for a point
-    def compute_code(x, y):
-        code = INSIDE
-        if x < 0:
-            code |= LEFT
-        elif x > bed_width:
-            code |= RIGHT
-        if y < 0:
-            code |= BOTTOM
-        elif y > bed_height:
-            code |= TOP
-        return code
-    
-    # Calculate codes for both points
-    code1 = compute_code(x1, y1)
-    code2 = compute_code(x2, y2)
-    
-    # Both points inside bed, no clipping needed
-    if code1 == 0 and code2 == 0:
-        return x2, y2
-    
-    # Line completely outside bed, return the start point
-    if (code1 & code2) != 0:
-        return x1, y1
-    
-    # Line needs clipping, determine which point is outside
-    if code1 == 0:  # First point inside, second point outside
-        outside_code = code2
-        outside_x, outside_y = x2, y2
-        inside_x, inside_y = x1, y1
-    else:  # Second point inside or both points outside
-        outside_code = code1
-        outside_x, outside_y = x1, y1
-        inside_x, inside_y = x2, y2
-    
-    # Calculate intersection with edge
-    if outside_code & LEFT:  # Intersect with left edge
-        y = inside_y + (outside_y - inside_y) * (-inside_x) / (outside_x - inside_x)
-        x = 0
-        if 0 <= y <= bed_height:
-            return x, y
-    
-    if outside_code & RIGHT:  # Intersect with right edge
-        y = inside_y + (outside_y - inside_y) * (bed_width - inside_x) / (outside_x - inside_x)
-        x = bed_width
-        if 0 <= y <= bed_height:
-            return x, y
-    
-    if outside_code & BOTTOM:  # Intersect with bottom edge
-        x = inside_x + (outside_x - inside_x) * (-inside_y) / (outside_y - inside_y)
-        y = 0
-        if 0 <= x <= bed_width:
-            return x, y
-    
-    if outside_code & TOP:  # Intersect with top edge
-        x = inside_x + (outside_x - inside_x) * (bed_height - inside_y) / (outside_y - inside_y)
-        y = bed_height
-        if 0 <= x <= bed_width:
-            return x, y
-    
-    # If we reach here, something went wrong, just return last known good point
-    return x1, y1
-
-def center_file_on_bed(segments, transform_params, bed_width, bed_height):
-    """Centers a file's segments on the bed by calculating appropriate offsets."""
-    if not segments:
-        return transform_params
-    
-    # Apply current scale and rotation to get bounds
-    temp_segments = apply_transformations_to_coords(segments, {
-        'x_scale': transform_params['x_scale'],
-        'y_scale': transform_params['y_scale'],
-        'x_offset': 0,  # Use 0 offset for centering calculation
+def center_on_bed(segs, tp, bw, bh):
+    if not segs:
+        return tp
+    tmp_s = apply_trans_coords(segs, {
+        'x_scale': tp['x_scale'],
+        'y_scale': tp['y_scale'],
+        'x_offset': 0,
         'y_offset': 0,
-        'rotation_angle': transform_params.get('rotation_angle', 0)
+        'rotation_angle': tp.get('rotation_angle', 0)
     })
-    
-    bounds = calculate_bounds(temp_segments)
-    if not bounds:
-        return transform_params
-    
-    # Calculate required offset for centering
-    path_width = bounds['max_x'] - bounds['min_x']
-    path_height = bounds['max_y'] - bounds['min_y']
-    path_center_x = bounds['min_x'] + path_width / 2.0
-    path_center_y = bounds['min_y'] + path_height / 2.0
-    bed_center_x = bed_width / 2.0
-    bed_center_y = bed_height / 2.0
-    
-    # Update transform parameters
-    new_transform = transform_params.copy()
-    new_transform['x_offset'] = bed_center_x - path_center_x
-    new_transform['y_offset'] = bed_center_y - path_center_y
-    
-    return new_transform
+    bds = calc_bds(tmp_s)
+    if not bds:
+        return tp
+    pw = bds['max_x'] - bds['min_x']
+    ph = bds['max_y'] - bds['min_y']
+    pcx = bds['min_x'] + pw / 2.0
+    pcy = bds['min_y'] + ph / 2.0
+    bcx = bw / 2.0
+    bcy = bh / 2.0
+    nt = tp.copy()
+    nt['x_offset'] = bcx - pcx
+    nt['y_offset'] = bcy - pcy
+    return nt
 
-def process_multiple_files(file_paths, transformations, bed_width=220, bed_height=220, crop_to_bed=False):
-    """
-    Process multiple G-code files with individual transformations.
-    
-    Args:
-        file_paths: List of file paths
-        transformations: List of transformation dictionaries for each file
-        bed_width, bed_height: Bed dimensions for bounds checking
-        crop_to_bed: Whether to crop coordinates to bed boundaries
-    
-    Returns:
-        List of processed G-code lines
-    """
-    merged_gcode = []
-    merged_gcode.append("; G-code merged and modified by Legacy Command-Line Tool")
-    merged_gcode.append(f"; Merging {len(file_paths)} file(s)")
-    merged_gcode.append(";")
-    merged_gcode.append(f"; Bed Dimensions Used: {bed_width:.3f} x {bed_height:.3f} mm")
-    if crop_to_bed:
-        merged_gcode.append("; Crop-to-bed: Enabled - G-code paths outside bed boundaries will be cropped")
-    merged_gcode.append(";")
-    
-    for i, (file_path, transform) in enumerate(zip(file_paths, transformations)):
+def proc_multi(fps, tfs, bw=220, bh=220, crop=False):
+    mgc = []
+    for i, (fp, tf) in enumerate(zip(fps, tfs)):
         try:
-            with open(file_path, 'r', errors='ignore') as f:
-                lines = [line.strip() for line in f if line.strip()]
-            
-            if not lines:
-                print(f"Warning: Skipped empty file: {os.path.basename(file_path)}")
+            with open(fp, 'r', errors='ignore') as f:
+                lns = [l.strip() for l in f if l.strip()]
+            if not lns:
+                print(f"Skipping empty file: {os.path.basename(fp)}")
                 continue
             
-            filename = os.path.basename(file_path)
-            merged_gcode.append(f"; --- Start: {filename} ---")
-            merged_gcode.append(f"; Transform: Scale(X:{transform.get('x_scale', 1.0):.4f} Y:{transform.get('y_scale', 1.0):.4f} Z:{transform.get('z_scale', 1.0):.4f}) Offset(X:{transform.get('x_offset', 0.0):.4f} Y:{transform.get('y_offset', 0.0):.4f} Z:{transform.get('z_offset', 0.0):.4f}) Pen(X:{transform.get('pen_x_offset', 0.0):.4f} Y:{transform.get('pen_y_offset', 0.0):.4f}) Rotation({transform.get('rotation_angle', 0.0):.2f}°)")
-            
-            # Generate transformed G-code
-            if crop_to_bed:
-                transformed_lines = crop_gcode_to_bed(
-                    lines, bed_width, bed_height,
-                    x_scale=transform.get('x_scale', 1.0),
-                    y_scale=transform.get('y_scale', 1.0),
-                    z_scale=transform.get('z_scale', 1.0),
-                    x_offset=transform.get('x_offset', 0.0),
-                    y_offset=transform.get('y_offset', 0.0),
-                    z_offset=transform.get('z_offset', 0.0),
-                    pen_x_offset=transform.get('pen_x_offset', 0.0),
-                    pen_y_offset=transform.get('pen_y_offset', 0.0),
-                    rotation_angle=transform.get('rotation_angle', 0.0)
+            if crop:
+                tf_lns = crop_gcode(
+                    lns, bw, bh,
+                    x_scale=tf.get('x_scale', 1.0),
+                    y_scale=tf.get('y_scale', 1.0),
+                    z_scale=tf.get('z_scale', 1.0),
+                    x_offset=tf.get('x_offset', 0.0),
+                    y_offset=tf.get('y_offset', 0.0),
+                    z_offset=tf.get('z_offset', 0.0),
+                    pen_x_offset=tf.get('pen_x_offset', 0.0),
+                    pen_y_offset=tf.get('pen_y_offset', 0.0),
+                    rotation_angle=tf.get('rotation_angle', 0.0)
                 )
             else:
-                transformed_lines = generate_transformed_gcode(
-                    lines,
-                    x_scale=transform.get('x_scale', 1.0),
-                    y_scale=transform.get('y_scale', 1.0),
-                    z_scale=transform.get('z_scale', 1.0),
-                    x_offset=transform.get('x_offset', 0.0),
-                    y_offset=transform.get('y_offset', 0.0),
-                    z_offset=transform.get('z_offset', 0.0),
-                    pen_x_offset=transform.get('pen_x_offset', 0.0),
-                    pen_y_offset=transform.get('pen_y_offset', 0.0),
-                    rotation_angle=transform.get('rotation_angle', 0.0)
+                tf_lns = gen_trans_gcode(
+                    lns,
+                    x_scale=tf.get('x_scale', 1.0),
+                    y_scale=tf.get('y_scale', 1.0),
+                    z_scale=tf.get('z_scale', 1.0),
+                    x_offset=tf.get('x_offset', 0.0),
+                    y_offset=tf.get('y_offset', 0.0),
+                    z_offset=tf.get('z_offset', 0.0),
+                    pen_x_offset=tf.get('pen_x_offset', 0.0),
+                    pen_y_offset=tf.get('pen_y_offset', 0.0),
+                    rotation_angle=tf.get('rotation_angle', 0.0)
                 )
-            
-            merged_gcode.extend(transformed_lines)
-            merged_gcode.append(f"; --- End: {filename} ---")
-            merged_gcode.append(";")
-            
+            mgc.extend(tf_lns)
         except Exception as e:
-            print(f"Error processing file {file_path}: {e}")
+            print(f"Error processing file {fp}: {e}")
             continue
-    
-    return merged_gcode
+    return mgc
 
-def interactive_transform_mode():
-    """Interactive mode for transforming a single file."""
-    print("\n=== Single File Transform Mode ===")
-    
-    file_path = input("Enter the path to your G-code file: ").strip()
-    if not os.path.exists(file_path):
-        print(f"Error: File not found at '{file_path}'")
+def interactive_single():
+    fp = input("Enter G-code file path: ").strip()
+    if not os.path.exists(fp):
+        print(f"Error: File not found at '{fp}'")
         return
-    
     try:
-        with open(file_path, 'r', errors='ignore') as f:
-            gcode_lines = [line.strip() for line in f if line.strip()]
-        
-        if not gcode_lines:
-            print("Error: File is empty or contains no valid G-code.")
+        with open(fp, 'r', errors='ignore') as f:
+            g_lns = [l.strip() for l in f if l.strip()]
+        if not g_lns:
+            print("Error: File is empty.")
             return
         
-        print(f"\nLoaded file: {os.path.basename(file_path)}")
-        print(f"Total lines: {len(gcode_lines)}")
+        segs, _, _ = parse_xy(g_lns)
+        bds = calc_bds(segs)
         
-        # Parse for bounds information
-        segments, _, _ = parse_gcode_for_xy(gcode_lines)
-        bounds = calculate_bounds(segments)
+        xs = float(input("Enter X-axis scale (default 1.0): ") or "1.0")
+        ys = float(input("Enter Y-axis scale (default 1.0): ") or "1.0")
+        zs = float(input("Enter Z-axis scale (default 1.0): ") or "1.0")
+        rot_a = float(input("Enter rotation angle in degrees (default 0.0): ") or "0.0")
+        xo = float(input("Enter X-axis offset in mm (default 0.0): ") or "0.0")
+        yo = float(input("Enter Y-axis offset in mm (default 0.0): ") or "0.0")
+        zo = float(input("Enter Z-axis offset in mm (default 0.0): ") or "0.0")
+        pxo = float(input("Enter Pen X offset in mm (default 0.0): ") or "0.0")
+        pyo = float(input("Enter Pen Y offset in mm (default 0.0): ") or "0.0")
+        bw = float(input("Enter bed width in mm (default 220.0): ") or "220.0")
+        bh = float(input("Enter bed height in mm (default 220.0): ") or "220.0")
+        crop = input("Crop to bed boundaries? (y/N, default N): ").lower().startswith('y')
         
-        if bounds:
-            width = bounds['max_x'] - bounds['min_x']
-            height = bounds['max_y'] - bounds['min_y']
-            print(f"Original bounds: X[{bounds['min_x']:.2f} .. {bounds['max_x']:.2f}] Y[{bounds['min_y']:.2f} .. {bounds['max_y']:.2f}]")
-            print(f"Original dimensions: {width:.2f} x {height:.2f} mm")
-        
-        # Get transformation parameters
-        print("\n--- Transformation Parameters ---")
-        x_scale = float(input("Enter X-axis scale factor (1.0 = no change): ") or "1.0")
-        y_scale = float(input("Enter Y-axis scale factor (1.0 = no change): ") or "1.0")
-        z_scale = float(input("Enter Z-axis scale factor (1.0 = no change): ") or "1.0")
-        
-        rotation_angle = float(input("Enter rotation angle in degrees (0 = no rotation): ") or "0.0")
-        
-        x_offset = float(input("Enter X-axis offset in mm (0 = no offset): ") or "0.0")
-        y_offset = float(input("Enter Y-axis offset in mm (0 = no offset): ") or "0.0")
-        z_offset = float(input("Enter Z-axis offset in mm (0 = no offset): ") or "0.0")
-        
-        pen_x_offset = float(input("Enter pen X offset in mm (0 = no offset): ") or "0.0")
-        pen_y_offset = float(input("Enter pen Y offset in mm (0 = no offset): ") or "0.0")
-        
-        # Bed dimensions for validation
-        bed_width = float(input("Enter bed width in mm (220): ") or "220.0")
-        bed_height = float(input("Enter bed height in mm (220): ") or "220.0")
-        
-        # Options
-        crop_to_bed = input("Crop to bed boundaries? (y/N): ").lower().startswith('y')
-        
-        # Apply transformations
-        if crop_to_bed:
-            modified_code = crop_gcode_to_bed(
-                gcode_lines, bed_width, bed_height,
-                x_scale, y_scale, z_scale,
-                x_offset, y_offset, z_offset,
-                pen_x_offset, pen_y_offset, rotation_angle
+        if crop:
+            mod_c = crop_gcode(
+                g_lns, bw, bh, xs, ys, zs, xo, yo, zo, pxo, pyo, rot_a
             )
         else:
-            modified_code = generate_transformed_gcode(
-                gcode_lines,
-                x_scale, y_scale, z_scale,
-                x_offset, y_offset, z_offset,
-                pen_x_offset, pen_y_offset, rotation_angle
+            mod_c = gen_trans_gcode(
+                g_lns, xs, ys, zs, xo, yo, zo, pxo, pyo, rot_a
             )
         
-        # Save output
-        base_name = os.path.splitext(file_path)[0]
-        default_output = f"{base_name}_modified.gcode"
-        output_path = input(f"Enter output file path ({default_output}): ").strip() or default_output
+        base_n = os.path.splitext(fp)[0]
+        def_out = f"{base_n}_mod.gcode"
+        out_p = input(f"Enter output file path (default {def_out}): ").strip() or def_out
         
-        with open(output_path, 'w') as f:
-            for line in modified_code:
-                f.write(line + '\n')
+        with open(out_p, 'w') as f:
+            for l_item in mod_c:
+                f.write(l_item + '\n')
+        print(f"Transformed G-code saved to: {out_p}")
         
-        print(f"\nTransformed G-code saved to: {output_path}")
-        
-        # Calculate and display new bounds
-        new_segments, _, _ = parse_gcode_for_xy(modified_code)
-        new_bounds = calculate_bounds(new_segments)
-        
-        if new_bounds:
-            new_width = new_bounds['max_x'] - new_bounds['min_x']
-            new_height = new_bounds['max_y'] - new_bounds['min_y']
-            print(f"New bounds: X[{new_bounds['min_x']:.2f} .. {new_bounds['max_x']:.2f}] Y[{new_bounds['min_y']:.2f} .. {new_bounds['max_y']:.2f}]")
-            print(f"New dimensions: {new_width:.2f} x {new_height:.2f} mm")
-            
-            # Check if within bed bounds
-            if new_bounds['min_x'] < 0 or new_bounds['min_y'] < 0 or new_bounds['max_x'] > bed_width or new_bounds['max_y'] > bed_height:
-                print("WARNING: Transformed G-code extends outside bed boundaries!")
-    
+        new_s, _, _ = parse_xy(mod_c)
+        new_b = calc_bds(new_s)
+        if new_b:
+            if new_b['min_x'] < 0 or new_b['min_y'] < 0 or new_b['max_x'] > bw or new_b['max_y'] > bh:
+                print("WARNING: Transformed G-code may extend outside bed boundaries!")
     except ValueError as e:
         print(f"Error: Invalid input - {e}")
     except Exception as e:
-        print(f"Error processing file: {e}")
+        print(f"Error during processing: {e}")
 
-def interactive_merge_mode():
-    """Interactive mode for merging multiple files."""
-    print("\n=== Multi-File Merge Mode ===")
-    
+def interactive_multi():
     files = []
-    transformations = []
+    tfs = []
+    bw = float(input("Enter bed width for all files in mm (default 220.0): ") or "220.0")
+    bh = float(input("Enter bed height for all files in mm (default 220.0): ") or "220.0")
     
-    # Get bed dimensions
-    bed_width = float(input("Enter bed width in mm (220): ") or "220.0")
-    bed_height = float(input("Enter bed height in mm (220): ") or "220.0")
-    
-    print("\nAdd files to merge (enter empty path to finish):")
-    
-    file_count = 1
+    fc = 1
     while True:
-        file_path = input(f"File {file_count} path: ").strip()
-        if not file_path:
-            break
-        
-        if not os.path.exists(file_path):
-            print(f"Error: File not found at '{file_path}'")
+        fp = input(f"Enter path for file {fc} (or leave empty to finish adding files): ").strip()
+        if not fp: break
+        if not os.path.exists(fp):
+            print(f"Error: File not found at '{fp}'")
             continue
-        
-        # Load and analyze file
         try:
-            with open(file_path, 'r', errors='ignore') as f:
-                lines = [line.strip() for line in f if line.strip()]
-            
-            if not lines:
+            with open(fp, 'r', errors='ignore') as f:
+                lns = [l.strip() for l in f if l.strip()]
+            if not lns:
                 print("Warning: File is empty, skipping.")
                 continue
             
-            segments, _, _ = parse_gcode_for_xy(lines)
-            bounds = calculate_bounds(segments)
+            segs, _, _ = parse_xy(lns)
+            bds = calc_bds(segs)
+            files.append(fp)
             
-            print(f"Loaded: {os.path.basename(file_path)}")
-            if bounds:
-                width = bounds['max_x'] - bounds['min_x']
-                height = bounds['max_y'] - bounds['min_y']
-                print(f"  Bounds: X[{bounds['min_x']:.2f}..{bounds['max_x']:.2f}] Y[{bounds['min_y']:.2f}..{bounds['max_y']:.2f}] ({width:.2f}x{height:.2f}mm)")
+            print(f"--- Transformations for {os.path.basename(fp)} ---")
+            tf = {}
+            tf['x_scale'] = float(input("X scale (default 1.0): ") or "1.0")
+            tf['y_scale'] = float(input("Y scale (default 1.0): ") or "1.0")
+            tf['z_scale'] = float(input("Z scale (default 1.0): ") or "1.0")
+            tf['rotation_angle'] = float(input("Rotation angle degrees (default 0.0): ") or "0.0")
+            tf['x_offset'] = float(input("X offset mm (default 0.0): ") or "0.0")
+            tf['y_offset'] = float(input("Y offset mm (default 0.0): ") or "0.0")
+            tf['z_offset'] = float(input("Z offset mm (default 0.0): ") or "0.0")
+            tf['pen_x_offset'] = float(input("Pen X offset mm (default 0.0): ") or "0.0")
+            tf['pen_y_offset'] = float(input("Pen Y offset mm (default 0.0): ") or "0.0")
             
-            files.append(file_path)
+            if input("Auto-center this file on bed? (y/N, default N): ").lower().startswith('y'):
+                tf = center_on_bed(segs, tf, bw, bh)
+                print(f"  Auto-centered: New X offset = {tf['x_offset']:.2f}, New Y offset = {tf['y_offset']:.2f}")
             
-            # Get transformation for this file
-            print(f"\n--- Transformation for {os.path.basename(file_path)} ---")
-            
-            transform = {}
-            transform['x_scale'] = float(input("X scale (1.0): ") or "1.0")
-            transform['y_scale'] = float(input("Y scale (1.0): ") or "1.0")
-            transform['z_scale'] = float(input("Z scale (1.0): ") or "1.0")
-            transform['rotation_angle'] = float(input("Rotation degrees (0): ") or "0.0")
-            transform['x_offset'] = float(input("X offset mm (0): ") or "0.0")
-            transform['y_offset'] = float(input("Y offset mm (0): ") or "0.0")
-            transform['z_offset'] = float(input("Z offset mm (0): ") or "0.0")
-            transform['pen_x_offset'] = float(input("Pen X offset mm (0): ") or "0.0")
-            transform['pen_y_offset'] = float(input("Pen Y offset mm (0): ") or "0.0")
-            
-            # Option to auto-center
-            if input("Auto-center on bed? (y/N): ").lower().startswith('y'):
-                transform = center_file_on_bed(segments, transform, bed_width, bed_height)
-                print(f"Auto-centered: X offset = {transform['x_offset']:.2f}, Y offset = {transform['y_offset']:.2f}")
-            
-            transformations.append(transform)
-            file_count += 1
-            
+            tfs.append(tf)
+            fc += 1
         except Exception as e:
-            print(f"Error loading file: {e}")
+            print(f"Error loading or processing file {fp}: {e}")
             continue
     
     if not files:
-        print("No files loaded.")
+        print("No files were added for merging.")
         return
     
-    # Processing options
-    crop_to_bed = input("\nCrop all files to bed boundaries? (y/N): ").lower().startswith('y')
-    
-    # Generate merged output
-    output_path = input("Enter output file path (merged.gcode): ").strip() or "merged.gcode"
+    crop = input("Crop all files to bed boundaries? (y/N, default N): ").lower().startswith('y')
+    out_p = input("Enter output file path for merged G-code (default merged.gcode): ").strip() or "merged.gcode"
     
     try:
-        merged_gcode = process_multiple_files(files, transformations, bed_width, bed_height, crop_to_bed)
-        
-        with open(output_path, 'w') as f:
-            for line in merged_gcode:
-                f.write(line + '\n')
-        
-        print(f"\nMerged G-code saved to: {output_path}")
-        print(f"Total files merged: {len(files)}")
-        
+        mgc = proc_multi(files, tfs, bw, bh, crop)
+        with open(out_p, 'w') as f:
+            for l_item in mgc:
+                f.write(l_item + '\n')
+        print(f"Merged G-code saved to: {out_p}")
     except Exception as e:
         print(f"Error creating merged file: {e}")
 
-def scale_gcode(gcode_lines, x_scale=1.0, y_scale=1.0, z_scale=1.0):
-    """
-    Scales the X, Y, and Z coordinates in a list of G-code lines.
-
-    Args:
-        gcode_lines (list): A list of strings, where each string is a line of G-code.
-        x_scale (float): The scaling factor for the X coordinates.
-        y_scale (float): The scaling factor for the Y coordinates.
-        z_scale (float): The scaling factor for the Z coordinates.
-
-    Returns:
-        list: A new list of G-code lines with the scaling applied.
-    """
-    modified_gcode = []
-    for line in gcode_lines:
-        parts = line.split()
-        modified_parts = []
-        for part in parts:
-            if part.startswith('X') and len(part) > 1:
+def scale_g(g_lns, xs=1.0, ys=1.0, zs=1.0):
+    mod_g = []
+    for l in g_lns:
+        pts = l.split()
+        mod_pts = []
+        for p_item in pts:
+            if p_item.startswith('X') and len(p_item) > 1:
                 try:
-                    x_val = float(part[1:]) * x_scale
-                    modified_parts.append(f'X{x_val:.6f}')
+                    xv = float(p_item[1:]) * xs
+                    mod_pts.append(f'X{xv:.6f}')
                 except ValueError:
-                    modified_parts.append(part)
-            elif part.startswith('Y') and len(part) > 1:
+                    mod_pts.append(p_item)
+            elif p_item.startswith('Y') and len(p_item) > 1:
                 try:
-                    y_val = float(part[1:]) * y_scale
-                    modified_parts.append(f'Y{y_val:.6f}')
+                    yv = float(p_item[1:]) * ys
+                    mod_pts.append(f'Y{yv:.6f}')
                 except ValueError:
-                    modified_parts.append(part)
-            elif part.startswith('Z') and len(part) > 1:
+                    mod_pts.append(p_item)
+            elif p_item.startswith('Z') and len(p_item) > 1:
                 try:
-                    z_val = float(part[1:]) * z_scale
-                    modified_parts.append(f'Z{z_val:.6f}')
+                    zv = float(p_item[1:]) * zs
+                    mod_pts.append(f'Z{zv:.6f}')
                 except ValueError:
-                    modified_parts.append(part)
+                    mod_pts.append(p_item)
             else:
-                modified_parts.append(part)
-        modified_gcode.append(' '.join(modified_parts))
-    return modified_gcode
+                mod_pts.append(p_item)
+        mod_g.append(' '.join(mod_pts))
+    return mod_g
 
-def offset_gcode(gcode_lines, x_offset=0.0, y_offset=0.0, z_offset=0.0):
-    """
-    Offsets the X, Y, and Z coordinates in a list of G-code lines.
-
-    Args:
-        gcode_lines (list): A list of strings, where each string is a line of G-code.
-        x_offset (float): The amount to offset the X coordinates.
-        y_offset (float): The amount to offset the Y coordinates.
-        z_offset (float): The amount to offset the Z coordinates.
-
-    Returns:
-        list: A new list of G-code lines with the offsets applied.
-    """
-    modified_gcode = []
-    for line in gcode_lines:
-        parts = line.split()
-        modified_parts = []
-        for part in parts:
-            if part.startswith('X') and len(part) > 1:
+def offset_g(g_lns, xo=0.0, yo=0.0, zo=0.0):
+    mod_g = []
+    for l in g_lns:
+        pts = l.split()
+        mod_pts = []
+        for p_item in pts:
+            if p_item.startswith('X') and len(p_item) > 1:
                 try:
-                    x_val = float(part[1:]) + x_offset
-                    modified_parts.append(f'X{x_val:.6f}')
+                    xv = float(p_item[1:]) + xo
+                    mod_pts.append(f'X{xv:.6f}')
                 except ValueError:
-                    modified_parts.append(part)
-            elif part.startswith('Y') and len(part) > 1:
+                    mod_pts.append(p_item)
+            elif p_item.startswith('Y') and len(p_item) > 1:
                 try:
-                    y_val = float(part[1:]) + y_offset
-                    modified_parts.append(f'Y{y_val:.6f}')
+                    yv = float(p_item[1:]) + yo
+                    mod_pts.append(f'Y{yv:.6f}')
                 except ValueError:
-                    modified_parts.append(part)
-            elif part.startswith('Z') and len(part) > 1:
+                    mod_pts.append(p_item)
+            elif p_item.startswith('Z') and len(p_item) > 1:
                 try:
-                    z_val = float(part[1:]) + z_offset
-                    modified_parts.append(f'Z{z_val:.6f}')
+                    zv = float(p_item[1:]) + zo
+                    mod_pts.append(f'Z{zv:.6f}')
                 except ValueError:
-                    modified_parts.append(part)
+                    mod_pts.append(p_item)
             else:
-                modified_parts.append(part)
-        modified_gcode.append(' '.join(modified_parts))
-    return modified_gcode
+                mod_pts.append(p_item)
+        mod_g.append(' '.join(mod_pts))
+    return mod_g
 
 if __name__ == "__main__":
-    print("=== G-Code Manipulator Command-Line Tool ===")
-    print("Enhanced version with rotation, pen offsets, and multi-file support")
-    print()
-    print("Choose mode:")
-    print("1. Single file transform")
-    print("2. Multi-file merge")
+    print("G-Code Manipulation Tool")
+    print("Available modes:")
+    print("1. Single file transformation")
+    print("2. Multi-file merge and transform")
     print("3. Legacy mode (simple scale/offset)")
-    print()
     
     try:
-        choice = input("Enter choice (1-3): ").strip()
-        
-        if choice == "1":
-            interactive_transform_mode()
-        elif choice == "2":
-            interactive_merge_mode()
-        elif choice == "3":
-            # Legacy mode for backward compatibility
-            file_path = input("Enter the path to your G-code file: ")
-            with open(file_path, 'r') as f:
-                gcode_lines = [line.strip() for line in f]
+        chc = input("Enter your choice (1-3): ").strip()
+        if chc == "1":
+            interactive_single()
+        elif chc == "2":
+            interactive_multi()
+        elif chc == "3":
+            fp = input("Enter path to G-code file: ")
+            with open(fp, 'r') as f:
+                g_lns = [l.strip() for l in f]
 
-            print("\nOriginal G-code (first few lines):")
-            for i, line in enumerate(gcode_lines[:5]):
-                print(f"{i+1}: {line}")
-            if len(gcode_lines) > 5:
-                print("...")
-                print(f"Total lines: {len(gcode_lines)}")
+            xs = float(input("Enter X-axis scale factor: "))
+            ys = float(input("Enter Y-axis scale factor: "))
+            zs = float(input("Enter Z-axis scale factor: "))
+            s_code = scale_g(g_lns, xs, ys, zs)
 
-            x_scale = float(input("Enter the X-axis scale factor (e.g., 2.0 for 200%): "))
-            y_scale = float(input("Enter the Y-axis scale factor: "))
-            z_scale = float(input("Enter the Z-axis scale factor: "))
+            xo = float(input("Enter X-axis offset: "))
+            yo = float(input("Enter Y-axis offset: "))
+            zo = float(input("Enter Z-axis offset: "))
+            mod_c = offset_g(s_code, xo, yo, zo)
 
-            scaled_code = scale_gcode(gcode_lines, x_scale, y_scale, z_scale)
-
-            x_offset = float(input("Enter the X-axis offset: "))
-            y_offset = float(input("Enter the Y-axis offset: "))
-            z_offset = float(input("Enter the Z-axis offset: "))
-
-            modified_code = offset_gcode(scaled_code, x_offset, y_offset, z_offset)
-
-            output_file_path = input("Enter the path to save the modified G-code file: ")
-            with open(output_file_path, 'w') as outfile:
-                for line in modified_code:
-                    outfile.write(line + '\n')
-
-            print(f"\nModified G-code (scaled and offset) saved to: {output_file_path}")
+            out_fp = input("Enter path to save modified G-code: ")
+            with open(out_fp, 'w') as of:
+                for l_item in mod_c:
+                    of.write(l_item + '\n')
+            print(f"Modified G-code saved to: {out_fp}")
         else:
-            print("Invalid choice. Please run the program again.")
-            
+            print("Invalid choice. Please run again.")
     except FileNotFoundError:
-        print(f"Error: File not found")
+        print(f"Error: Input file not found.")
     except ValueError:
-        print("Invalid input. Please enter numeric values for the scaling factors and offsets.")
+        print("Error: Invalid numeric input.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An unexpected error occurred: {e}")
