@@ -4,9 +4,11 @@ import os
 from typing import List, Optional
 from datetime import datetime
 import logging
+import time
 
 from rich.console import Console
 from rich.panel import Panel
+from rich.live import Live
 
 from .config import config, save_config
 from .weather import WeatherPredictor
@@ -103,6 +105,18 @@ def parse_arguments(args: Optional[List[str]] = None) -> argparse.Namespace:
         help='Hours of historical data'
     )
     
+    map_parser = subparsers.add_parser(
+        'map',
+        help='Display ASCII weather map',
+        description='Show a visual ASCII weather map for your location.'
+    )
+    map_parser.add_argument(
+        '--location', '-l',
+        type=str,
+        help='Location for weather map (city name or lat,lon)',
+        default=config.get('user_preferences.default_location', '')
+    )
+    
     config_parser = subparsers.add_parser(
         'config',
         help='Manage configuration settings',
@@ -166,6 +180,11 @@ def parse_arguments(args: Optional[List[str]] = None) -> argparse.Namespace:
         type=float,
         metavar='REFERENCE_PRESSURE',
         help='Calibrate pressure sensor with reference value'
+    )
+    sensor_parser.add_argument(
+        '--monitor', '-m',
+        action='store_true',
+        help='Continuously monitor sensor readings'
     )
     
     parser.add_argument(
@@ -234,6 +253,21 @@ def run_pressure(args: argparse.Namespace, visualizer: TerminalVisualizer, senso
         logging.error(f"Pressure analysis error: {e}", exc_info=True)
         sys.exit(1)
 
+def run_map(args: argparse.Namespace, visualizer: TerminalVisualizer, predictor: WeatherPredictor):
+    if not args.location:
+        console.print("[red]❌ Error: Location is required for weather map.[/red]")
+        console.print("[dim]💡 Use --location or set a default in config.[/dim]")
+        sys.exit(1)
+    console.print(f"🗺️ Generating ASCII weather map for [bold]{args.location}[/bold]...")
+    try:
+        # Generate forecast data needed for the map
+        forecast_data = predictor.generate_forecast(args.location, days=1)
+        visualizer.display_ascii_weather_map(args.location, forecast_data)
+    except Exception as e:
+        console.print(f"[red]❌ Error: {e}[/red]")
+        logging.error(f"Weather map error: {e}", exc_info=True)
+        sys.exit(1)
+
 def run_config(args: argparse.Namespace):
     if args.view:
         console.print(Panel("Current Configuration", style="bold blue"))
@@ -272,6 +306,20 @@ def run_sensor(args: argparse.Namespace, sensor_manager: SensorManager, visualiz
     if args.status:
         status = sensor_manager.get_sensor_status()
         visualizer.display_sensor_status(status)
+    elif args.monitor:
+        from rich.panel import Panel
+        from rich.console import Group
+        try:
+            with Live(refresh_per_second=2, console=console) as live:
+                while True:
+                    status = sensor_manager.get_sensor_status()
+                    # Instead of printing, get the Panel from display_sensor_status
+                    # We'll need to refactor display_sensor_status to return the Panel
+                    panel = visualizer.get_sensor_status_panel(status)
+                    live.update(panel)
+                    time.sleep(2)
+        except KeyboardInterrupt:
+            console.print("\n[yellow]⚠️ Monitoring stopped by user.[/yellow]")
     elif args.enable:
         config.set('sensor.enabled', True)
         console.print("[green]✅ Sensor enabled.[/green]")
@@ -319,6 +367,7 @@ def main(args: Optional[List[str]] = None):
         'forecast': lambda: run_forecast(parsed_args, visualizer, predictor),
         'satellite': lambda: run_satellite(parsed_args, visualizer, tracker),
         'pressure': lambda: run_pressure(parsed_args, visualizer, sensor_manager),
+        'map': lambda: run_map(parsed_args, visualizer, predictor),
         'config': lambda: run_config(parsed_args),
         'sensor': lambda: run_sensor(parsed_args, sensor_manager, visualizer)
     }

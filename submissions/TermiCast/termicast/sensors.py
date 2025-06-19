@@ -134,7 +134,6 @@ class SensorManager:
             else:
                 # Old-school comma-separated format - my first sensor used this
                 parts = data_line.split(',')
-                print(f"📥 Got plain sensor data: {data_line[:50]}...")
                 for part in parts:
                     if ':' in part:
                         key, value = part.split(':', 1)
@@ -148,17 +147,14 @@ class SensorManager:
                         elif key in ['humidity', 'humid', 'h']:
                             self._update_sensor_value('humidity', value, current_time)
             
-            # Save to file every 60 readings so I don't lose too much if it crashes
-            if len(self.sensor_data['pressure']['history']) % 60 == 0:
-                print("💾 Saving sensor data to file...")
-                self._save_sensor_data()
+            # Save to file after every update for development/debugging
+            self._save_sensor_data()
         
         except (ValueError, json.JSONDecodeError) as e:
             logging.warning(f"Could not parse sensor data '{data_line}': {e}")
             print(f"[yellow]⚠️ Bad sensor data format: {data_line[:30]}...[/yellow]")
     
     def _update_sensor_value(self, sensor_type: str, value: float, timestamp: str):
-        """Update sensor readings and keep history - I limit to 24h to save space"""
         if sensor_type not in self.sensor_data:
             return
         
@@ -227,15 +223,18 @@ class SensorManager:
             status['last_readings'] = {
                 'pressure': {
                     'value': self.sensor_data['pressure']['current'],
-                    'time': self.sensor_data['pressure']['history'][-1]['timestamp'] if self.sensor_data['pressure']['history'] else 'N/A'
+                    'time': self.sensor_data['pressure']['history'][-1]['timestamp'] if self.sensor_data['pressure']['history'] else 'N/A',
+                    'history_points': len(self.sensor_data['pressure']['history'])
                 },
                 'temperature': {
                     'value': self.sensor_data['temperature']['current'],
-                    'time': self.sensor_data['temperature']['history'][-1]['timestamp'] if self.sensor_data['temperature']['history'] else 'N/A'
+                    'time': self.sensor_data['temperature']['history'][-1]['timestamp'] if self.sensor_data['temperature']['history'] else 'N/A',
+                    'history_points': len(self.sensor_data['temperature']['history'])
                 },
                 'humidity': {
                     'value': self.sensor_data['humidity']['current'],
-                    'time': self.sensor_data['humidity']['history'][-1]['timestamp'] if self.sensor_data['humidity']['history'] else 'N/A'
+                    'time': self.sensor_data['humidity']['history'][-1]['timestamp'] if self.sensor_data['humidity']['history'] else 'N/A',
+                    'history_points': len(self.sensor_data['humidity']['history'])
                 }
             }
         return status

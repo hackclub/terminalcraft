@@ -286,19 +286,16 @@ class TerminalVisualizer:
         
         self.console.print(sat_table)
     
-    def display_sensor_status(self, sensor_data: Dict[str, Any]):
-        """Display sensor connection and data status"""
-        # Sensor status panel
+    def get_sensor_status_panel(self, sensor_data: Dict[str, Any]):
+        """Return the Panel object for sensor connection and data status (for Live display)"""
         if sensor_data['enabled']:
             status_color = "green" if sensor_data['connected'] else "red"
             status_text = "Connected" if sensor_data['connected'] else "Disconnected"
-            
             sensor_info = f"""
 Status: [{status_color}]{status_text}[/{status_color}]
 Port: {sensor_data['port']}
 Monitoring: {'Yes' if sensor_data.get('monitoring') else 'No'}
 """
-            
             if 'last_readings' in sensor_data:
                 readings = sensor_data['last_readings']
                 sensor_info += f"""
@@ -309,8 +306,12 @@ Last Readings:
 """
         else:
             sensor_info = "[yellow]Sensor disabled[/yellow]\nEnable in configuration for enhanced predictions."
-        
-        self.console.print(Panel(sensor_info, title="🌡️ Sensor Status", border_style="blue"))
+        return Panel(sensor_info, title="🌡️ Sensor Status", border_style="blue")
+
+    def display_sensor_status(self, sensor_data: Dict[str, Any]):
+        """Display sensor connection and data status"""
+        panel = self.get_sensor_status_panel(sensor_data)
+        self.console.print(panel)
     
     def show_progress(self, message: str):
         """Show progress spinner"""
