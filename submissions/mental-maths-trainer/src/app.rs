@@ -70,7 +70,7 @@ pub fn update(model: &mut Model, msg: Msg) {
                         model.game_state = GameState::new(model.difficulty_settings.clone());
                         model.game_state.generate_new_problem();
                         model.game_state.playing = true;
-                        if let Some(duration) = model.difficulty_settings.timed_mode.to_duration() {
+                        if let Some(duration) = model.difficulty_settings.game_mode.to_duration() {
                             model.game_state.remaining_time = Some(duration);
                         } else {
                             model.game_state.remaining_time = None;
@@ -78,7 +78,7 @@ pub fn update(model: &mut Model, msg: Msg) {
                         model.game_state.question_given_at = Instant::now();
                     } else if screen == Screen::StatsScreen {
                         // Load stats for the selected timed_mode
-                        match stats::load_all_stats_for_mode(&model.difficulty_settings.timed_mode)
+                        match stats::load_all_stats_for_mode(&model.difficulty_settings.game_mode)
                         {
                             Ok(data) => model.stats_data = data,
                             Err(e) => {
@@ -100,11 +100,13 @@ pub fn update(model: &mut Model, msg: Msg) {
                         return;
                     }
                     model.game_state.user_input.push(c);
-                    if model.game_state.difficulty_settings.input_mode != InputMode::AutoSubmit {
+                    if model.game_state.difficulty_settings.input_mode != InputMode::AutoSubmit
+                       || model.game_state.difficulty_settings.game_mode.is_estimation_mode() {
                         return;
                     }
                     if let Some(problem) = model.game_state.active_problem {
-                        if model.game_state.user_input == problem.answer.to_string() {
+                        if let Ok(user_answer) = model.game_state.user_input.parse::<i32>() {
+                            if problem.check_answer(user_answer) { return; }
                             model.game_state.current_score += 1;
                             let problem_stat = ProblemStat {
                                 problem_text: get_problem_text(Some(&problem)),
@@ -134,35 +136,50 @@ pub fn update(model: &mut Model, msg: Msg) {
                     if !model.game_state.playing {
                         return;
                     }
-                    if model.game_state.difficulty_settings.input_mode == InputMode::AutoSubmit {
-                        return;
-                    }
                     if let Some(problem) = model.game_state.active_problem {
-                        let mut problem_stat = ProblemStat {
-                            problem_text: get_problem_text(Some(&problem)),
-                            correct_answer: problem.answer,
-                            user_answer_if_incorrect: None,
-                            time_taken: model.game_state.question_given_at.elapsed(),
-                            is_correct: true,
-                        };
-                        if model.game_state.user_input == problem.answer.to_string() {
-                            model.game_state.current_score += 1;
-                            model.game_state.feedback_message = Some("Correct!".to_string());
-                        } else {
-                            model.game_state.feedback_message =
-                                Some(format!("Incorrect. The answer was {}.", problem.answer));
-                            problem_stat.is_correct = false;
-                            problem_stat.user_answer_if_incorrect =
-                                Some(model.game_state.user_input.clone());
+                        if let Ok(answer) = model.game_state.user_input.parse::<i32>() {
+                            let is_correct = problem.check_answer(answer);
+                            let mut estimation_correct = false;
+                            if is_correct {
+                                model.game_state.current_score += 1;
+                                model.game_state.feedback_message = Some("Correct!".to_string());
+                            } else if let Some(threshold) = model.game_state.difficulty_settings.game_mode.get_estimation_threshold() {
+                                let answer_f64 = problem.answer as f64;
+                                let user_answer_f64 = answer as f64;
+                                let difference = (answer_f64 - user_answer_f64).abs();
+                                let percentage_diff = difference / answer_f64;
+        
+                                if percentage_diff <= threshold {
+                                    estimation_correct = true;
+                                    model.game_state.current_score += 1;
+                                    model.game_state.feedback_message = Some(format!("Good. The answer was {}", problem.answer));
+                                } else {
+                                    model.game_state.feedback_message = Some(format!("Incorrect. The answer was {}.", problem.answer));
+                                }
+                            }
+                            else {
+                                model.game_state.feedback_message = Some(format!("Too far off. The answer was {}.", problem.answer));
+                            }
+                            
+                            // Record detailed stats
+                            let elapsed = model.game_state.question_given_at.elapsed();
+                            model.game_state.detailed_round_stats.problems.push(stats::ProblemStat {
+                                problem_text: get_problem_text(Some(&problem)),
+                                correct_answer: problem.answer,
+                                user_answer_if_incorrect: if !is_correct && !estimation_correct {
+                                    Some(answer.to_string())
+                                } else {
+                                    None
+                                },
+                                time_taken: elapsed,
+                                is_correct,
+                            });
+
+                            // Generate new problem and reset input
+                            model.game_state.user_input.clear();
+                            model.game_state.generate_new_problem();
+                            model.game_state.question_given_at = Instant::now();
                         }
-                        model
-                            .game_state
-                            .detailed_round_stats
-                            .problems
-                            .push(problem_stat);
-                        model.game_state.generate_new_problem();
-                        model.game_state.user_input.clear();
-                        model.game_state.question_given_at = Instant::now();
                     }
                 }
                 Msg::SwitchScreen(Screen::DetailedRoundScreen) => {
@@ -190,7 +207,7 @@ pub fn update(model: &mut Model, msg: Msg) {
                                 let session_stat = stats::GameSessionStats {
                                     score: model.game_state.current_score,
                                     timestamp: Utc::now(),
-                                    timed_mode: model.difficulty_settings.timed_mode,
+                                    timed_mode: model.difficulty_settings.game_mode,
                                 };
                                 if model.game_state.current_score == 0 {
                                     model.game_state.feedback_message =
@@ -269,8 +286,8 @@ pub fn update(model: &mut Model, msg: Msg) {
                     model.game_state.difficulty_settings = model.difficulty_settings.clone();
                 }
                 Msg::ToggleTimedMode => {
-                    model.difficulty_settings.timed_mode =
-                        model.difficulty_settings.timed_mode.next();
+                    model.difficulty_settings.game_mode =
+                        model.difficulty_settings.game_mode.next();
                     config::save_settings(&model.difficulty_settings).unwrap_or_default();
                     model.game_state.difficulty_settings = model.difficulty_settings.clone();
                 }
@@ -284,11 +301,11 @@ pub fn update(model: &mut Model, msg: Msg) {
                     model.stats_show_rolling_average = !model.stats_show_rolling_average
                 }
                 Msg::ToggleTimedMode => {
-                    model.difficulty_settings.timed_mode =
-                        model.difficulty_settings.timed_mode.next();
+                    model.difficulty_settings.game_mode =
+                        model.difficulty_settings.game_mode.next();
                     config::save_settings(&model.difficulty_settings).unwrap_or_default();
                     model.game_state.difficulty_settings = model.difficulty_settings.clone();
-                    match stats::load_all_stats_for_mode(&model.difficulty_settings.timed_mode) {
+                    match stats::load_all_stats_for_mode(&model.difficulty_settings.game_mode) {
                         Ok(data) => model.stats_data = data,
                         Err(e) => {
                             eprintln!("Failed to load stats: {}", e);
