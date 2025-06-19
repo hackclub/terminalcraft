@@ -4,6 +4,12 @@ A simple command-line tool to create, update, analyze, and visualize graphs usin
 
 ---
 
+## Why this was created
+
+Being a competitive programmer, I have often encountered problems relating to graph theory. Sometimes, the process of solving the problem requires testing of various algorithms, and this was made to aid with that. Rather than having to write the entire algorithm again, this serves as a quick solution to gauge whether the algorithm will be useful or not.
+
+---
+
 ## Features
 
 - Input and update directed or undirected graphs interactively  
