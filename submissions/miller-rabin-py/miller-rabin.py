@@ -3,17 +3,23 @@
 import random as rnd
 import math
 import argparse as arg
+import curses as cs
 
 parser = arg.ArgumentParser(description="Miller-Rabin primality test implementation in Python.")
 
 parser.add_argument("type", help="specifies type of test; use 0 to manualy test a base; use 1 to randomly test a bunch of bases; use 2 to make \
 a deterministic test, assuming that extended riemann hypothesis is true or for numbers less than 3317044064679887385961980, its true without this hypothesis;\
- use 3 to calculate pi(x)-pi(y) (its inclusive with those bounds); use 4 to find next primes from a given number")
+ use 3 to calculate pi(x)-pi(y) (its inclusive with those bounds); use 4 to find next primes from a given number; use 5 for art")
 
 parser.add_argument("-f", "--fast", action="store_true", help="use fast mode, which will not print intermediate results,\
                     on example it will not list primes counted in 3rd mode, it will not show progress, and it will stop when any witness is found")
 
 test0 = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41]
+
+BLOCK_CHAR = "█"
+BORDER_CHAR = "│"
+TOP_BOTTOM_BORDER_CHAR = "─"
+CORNER_CHAR = "┌┐└┘"
 
 args = parser.parse_args()
 
@@ -101,6 +107,24 @@ def mil(n, fast=False):
     divisors.sort()
 
     return [com, witnesses, divisors]
+
+def check_size(stdscr, changebox = 0):
+    global height, width
+    size = stdscr.getmaxyx()
+    height, width = size[0]-1, 2*(size[1]//2)-2
+
+def draw_box(stdscr, box_height, box_width):
+    stdscr.addch(0, 0, CORNER_CHAR[0])
+    for x in range(1, box_width):
+        stdscr.addch(0, x, TOP_BOTTOM_BORDER_CHAR)
+    stdscr.addch(0, box_width, CORNER_CHAR[1])
+    for y in range(1, box_height):
+        stdscr.addch(y, 0, BORDER_CHAR)
+        stdscr.addch(y, box_width, BORDER_CHAR)
+    stdscr.addch(box_height, 0, CORNER_CHAR[2])
+    for x in range(1, box_width):
+        stdscr.addch(box_height, x, TOP_BOTTOM_BORDER_CHAR)
+    stdscr.addch(box_height, box_width, CORNER_CHAR[3])
 
 
 while True:
@@ -282,3 +306,95 @@ while True:
 
         print("\n")
         print(prime, "", "are the next primes\n")
+    
+    if test == "5" or test == "5f":
+        start_pos = digits(input("Look at primes after this number, it is possible to scroll later (2): "))
+        if start_pos < 2 or start_pos == None:
+            start_pos = 2
+        
+        def main(stdscr):
+            cs.curs_set(0)  # Hide cursor
+            stdscr.nodelay(1)
+            stdscr.timeout(1000)
+            stdscr.clear()
+            global start_pos
+            start = start_pos
+            change = 0
+            pos = [1, 1]
+            global height, width
+            
+            cs.start_color()
+            cs.init_pair(1, cs.COLOR_WHITE, cs.COLOR_BLACK)
+            cs.init_pair(2, cs.COLOR_GREEN, cs.COLOR_BLACK)
+            stdscr.bkgd(' ', cs.color_pair(1) | cs.A_BOLD)
+            
+            
+            check_size(stdscr)
+            primes = [i for i in range(start, start + (3*height)*(width-1)) if mil(i, True)[0] == False]
+
+            while True:
+                stdscr.clear()
+                prime_count = 0
+                check_size(stdscr)
+                width_2 = width - change
+                draw_box(stdscr, height, width_2)
+                stdscr.addstr(height, 1, "'q' - quit, 'j'/'k' - change width, PGUP/PGDN - scroll, arrows - cursor", cs.color_pair(1))
+                
+                
+                stdscr.addstr(pos[0], pos[1], "+", cs.color_pair(2))
+                
+                for n in primes:
+                    if 1+(n - start)//(width_2-1) <= height-1:
+                        p_pos = (1+(n - start)//(width_2-1), 1+(n - start)%(width_2-1))
+                        
+                        if pos[0] == p_pos[0] and pos[1] == p_pos[1]:
+                            stdscr.addstr(p_pos[0], p_pos[1], BLOCK_CHAR, cs.color_pair(2))
+                        else:
+                            stdscr.addstr(p_pos[0], p_pos[1], BLOCK_CHAR, cs.color_pair(1))
+                        
+                        prime_count += 1
+                    
+                        
+                if change > 17+len(str(start))+len(str(start + (width_2-2)*(height-2))):
+                    stdscr.addstr(1, width_2+2, f"Cursor on: {(pos[0]-1)*(width_2-1) + pos[1] - 1 + start}")
+                    stdscr.addstr(2, width_2+2, f"Primes on screen: {prime_count}")
+                    stdscr.addstr(3, width_2+2, f"Showing from {start} to {start-1 + (width_2-1)*(height-1)}")
+                
+                
+                key = stdscr.getch()
+                if key == ord('q'):
+                    break
+                elif key == ord('k') or key == ord('j'):
+                    change += 1 if key == ord('j') else -1
+                    if key == ord('j') and pos[1] > width_2 - 3:
+                        pos[1] -= 1
+                    if change < 0:
+                        change = 0
+                    elif change > width - 3:
+                        change = width - 3
+                elif key == cs.KEY_UP or key == cs.KEY_DOWN:
+                    pos[0] += 1 if key == cs.KEY_DOWN else -1
+                elif key == cs.KEY_LEFT or key == cs.KEY_RIGHT:
+                    pos[1] += 1 if key == cs.KEY_RIGHT else -1
+                elif key == cs.KEY_PPAGE or key == cs.KEY_NPAGE:
+                    start += (height-1) if key == cs.KEY_NPAGE else -(height-1)
+                    if start < 2:
+                        start = 2
+                    primes = [i for i in range(start, start + (6*height)*(width-1)) if mil(i, True)[0] == False]
+                
+                if pos[0] < 1:
+                    pos[0] = 1
+                elif pos[0] > height - 1:
+                    pos[0] = height - 1
+                
+                if pos[1] < 1:
+                    pos[1] = 1
+                elif pos[1] > width_2-1:
+                    pos[1] = width_2-1
+                stdscr.refresh()
+        
+        try:
+            cs.wrapper(main)
+        except cs.error:
+            print("Terminal size is too small, please resize it to at least 70 characters wide.")
+        break
