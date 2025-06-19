@@ -1,6 +1,4 @@
-from rich.console import Console
 from src.systems import Reactor, Engine, Sonar, LifeSupport
-console = Console()
 class Submarine:
     def __init__(self):
         self.hull_integrity = 100
@@ -25,15 +23,16 @@ class Submarine:
         self.noise_level = 0
         self.silent_running = False
     def update(self, depth):
+        messages = []
         self.systems["Reactor"].update()
         self.power_generated = self.systems["Reactor"].power_output
         self.power_consumed = sum(sys.power_draw for sys in self.systems.values() if sys.is_active and not sys.is_broken)
         if self.power_consumed > self.power_generated:
-            console.print("[bold red]POWER GRID OVERLOAD! Non-essential systems shutting down.[/bold red]")
+            messages.append("[bold red]POWER GRID OVERLOAD! Non-essential systems shutting down.[/bold red]")
             for name, system in self.systems.items():
                 if name not in self.essential_systems and system.is_active:
                     system.deactivate()
-                    console.print(f"[yellow]{name} has been shut down to conserve power.[/yellow]")
+                    messages.append(f"[yellow]{name} has been shut down to conserve power.[/yellow]")
                     self.power_consumed = sum(sys.power_draw for sys in self.systems.values() if sys.is_active and not sys.is_broken)
                     if self.power_consumed <= self.power_generated:
                         break
@@ -43,19 +42,20 @@ class Submarine:
         self.resources["oxygen"]["level"] = min(self.resources["oxygen"]["capacity"], self.resources["oxygen"]["level"])
         self.resources["oxygen"]["level"] = max(0, self.resources["oxygen"]["level"])
         if self.resources["oxygen"]["level"] == 0:
-            console.print("[bold red]CRITICAL: OXYGEN DEPLETED! Hull integrity failing...[/bold red]")
+            messages.append("[bold red]CRITICAL: OXYGEN DEPLETED! Hull integrity failing...[/bold red]")
             self.take_damage(5)
         fuel_consumed = self.systems["Engine"].get_fuel_consumption()
         self.resources["fuel"]["level"] -= fuel_consumed
         self.resources["fuel"]["level"] = max(0, self.resources["fuel"]["level"])
         if self.resources["fuel"]["level"] == 0 and self.systems["Engine"].is_active:
-            console.print("[bold red]Out of fuel! The engine sputters and dies.[/bold red]")
+            messages.append("[bold red]Out of fuel! The engine sputters and dies.[/bold red]")
             self.systems["Engine"].deactivate()
         base_noise = sum(sys.get_noise() for sys in self.systems.values() if hasattr(sys, 'get_noise'))
         if self.silent_running:
             base_noise //= 2
         self.noise_level = base_noise
         self.take_damage(depth // 100)
+        return messages
     def take_damage(self, amount):
         self.hull_integrity -= amount
         if self.crew_manager:
@@ -64,41 +64,47 @@ class Submarine:
     def get_system(self, name):
         return self.systems.get(name)
     def toggle_system(self, system_name):
+        messages = []
         if system_name in self.essential_systems:
-            console.print(f"[red]Cannot manually toggle essential system: {system_name}.[/red]")
-            return
+            messages.append(f"[red]Cannot manually toggle essential system: {system_name}.[/red]")
+            return messages
         system = self.get_system(system_name)
         if not system:
-            console.print(f"[red]System '{system_name}' not found.[/red]")
-            return
+            messages.append(f"[red]System '{system_name}' not found.[/red]")
+            return messages
         if system.is_active:
             system.deactivate()
-            console.print(f"[cyan]{system.name} is now Offline.[/cyan]")
+            messages.append(f"[cyan]{system.name} is now Offline.[/cyan]")
         else:
             system.activate()
-            console.print(f"[cyan]{system.name} is now Online.[/cyan]")
+            messages.append(f"[cyan]{system.name} is now Online.[/cyan]")
+        return messages
     def toggle_silent_running(self):
+        messages = []
         self.silent_running = not self.silent_running
         if self.silent_running:
-            console.print("[bold blue]Silent running enabled. Non-essential systems offline.[/bold blue]")
+            messages.append("[bold blue]Silent running enabled. Non-essential systems offline.[/bold blue]")
             for name, system in self.systems.items():
                 if name not in self.essential_systems and system.is_active:
                     system.deactivate()
-                    console.print(f"[yellow]{name} has been shut down for silent running.[/yellow]")
+                    messages.append(f"[yellow]{name} has been shut down for silent running.[/yellow]")
         else:
-            console.print("[bold blue]Silent running disabled. Systems must be manually reactivated.[/bold blue]")
-    def print_status(self):
-        console.print("\n[bold]Submarine Status Report[/bold]")
-        console.print(f"Hull Integrity: {self.hull_integrity}/{self.max_hull_integrity}%")
-        console.print("\n[bold]Power Grid[/bold]")
-        console.print(f"  - Generated: {self.power_generated:.0f} MW")
-        console.print(f"  - Consumed: {self.power_consumed:.0f} MW")
+            messages.append("[bold blue]Silent running disabled. Systems must be manually reactivated.[/bold blue]")
+        return messages
+    def get_status_report(self):
+        report = []
+        report.append("\n[bold]Submarine Status Report[/bold]")
+        report.append(f"Hull Integrity: {self.hull_integrity}/{self.max_hull_integrity}%")
+        report.append("\n[bold]Power Grid[/bold]")
+        report.append(f"  - Generated: {self.power_generated:.0f} MW")
+        report.append(f"  - Consumed: {self.power_consumed:.0f} MW")
         power_color = "green" if self.power_generated >= self.power_consumed else "red"
-        console.print(f"  - Net: [bold {power_color}]{self.power_generated - self.power_consumed:.0f} MW[/bold {power_color}]")
-        console.print("\n[bold]Onboard Resources[/bold]")
+        report.append(f"  - Net: [bold {power_color}]{self.power_generated - self.power_consumed:.0f} MW[/bold {power_color}]")
+        report.append("\n[bold]Onboard Resources[/bold]")
         for name, data in self.resources.items():
-            console.print(f"  - {name.replace('_', ' ').title()}: {data['level']}/{data['capacity']}")
-        console.print("\n[bold]Systems[/bold]")
+            report.append(f"  - {name.replace('_', ' ').title()}: {data['level']}/{data['capacity']}")
+        report.append("\n[bold]Systems[/bold]")
         for system in self.systems.values():
-            console.print(system.get_status())
-        console.print(f"\nNoise Level: {self.noise_level}")
+            report.append(system.get_status())
+        report.append(f"\nNoise Level: {self.noise_level}")
+        return report

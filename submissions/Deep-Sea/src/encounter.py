@@ -1,9 +1,7 @@
 import random
-from rich.console import Console
 from src.monster import Monster
 from src.outpost import Outpost
 from src.faction import Faction
-console = Console()
 class EncounterManager:
     def __init__(self, submarine, crew_manager, research_manager):
         self.submarine = submarine
@@ -23,33 +21,37 @@ class EncounterManager:
         self.active_monster = None
         self.active_outpost = None
     def update(self, depth):
+        messages = []
         encounter_chance = 0.3
         if self.research_manager.upgrades["improved_sonar"]["applied"]:
             encounter_chance += self.submarine.noise_level / 100
         if self.submarine.systems["Sonar"].is_active and random.random() < encounter_chance:
-            self.trigger_encounter(depth)
+            messages.extend(self.trigger_encounter(depth))
+        return messages
     def trigger_encounter(self, depth):
+        messages = []
         self.active_monster = None
         self.active_outpost = None
         encounter_type = random.choice(["fauna", "point_of_interest", "outpost"])
         if encounter_type == "fauna":
             species_name = random.choice(list(self.fauna.keys()))
             species_data = self.fauna[species_name]
-            console.print(f"[bold magenta]Sonar has detected a lifeform! It looks like a {species_name}.[/bold magenta]")
+            messages.append(f"[bold magenta]Sonar has detected a lifeform! It looks like a {species_name}.[/bold magenta]")
             if species_data["aggressive"]:
-                console.print(f"[bold red]The {species_name} is aggressive![/bold red]")
+                messages.append(f"[bold red]The {species_name} is aggressive![/bold red]")
                 loot = {species_data["loot"]: 1}
                 self.active_monster = Monster(species_name, species_data["health"], species_data["attack"], loot)
             else:
-                self.research_manager.add_sample(species_data["loot"], 1)
+                messages.extend(self.research_manager.add_sample(species_data["loot"], 1))
         elif encounter_type == "point_of_interest":
-            console.print("[bold yellow]Sonar has detected a strange geological formation.[/bold yellow]")
+            messages.append("[bold yellow]Sonar has detected a strange geological formation.[/bold yellow]")
             if random.random() < 0.5:
                 resource_type = random.choice(['fuel', 'spare_parts'])
                 amount = random.randint(5, 20)
                 self.submarine.resources[resource_type]['level'] += amount
-                console.print(f"[bold green]We salvaged {amount} units of {resource_type}![/bold green]")
+                messages.append(f"[bold green]We salvaged {amount} units of {resource_type}![/bold green]")
         elif encounter_type == "outpost":
             outpost_name = random.choice(list(self.outposts.keys()))
             self.active_outpost = self.outposts[outpost_name]
-            console.print(f"[bold yellow]Sonar has detected an outpost: {self.active_outpost.name}[/bold yellow]")
+            messages.append(f"[bold yellow]Sonar has detected an outpost: {self.active_outpost.name}[/bold yellow]")
+        return messages

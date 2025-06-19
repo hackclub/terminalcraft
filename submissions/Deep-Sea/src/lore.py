@@ -21,20 +21,21 @@ class LoreManager:
         if lore_id in ALL_LORE and lore_id not in self.unlocked_lore:
             self.unlocked_lore.add(lore_id)
             entry = ALL_LORE[lore_id]
-            console.print(f"\n[bold magenta]New Lore Unlocked: {entry.title}[/bold magenta]")
-    def print_lore_index(self):
-        console.print("\n[bold]Lore Databank[/bold]")
+            return [f"\n[bold magenta]New Lore Unlocked: {entry.title}[/bold magenta]"]
+        return []
+    def get_lore_index_report(self):
+        report = ["\n[bold]Lore Databank[/bold]"]
         if not self.unlocked_lore:
-            console.print("No lore entries unlocked.")
-            return
+            report.append("No lore entries unlocked.")
+            return report
         for i, lore_id in enumerate(self.unlocked_lore, 1):
             entry = ALL_LORE[lore_id]
-            console.print(f" {i}. {entry.title}")
-        console.print("\nType 'lore [number]' to read an entry.")
-    def print_lore_entry(self, index):
+            report.append(f" {i}. {entry.title}")
+        report.append("\nType 'lore [number]' to read an entry.")
+        return report
+    def get_lore_entry_report(self, index):
         if not 1 <= index <= len(self.unlocked_lore):
-            console.print("[red]Invalid lore entry number.[/red]")
-            return
+            return ["[red]Invalid lore entry number.[/red]"]
         lore_id = list(self.unlocked_lore)[index - 1]
         entry = ALL_LORE[lore_id]
-        console.print(Panel(entry.content, title=entry.title, border_style="magenta"))
+        return [f"[bold magenta]{entry.title}[/bold magenta]", entry.content]

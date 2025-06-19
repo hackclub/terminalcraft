@@ -49,20 +49,25 @@ class MissionManager:
         self.completed_quests = set()
         self.add_quest("main_1") 
     def add_quest(self, quest_id):
+        messages = []
         if quest_id in ALL_QUESTS and quest_id not in self.active_quests and quest_id not in self.completed_quests:
             self.active_quests[quest_id] = ALL_QUESTS[quest_id]
-            console.print(f"\n[bold yellow]New Quest Started: {self.active_quests[quest_id].title}[/bold yellow]")
+            messages.append(f"\n[bold yellow]New Quest Started: {self.active_quests[quest_id].title}[/bold yellow]")
+        return messages
     def update(self, game_state):
+        messages = []
         quests_to_complete = []
-        for quest_id, quest in self.active_quests.items():
+        for quest_id, quest in list(self.active_quests.items()):
             for objective in quest.objectives:
                 if not objective.completed:
-                    self.check_objective(objective, game_state)
+                    messages.extend(self.check_objective(objective, game_state))
             if quest.is_complete():
                 quests_to_complete.append(quest_id)
         for quest_id in quests_to_complete:
-            self.complete_quest(quest_id)
+            messages.extend(self.complete_quest(quest_id))
+        return messages
     def check_objective(self, objective, game_state):
+        messages = []
         completed = False
         if objective.type == 'reach_depth' and game_state['depth'] >= objective.target:
             completed = True
@@ -70,38 +75,45 @@ class MissionManager:
             for poi in game_state['nearby_pois']:
                 if objective.target in poi.name and not poi.visited:
                     poi.visited = True 
-                    console.print(f"[cyan]You have arrived at the {poi.name}.[/cyan]")
+                    messages.append(f"[cyan]You have arrived at the {poi.name}.[/cyan]")
                     completed = True
                     break
         elif objective.type == 'collect_item' and self.research_manager.has_item(objective.target):
             completed = True
         if completed:
             objective.completed = True
-            console.print(f"[bold green]Objective Complete:[/bold green] {objective.description}")
-            self.crew_manager.broadcast_event('mission_objective_complete')
+            messages.append(f"[bold green]Objective Complete:[/bold green] {objective.description}")
+            messages.extend(self.crew_manager.broadcast_event('mission_objective_complete'))
+        return messages
     def complete_quest(self, quest_id):
+        messages = []
         quest = self.active_quests.pop(quest_id)
         quest.completed = True
         self.completed_quests.add(quest_id)
-        console.print(f"\n[bold green]Quest Complete: {quest.title}[/bold green]")
+        messages.append(f"\n[bold green]Quest Complete: {quest.title}[/bold green]")
         if quest.rewards.get("experience"):
             for member in self.crew_manager.crew.values():
-                member.gain_experience(quest.rewards["experience"])
+                messages.extend(member.gain_experience(quest.rewards["experience"]))
         if quest.rewards.get("spare_parts"):
             self.research_manager.submarine.resources['spare_parts']['level'] += quest.rewards["spare_parts"]
+            messages.append(f"[yellow]Added {quest.rewards['spare_parts']} spare parts.[/yellow]")
         if quest.next_quest:
-            self.add_quest(quest.next_quest)
+            messages.extend(self.add_quest(quest.next_quest))
         if quest.lore_unlock:
-            self.lore_manager.unlock_lore(quest.lore_unlock)
-    def print_journal(self):
-        console.print("\n[bold]Captain's Log[/bold]")
+            lore_messages = self.lore_manager.unlock_lore(quest.lore_unlock)
+            if lore_messages:
+                messages.extend(lore_messages)
+        return messages
+    def get_journal_report(self):
+        report = ["\n[bold]Captain's Log[/bold]"]
         if not self.active_quests:
-            console.print("No active quests.")
-            return
+            report.append("No active quests.")
+            return report
         for quest in self.active_quests.values():
             faction_tag = f" ([italic]{quest.faction}[/italic])" if quest.faction else ""
-            console.print(f"\n[cyan]{quest.title}{faction_tag}[/cyan]")
-            console.print(f"  [dim]{quest.description}[/dim]")
+            report.append(f"\n[cyan]{quest.title}{faction_tag}[/cyan]")
+            report.append(f"  [dim]{quest.description}[/dim]")
             for obj in quest.objectives:
                 status = "[green](Completed)[/green]" if obj.completed else ""
-                console.print(f"  - {obj.description} {status}")
+                report.append(f"  - {obj.description} {status}")
+        return report

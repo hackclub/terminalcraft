@@ -1,6 +1,5 @@
 import random
 from rich.console import Console
-console = Console()
 class PointOfInterest:
     def __init__(self, name, poi_type, depth):
         self.name = name
@@ -52,16 +51,17 @@ class Map:
             if abs(poi.depth - depth) <= range:
                 nearby_pois.append(poi)
         return nearby_pois
-    def print_map(self, player_depth):
-        console.print("\n[bold]Submarine Cartography[/bold]")
+    def get_map_report(self, player_depth):
+        report = ["\n[bold]Submarine Cartography[/bold]"]
         for zone in self.zones:
             player_marker = ""
             if zone.start_depth <= player_depth < zone.end_depth:
                 player_marker = " < (You are here)"
-            console.print(f"\n[cyan] - {zone.name} ({zone.start_depth}m - {zone.end_depth}m){player_marker}[/cyan]")
+            report.append(f"\n[cyan] - {zone.name} ({zone.start_depth}m - {zone.end_depth}m){player_marker}[/cyan]")
             if not zone.points_of_interest:
-                console.print("    [italic]No points of interest detected.[/italic]")
+                report.append("    [italic]No points of interest detected.[/italic]")
             else:
                 for poi in sorted(zone.points_of_interest, key=lambda p: p.depth):
                     visited_marker = "[green](Visited)[/green]" if poi.visited else ""
-                    console.print(f"    - {poi.name} at {poi.depth}m {visited_marker}")
+                    report.append(f"    - {poi.name} at {poi.depth}m {visited_marker}")
+        return report

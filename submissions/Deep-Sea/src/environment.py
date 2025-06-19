@@ -1,6 +1,4 @@
 import random
-from rich.console import Console
-console = Console()
 class EnvironmentManager:
     def __init__(self, submarine):
         self.submarine = submarine
@@ -10,16 +8,22 @@ class EnvironmentManager:
             "magnetic_anomaly": {"description": "A magnetic anomaly interferes with the sonar.", "effect": self.magnetic_anomaly}
         }
     def update(self):
-        if random.random() < 0.1: 
+        messages = []
+        if random.random() < 0.1:
             event_name = random.choice(list(self.events.keys()))
             event = self.events[event_name]
-            console.print(f"[bold yellow]Environmental Hazard: {event['description']}[/bold yellow]")
-            event['effect']()
+            messages.append(f"[bold yellow]Environmental Hazard: {event['description']}[/bold yellow]")
+            messages.extend(event['effect']())
+        return messages
     def strong_current(self):
         self.submarine.resources["fuel"]["level"] -= 5
+        return []
     def hydrothermal_vent(self):
         self.submarine.hull_integrity -= 5
+        return []
     def magnetic_anomaly(self):
+        messages = []
         if self.submarine.systems["Sonar"].is_active:
             self.submarine.systems["Sonar"].deactivate()
-            console.print("[bold red]Sonar has been knocked offline by magnetic interference![/bold red]")
+            messages.append("[bold red]Sonar has been knocked offline by magnetic interference![/bold red]")
+        return messages

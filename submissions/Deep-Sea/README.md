@@ -12,17 +12,24 @@ A complex and immersive deep-sea submarine exploration simulator with RPG and su
 - **Stealth & Combat**: Engage in tactical combat with terrifying monsters or use silent running to slip by undetected.
 - **Trading & Factions**: Dock at outposts, trade resources, and build your reputation with the factions that inhabit the deep.
 - **Psychological Horror**: The abyss is a terrifying place. Protect your crew from panic, hallucinations, and the crushing weight of the darkness.
+- **Text-Based UI**: A fully interactive, terminal-based user interface powered by Textual.
 
 ## Installation
 
 1.  **Clone the repository:**
-    ```sh
-    git clone or download the zip
-    ```
+    
 2.  **Install dependencies:**
     ```sh
     pip install -r requirements.txt
     ```
+
+## How to Run
+
+To start the game, run the following command in your terminal:
+
+```sh
+py tui.py
+```
 
 ## How to Play
 
