@@ -60,7 +60,7 @@ however I recomend you play multiple times cause theres more than one ending
 
 ### Contributing
 
-I very very much welcome contributions! If you encounter any issues or have ideas for improvements, please submit an issue, and we will get back to you as soon as possible.
+I very very much welcome contributions! If you encounter any issues or have ideas for improvements, please submit an issue, and I will get back to you as soon as possible.
 
 ### AI Usage
 
