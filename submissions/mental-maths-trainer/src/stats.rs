@@ -1,5 +1,5 @@
 // src/stats_io.rs
-use crate::game::{InputMode, TimedModeOption};
+use crate::game::{InputMode, GameModeOption};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -12,7 +12,7 @@ use std::{
 pub struct GameSessionStats {
     pub score: u32,
     pub timestamp: DateTime<Utc>,
-    pub timed_mode: TimedModeOption,
+    pub timed_mode: GameModeOption,
 }
 
 // Struct to store statistics for a single problem
@@ -53,9 +53,9 @@ fn get_stats_path() -> Result<PathBuf, io::Error> {
 }
 
 pub fn load_all_stats_for_mode(
-    timed_mode: &TimedModeOption,
+    timed_mode: &GameModeOption,
 ) -> Result<Vec<GameSessionStats>, Box<dyn std::error::Error>> {
-    if *timed_mode == TimedModeOption::Unlimited {
+    if *timed_mode == GameModeOption::Unlimited {
         return Ok(Vec::new());
     }
     let path = get_stats_path()?;
@@ -77,7 +77,7 @@ pub fn load_all_stats_for_mode(
 pub fn append_game_session_stats(
     session_stats: &GameSessionStats,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    if session_stats.timed_mode == TimedModeOption::Unlimited {
+    if session_stats.timed_mode == GameModeOption::Unlimited {
         return Ok(());
     }
     let path = get_stats_path()?;
