@@ -88,6 +88,7 @@ class TermiSTL(App):
         ("pagedown", "adjust_zoom_level(0.83333)", "Zoom Out"),
         ("a", "previous_stl", "Previous STL"),
         ("d", "next_stl", "Next STL"),
+        ("r", "toggle_auto_rotation", "Rotate"),
         ("delete", "delete_current_stl", "Delete STL"),
         ("q", "quit_application", "Quit"),
     ]
@@ -102,6 +103,9 @@ class TermiSTL(App):
         self.current_directory: Path | None = None
         self.stl_files_in_directory: list[Path] = []
         self.current_stl_index_in_dir: int = -1
+
+        self.auto_rotate_mode = 0
+        self.auto_rotate_timer = None
 
         self.camera_rotation_x_radians = 0.0
         self.camera_rotation_y_radians = 0.0
@@ -118,6 +122,12 @@ class TermiSTL(App):
 
         self.file_pending_deletion_confirmation: Path | None = None
         self.delete_confirmation_timer_object = None
+
+    def _stop_auto_rotation(self):
+        if self.auto_rotate_timer:
+            self.auto_rotate_timer.stop()
+            self.auto_rotate_timer = None
+            self.auto_rotate_mode = 0
 
     def _apply_view_preset(self, view: str):
         if view == 'front':
@@ -366,23 +376,47 @@ class TermiSTL(App):
 
     def action_set_view(self, view: str):
         self._clear_pending_deletion_confirmation()
+        self._stop_auto_rotation()
         self._apply_view_preset(view)
         self.request_throttled_update()
 
     def action_rotate_x(self, delta_radians: float):
         self._clear_pending_deletion_confirmation()
+        self._stop_auto_rotation()
         self.camera_rotation_x_radians += delta_radians
         self.request_throttled_update()
 
     def action_rotate_y(self, delta_radians: float):
         self._clear_pending_deletion_confirmation()
+        self._stop_auto_rotation()
         self.camera_rotation_y_radians += delta_radians
         self.request_throttled_update()
 
     def action_rotate_z(self, delta_radians: float):
         self._clear_pending_deletion_confirmation()
+        self._stop_auto_rotation()
         self.camera_rotation_z_radians += delta_radians
         self.request_throttled_update()
+
+    def auto_rotate_step(self):
+        if self.auto_rotate_mode == 1:
+            self.camera_rotation_y_radians += 0.01
+        elif self.auto_rotate_mode == 2:
+            self.camera_rotation_x_radians += 0.01
+        elif self.auto_rotate_mode == 3:
+            self.camera_rotation_y_radians += 0.01
+            self.camera_rotation_x_radians += 0.01
+        self.request_throttled_update()
+
+    def action_toggle_auto_rotation(self):
+        self.auto_rotate_mode = (self.auto_rotate_mode + 1) % 4
+        if self.auto_rotate_mode > 0:
+            if self.auto_rotate_timer is None:
+                self.auto_rotate_timer = self.set_interval(1/60, self.auto_rotate_step)
+        else:
+            if self.auto_rotate_timer:
+                self.auto_rotate_timer.stop()
+                self.auto_rotate_timer = None
         
     def action_quit_application(self):
         self.exit()
@@ -462,6 +496,7 @@ class TermiSTL(App):
 
     def on_mouse_down(self, event: MouseDown) -> None:
         self._clear_pending_deletion_confirmation()
+        self._stop_auto_rotation()
         if self.query_one("#preview", Static).region.contains(event.x, event.y):
             self.dragging = True
             self.last_mouse_x = event.x
