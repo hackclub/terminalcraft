@@ -69,41 +69,66 @@ impl Problem {
             answer,
         }
     }
+    
+    pub fn check_answer(&self, user_answer: i32) -> bool {
+        return user_answer == self.answer;
+    
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub enum TimedModeOption {
+pub enum GameModeOption {
     ThirtySeconds,
     SixtySeconds,
     OneTwentySeconds,
     Unlimited,
+    EstimationEasy,
+    EstimationHard,
 }
 
-impl TimedModeOption {
+impl GameModeOption {
     pub fn to_duration(&self) -> Option<Duration> {
         match self {
-            TimedModeOption::ThirtySeconds => Some(Duration::from_secs(30)),
-            TimedModeOption::SixtySeconds => Some(Duration::from_secs(60)),
-            TimedModeOption::OneTwentySeconds => Some(Duration::from_secs(120)),
-            TimedModeOption::Unlimited => None,
+            GameModeOption::ThirtySeconds => Some(Duration::from_secs(30)),
+            GameModeOption::SixtySeconds => Some(Duration::from_secs(60)),
+            GameModeOption::OneTwentySeconds => Some(Duration::from_secs(120)),
+            GameModeOption::EstimationEasy => Some(Duration::from_secs(60)),
+            GameModeOption::EstimationHard => Some(Duration::from_secs(60)),
+            GameModeOption::Unlimited => None,
         }
     }
 
     pub fn next(&self) -> Self {
         match self {
-            TimedModeOption::ThirtySeconds => TimedModeOption::SixtySeconds,
-            TimedModeOption::SixtySeconds => TimedModeOption::OneTwentySeconds,
-            TimedModeOption::OneTwentySeconds => TimedModeOption::Unlimited,
-            TimedModeOption::Unlimited => TimedModeOption::ThirtySeconds,
+            GameModeOption::ThirtySeconds => GameModeOption::SixtySeconds,
+            GameModeOption::SixtySeconds => GameModeOption::OneTwentySeconds,
+            GameModeOption::OneTwentySeconds => GameModeOption::EstimationEasy,
+            GameModeOption::EstimationEasy => GameModeOption::EstimationHard,
+            GameModeOption::EstimationHard => GameModeOption::Unlimited,
+            GameModeOption::Unlimited => GameModeOption::ThirtySeconds,
         }
     }
 
     pub fn to_string(&self) -> String {
         match self {
-            TimedModeOption::ThirtySeconds => "30 Seconds".to_string(),
-            TimedModeOption::SixtySeconds => "60 Seconds".to_string(),
-            TimedModeOption::OneTwentySeconds => "120 Seconds".to_string(),
-            TimedModeOption::Unlimited => "Unlimited".to_string(),
+            GameModeOption::ThirtySeconds => "30 Seconds".to_string(),
+            GameModeOption::SixtySeconds => "60 Seconds".to_string(),
+            GameModeOption::OneTwentySeconds => "120 Seconds".to_string(),
+            GameModeOption::EstimationEasy => "Estimation (within 5%)".to_string(),
+            GameModeOption::EstimationHard => "Estimation (within 10%)".to_string(),
+            GameModeOption::Unlimited => "Unlimited".to_string(),
+        }
+    }
+    
+    pub fn is_estimation_mode(&self) -> bool {
+        matches!(self, GameModeOption::EstimationEasy | GameModeOption::EstimationHard)
+    }
+    
+    pub fn get_estimation_threshold(&self) -> Option<f64> {
+        match self {
+            GameModeOption::EstimationEasy => Some(0.10),
+            GameModeOption::EstimationHard => Some(0.05),
+            _ => None,
         }
     }
 }
@@ -120,7 +145,7 @@ pub struct DifficultySettings {
     pub max_val: i32,
     pub allowed_ops: Vec<Operation>,
     pub input_mode: InputMode,
-    pub timed_mode: TimedModeOption,
+    pub game_mode: GameModeOption,
 }
 
 impl Default for DifficultySettings {
@@ -135,7 +160,7 @@ impl Default for DifficultySettings {
                 Operation::Divide,
             ],
             input_mode: InputMode::EnterToSubmit,
-            timed_mode: TimedModeOption::Unlimited,
+            game_mode: GameModeOption::Unlimited,
         }
     }
 }
