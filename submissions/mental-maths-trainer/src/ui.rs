@@ -108,12 +108,21 @@ fn draw_problem_screen(model: &Model, frame: &mut Frame) {
 
     // Controls/Instructions
     let controls_text = if model.game_state.playing {
-        match model.game_state.difficulty_settings.input_mode {
-            InputMode::EnterToSubmit => {
-                "Type your answer. Press <Enter> to Submit, <Q> to Main Menu."
-            }
-            InputMode::AutoSubmit => {
-                "Type your answer. Correct answer submits automatically. <Q> to Main Menu."
+        if model
+            .game_state
+            .difficulty_settings
+            .game_mode
+            .is_estimation_mode()
+        {
+            "Type your estimate. Press <Enter> to Submit, <Q> to Main Menu."
+        } else {
+            match model.game_state.difficulty_settings.input_mode {
+                InputMode::EnterToSubmit => {
+                    "Type your answer. Press <Enter> to Submit, <Q> to Main Menu."
+                }
+                InputMode::AutoSubmit => {
+                    "Type your answer. Correct answer submits automatically. <Q> to Main Menu."
+                }
             }
         }
     } else {
@@ -186,23 +195,27 @@ fn draw_settings_screen(model: &Model, frame: &mut Frame) {
                 "Input Mode: ".into(),
                 match current_settings.input_mode {
                     InputMode::EnterToSubmit => "Enter to Submit".green(),
-                    InputMode::AutoSubmit => "Auto Submit".green(),
+                    InputMode::AutoSubmit => match current_settings.input_mode {
+                        InputMode::EnterToSubmit => "Enter to Submit".green(),
+                        InputMode::AutoSubmit => {
+                            if !current_settings.game_mode.is_estimation_mode() {
+                                "Auto Submit".green()
+                            } else {
+                                "Enter to submit (estimation mode)".gray()
+                            }
+                        }
+                    },
                 }
                 .into(),
                 " (Press 'I' to Toggle)".into(),
             ])
             .alignment(Alignment::Center),
         ),
-        // Timed Mode Setting
+        // Game Mode Setting
         ListItem::new(
             Line::from(vec![
-                "Timed Mode: ".into(),
-                current_settings
-                    .timed_mode
-                    .to_string()
-                    .green()
-                    .bold()
-                    .into(),
+                "Game Mode: ".into(),
+                current_settings.game_mode.to_string().green().bold().into(),
                 " (Press 'T' to Toggle)".into(),
             ])
             .alignment(Alignment::Center),
@@ -247,7 +260,7 @@ fn draw_stats_screen(model: &Model, frame: &mut Frame) {
                     "Stats for ".into(),
                     model
                         .difficulty_settings
-                        .timed_mode
+                        .game_mode
                         .to_string()
                         .green()
                         .bold(),
@@ -312,7 +325,7 @@ fn draw_stats_screen(model: &Model, frame: &mut Frame) {
         "Stats for ".into(),
         model
             .difficulty_settings
-            .timed_mode
+            .game_mode
             .to_string()
             .green()
             .bold(),
