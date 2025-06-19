@@ -9,7 +9,10 @@ A simple CLI app to help you with common git tasks.
 ## Installation
 
 ```bash
-npm install -g git-helper
+sudo npm install -g git-helper-crabbys@1.0.0
+#or
+npm install -g git-helper-crabbys@1.0.0
+
 ```
 
 ## Usage
