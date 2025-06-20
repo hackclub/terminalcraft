@@ -10,6 +10,7 @@ import contextlib
 import io
 import py7zr
 import queue
+import colorama
 
 # finds stuff, works with PyInstaller too (hopefully)
 def find_resource_path(rel):
@@ -71,17 +72,25 @@ def get_stuff_from_video(vid, out, speed=24):
 
 # image to ascii, not rocket science
 def pic_to_ascii(img, wide=80):
-    chars = "@%#*+=-:. "
-    pic = Image.open(img).convert('L')
-    ratio = pic.height / pic.width
+    # Extended ASCII ramp for more depth
+    chars = "@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?i!lI;:,\"•`'. ☐"
+    from colorama import Style
+    pic = Image.open(img)
+    gray = pic.convert('L')
+    color = pic.convert('RGB')
+    ratio = gray.height / gray.width
     tall = int(ratio * wide * 0.55)
-    pic = pic.resize((wide, tall))
-    px = pic.getdata()
+    gray = gray.resize((wide, tall))
+    color = color.resize((wide, tall))
+    px = list(gray.getdata())
+    px_color = list(color.getdata())
     out = ''
-    for i, p in enumerate(px):
-        out += chars[p * len(chars) // 256]
+    for i, (p, rgb) in enumerate(zip(px, px_color)):
+        r, g, b = rgb
+        out += f'\033[38;2;{r};{g};{b}m{chars[p * (len(chars) - 1) // 255]}'
         if (i + 1) % wide == 0:
-            out += '\n'
+            out += Style.RESET_ALL + '\n'
+    out += Style.RESET_ALL
     return out
 
 # yields ascii frames, lazy style
@@ -284,7 +293,7 @@ def main():
     extract_and_set_ffmpeg_bin()  # pulls ffmpeg from zip, sets env, whatever
     print('Turns videos into ugly terminal art. With sound.')
     print('Made by a lazy coder. @github/SajagIN')
-    vid_input = input('Video file? (default: BadApple.mp4): ').strip()
+    vid_input = input('Video file? Please Enter full path (default: BadApple.mp4): ').strip()
     vid = find_resource_path(vid_input) if vid_input else find_resource_path('BadApple.mp4')
     temp = input('Temp folder? (default: temp): ').strip() or 'temp'
     try:
@@ -305,4 +314,5 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    main()  # run it, or not, idc
+    while True:
+        main()  # run it, or not, idc
