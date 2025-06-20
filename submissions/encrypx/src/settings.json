@@ -1,0 +1,11 @@
+{
+	"vigenere": {
+		"bruteforce decode": {
+			"pause percentage": 50
+		}
+	},
+	"logging": {
+		"debug": true,
+		"warning": true
+	}
+}
