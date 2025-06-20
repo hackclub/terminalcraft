@@ -9,9 +9,9 @@ Task Organizer is a terminal-based tool that helps you plan, organize, and visua
 - Save and load your schedule from disk
 
 ## How to Run
-1. **Run the binaries** 
-    - For Windows: `main.exe`
-    - For Linux: `./main.bin`
+1. **Run the executables** 
+    - For Windows: `TaskOrganizer.exe`
+    - For Linux: `./TaskOrganizer.bin`
 2. **Run the source code**:
     1.**Install dependencies:**
       - Python 3.7 or higher
@@ -45,5 +45,5 @@ Task Organizer is a terminal-based tool that helps you plan, organize, and visua
 I always wanted something to quickly plan the thing I need to do for the day. I am not realy good at using a mouse - I always click the wrong thing. So, a schedule app that uses only keyboard made my life much easier.
 
 # Dependencies
-On Windows: rich and keyboard
-On Linux: rich
+- On Windows: rich and keyboard
+- On Linux: rich
