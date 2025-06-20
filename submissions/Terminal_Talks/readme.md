@@ -1,112 +1,75 @@
-# TerminalTalks
+# TerminalTalks 🎙️💻  
+TerminalTalks is an **offline, voice-powered command suggestion tool** for Linux. Speak natural phrases like _"list files"_ or _"check IP,"_ and it will suggest the appropriate terminal command like `ls` or `ip a`. Perfect for when you forget commands or want hands-free Linux exploration!
 
-TerminalTalks is an offline, voice-powered command suggestion tool for Linux. Speak natural phrases like “list files” or “check IP,” and it will suggest the appropriate terminal command, such as `ls` or `ip a`. Designed for quick use, it's especially helpful for those who forget common commands or want to explore Linux hands-free.
+## ✨ Features  
+- 🛜 **Works completely offline** (no internet required after setup)  
+- 🇮🇳 Supports **Indian English accent** using Vosk STT model  
+- 📋 Maps speech to **150+ common Linux commands**  
+- ⚡ **Simple one-command install** script  
+- 🔧 Easy to modify and expand command set  
+- 🐧 Beginner-friendly, works on most Linux systems  
 
-------------------------------------------------------------
+## 🛠️ How It Works  
+1. Run `terminal-talks` from any terminal  
+2. It starts listening to your voice 🎤  
+3. Speech is transcribed locally using Vosk  
+4. Searches for matching command in its dictionary  
+5. Shows the best Linux command match  
+6. Copy and run it manually  
 
-FEATURES
+**Example:**  
+🎤 You say: _"list all files"_  
+💻 It shows: `Suggested command: ls -a`  
 
-- Works completely offline (no internet required after setup)
-- Supports Indian English accent using Vosk STT model
-- Maps speech to 150+ common Linux commands
-- Simple one-command install script
-- Easy to modify and expand command set
-- Beginner-friendly, works on most Linux systems
+## 📥 Installation  
+> **Note:** Before installing, you must manually download the offline model due to file size.  
 
-------------------------------------------------------------
+### Step 1 — Download Speech Recognition Model  
+1. Visit: [https://alphacephei.com/vosk/models](https://alphacephei.com/vosk/models)  
+2. Download: `vosk-model-en-in-0.51`  
+3. Extract and rename folder to `model`  
+4. Place in TerminalTalks project directory  
 
-HOW IT WORKS
-
-1. You run the command `terminal-talks` from any terminal.
-2. It starts listening to your voice using the default microphone.
-3. Speech is transcribed locally using the Vosk model.
-4. It searches for a matching command in its mapping dictionary.
-5. The best-matching Linux command is shown as output.
-6. You can copy and run it manually.
-
-Example:
-
-You say: “list all files”  
-It shows: Suggested command: `ls -a`
-
-------------------------------------------------------------
-
-INSTALLATION
-
-NOTE: Before installing, you must manually download the offline model due to file size.
-
-STEP 1 — Download the Speech Recognition Model:
-
-- Visit: https://alphacephei.com/vosk/models
-- Download: vosk-model-en-in-0.51
-- Extract the folder
-- Rename the folder to: model
-- Move this folder into the TerminalTalks project directory
-
-Your final folder structure should look like:
-
-TerminalTalks/
-├── install.sh
-├── terminal-talks
-├── requirements.txt
-├── README.md
-└── model/
-    └── vosk files...
-
-STEP 2 — Run the Install Script:
-
-Make sure you're inside the `TerminalTalks` folder:
-
-```bash
-chmod +x install.sh
+### Step 2 — Run Install Script  
+```bash  
+chmod +x install.sh  
 ./install.sh
 ```
-What this does:
+Step 3 — Use the Tool
+```bash
+terminal-talks  
+```
+Try saying: "make a folder" → Shows: Suggested command: mkdir
 
-Installs all Python packages listed in requirements.txt
-Creates a global command terminal-talks accessible from any directory
+📚 Example Commands
+You Say	Suggested Command
+"list files"	ls
+"show all files"	ls -a
+"make a folder"	mkdir
+"remove a directory"	rm -r
+"check IP address"	ip a
+"what's my current path"	pwd
+"clear the screen"	clear
+"view running processes"	top
+Over 150 phrases supported!
 
-STEP 3 — Use the Tool:
+## ⚙️ Requirements
+---Python 3.7+
+---Linux-based system (Ubuntu, Arch, Debian, etc.)
+---Working microphone
 
-After installation:
+~1 GB free space for model
 
-terminal-talks
-
-Say something like “make a folder”It shows: Suggested command: mkdir
-
-EXAMPLES OF SUPPORTED COMMANDS
-
-You Say                      →  Suggested Command
-
-"list files"                →  ls"show all files"            →  ls -a"make a folder"             →  mkdir"remove a directory"        →  rm -r"check IP address"          →  ip a"what’s my current path"    →  pwd"clear the screen"          →  clear"view running processes"    →  top
-
-More than 150 phrases are supported.
-
-REQUIREMENTS
-
-Python 3.7+
-
-Linux-based system (Ubuntu, Arch, Debian, etc.)
-
-Working microphone input
-
-~1 GB free space for the speech model
-
-TESTED ON
-
+## ✔️ Tested On
 Ubuntu 22.04 ✅
-
 Arch Linux ✅
-
 Debian 12 ✅
 
-Tested by 3 users on various machines.
+## 🚀 Built For
+This project was built for Hack Club's TerminalCraft 🛠️
 
-BUILT FOR
+## 📬 Contact
+Created by Sameer Kulhari
+GitHub | Repository
 
-This project was built for Hack Club’s TerminalCrafthttps://terminalcraft.hackclub.dev
-
-
-CONTACT
-
-Created by Sameer KulhariGitHub: https://github.com/sameer-kulhariRepository: https://github.com/sameer-kulhari/TerminalTalks
+💡 Pro Tip: Add your own custom commands by editing the mapping dictionary!
