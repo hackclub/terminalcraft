@@ -1,4 +1,4 @@
-# TerminalTalks 🎙️💻  
+#                               💻🎙️ TerminalTalks 🎙️💻  
 TerminalTalks is an **offline, voice-powered command suggestion tool** for Linux. Speak natural phrases like _"list files"_ or _"check IP,"_ and it will suggest the appropriate terminal command like `ls` or `ip a`. Perfect for when you forget commands or want hands-free Linux exploration!
 
 ## ✨ Features  
@@ -42,29 +42,32 @@ terminal-talks
 Try saying: "make a folder" → Shows: Suggested command: mkdir
 
 ## 📚 Example Commands
-You Say	Suggested Command
-  "list files"  =  ls
-  "show all files"	= ls -a
-  "make a folder"	 =  mkdir
-  "remove a directory" =	rm -r
-  "check IP address" =	ip a
-  "what's my current path" =	pwd
-  "clear the screen" =	clear
-  "view running processes" =	top
-Over 150 phrases supported!
+
+| You Say                      | Suggested Command  |
+|------------------------------|--------------------|
+| "list files"                 | `ls`               |
+| "show all files"             | `ls -a`            |
+| "make a folder"              | `mkdir`            |
+| "remove a directory"         | `rm -r`            |
+| "check IP address"           | `ip a`             |
+| "what's my current path"     | `pwd`              |
+| "clear the screen"           | `clear`            |
+| "view running processes"     | `top`              |
+
+*Over 150 phrases supported!*
 
 ## ⚙️ Requirements
----Python 3.7+
----Linux-based system (Ubuntu, Arch, Debian, etc.)
----Working microphone
 
-~1 GB free space for model
+- Python 3.7+
+- Linux-based system (Ubuntu, Arch, Debian, etc.)
+- Working microphone
+- ~1 GB free space for model
 
 ## ✔️ Tested On
-Ubuntu 22.04 ✅
-Arch Linux ✅
-Debian 12 ✅
 
+- Ubuntu 22.04 ✅
+- Arch Linux ✅
+- Debian 12 ✅
 ## 🚀 Built For
 This project was built for Hack Club's TerminalCraft 🛠️
 
