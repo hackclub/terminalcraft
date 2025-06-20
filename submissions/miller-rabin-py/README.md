@@ -144,7 +144,7 @@ The 6th mode provides an interactive visualization of the famous Ulam spiral, di
 python miller-rabin.py 6
 Select starting position for the spiral (2): 41
 ```
-This creates a spiral starting with 41 at the center, which is known to produce interesting prime patterns along certain diagonals.
+This creates a spiral starting with 41 at the center.
 
 <img src=./ulam-example.png width=600>
 
