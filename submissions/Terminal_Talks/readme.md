@@ -41,16 +41,16 @@ terminal-talks
 ```
 Try saying: "make a folder" → Shows: Suggested command: mkdir
 
-📚 Example Commands
+## 📚 Example Commands
 You Say	Suggested Command
-"list files"	ls
-"show all files"	ls -a
-"make a folder"	mkdir
-"remove a directory"	rm -r
-"check IP address"	ip a
-"what's my current path"	pwd
-"clear the screen"	clear
-"view running processes"	top
+  "list files"  =  ls
+  "show all files"	= ls -a
+  "make a folder"	 =  mkdir
+  "remove a directory" =	rm -r
+  "check IP address" =	ip a
+  "what's my current path" =	pwd
+  "clear the screen" =	clear
+  "view running processes" =	top
 Over 150 phrases supported!
 
 ## ⚙️ Requirements
@@ -70,6 +70,6 @@ This project was built for Hack Club's TerminalCraft 🛠️
 
 ## 📬 Contact
 Created by Sameer Kulhari
-GitHub | Repository
+GitHub Repository : https://github.com/Sameer-Kulhari/TerminalTalks
 
 💡 Pro Tip: Add your own custom commands by editing the mapping dictionary!
