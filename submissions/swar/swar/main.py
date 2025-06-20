@@ -34,10 +34,12 @@ def generate_musicxml(note_list, output='swar_sheet.musicxml'):
     s.write('musicxml', fp=output)
 
 @click.command()
-@click.argument("text")
+# @click.argument("text")
+@click.option("-f",default="file",help="specify path of file to compile it into music")
+@click.option("-t",default="text",help="use this to pass a text message")
 @click.option("--output", default="swar", help="specifies name of music file")
 @click.option("-ms", is_flag=True, help="use this option to save a music sheet")
-def musicfy(text: str, output: str = "swar", ms: bool = False):
+def musicfy(f:str, t: str, output: str = "swar", ms: bool = False):
     mid = MidiFile()
     track = MidiTrack()
     tempo = MetaMessage('set_tempo', tempo=180000)
@@ -46,8 +48,30 @@ def musicfy(text: str, output: str = "swar", ms: bool = False):
     track.append(tempo)
     track.append(Message('program_change', program=0, time=0))
 
-    notes = mapper(text)
-    MIDI_NOTES = [note_to_midi(n) for n in notes]
+    
+    if f=="file" and t!="text":
+        notes = mapper(t)
+        MIDI_NOTES = [note_to_midi(n) for n in notes]
+    elif f!="file" and t=="text":
+        try:
+            if any(ext in str(f) for ext in ["txt", "md", "doc","py","js","c"]):
+                try:
+                    with open(f,"r") as file:
+                        data = file.read()
+                        notes = mapper(data)
+                        MIDI_NOTES = [note_to_midi(n) for n in notes]
+                except FileNotFoundError:
+                    sys.exit("File not found. Please recheck the path.")
+            else:
+                sys.exit("Sorry...File type not supported.")
+        except Exception as e:
+            click.echo("Error : ",e)
+                
+    elif f=="file" and t=="text":
+        sys.exit("Please specify either file path with -f or message with -t")
+    elif f!="file" and t!="text":
+        sys.exit("Please specify either file path with -f or message with -t")
+    
 
     for i, midi_val in enumerate(MIDI_NOTES):
         if i == len(MIDI_NOTES) - 1:
