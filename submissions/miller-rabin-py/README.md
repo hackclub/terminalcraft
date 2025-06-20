@@ -20,6 +20,8 @@ The Miller-Rabin primality test is a probabilistic algorithm used to determine i
 
 - **Visual Prime Numbers Viewer** - Explore the distribution of prime numbers visually in your terminal, with interactive navigation and prime highlighting.
 
+- **Ulam Spiral**
+
 ## Compatibility
 
 | Operating System | Supported  | Notes                                          |
@@ -57,6 +59,7 @@ Or on Linux you can run the miller-rabin file located in executable folder (requ
 - `3`: Prime counting - Count primes between two values
 - `4`: Next prime finder - Find the next prime(s) after a given number
 - `5`: Visual prime numbers viewer - Interactive terminal visualization of prime numbers
+- `6`: Ulam spiral viewer
 
 ### Options:
 
