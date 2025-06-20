@@ -1,4 +1,4 @@
-# ----------------------------💻🎙️ TerminalTalks 🎙️💻 ------------------------------
+# -------------------------💻🎙️ TerminalTalks 🎙️💻 --------------------------
 
 TerminalTalks is an **offline, voice-powered command suggestion tool** for Linux. Speak natural phrases like _"list files"_ or _"check IP,"_ and it will suggest the appropriate terminal command like `ls` or `ip a`. Perfect for when you forget commands or want hands-free Linux exploration!
 
