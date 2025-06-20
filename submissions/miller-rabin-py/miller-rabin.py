@@ -9,7 +9,7 @@ parser = arg.ArgumentParser(description="Miller-Rabin primality test implementat
 
 parser.add_argument("type", help="specifies type of test; use 0 to manualy test a base; use 1 to randomly test a bunch of bases; use 2 to make \
 a deterministic test, assuming that extended riemann hypothesis is true or for numbers less than 3317044064679887385961980, its true without this hypothesis;\
- use 3 to calculate pi(x)-pi(y) (its inclusive with those bounds); use 4 to find next primes from a given number; use 5 for art")
+ use 3 to calculate pi(x)-pi(y) (its inclusive with those bounds); use 4 to find next primes from a given number; use 5 for viewer; 6 for ulam spiral")
 
 parser.add_argument("-f", "--fast", action="store_true", help="use fast mode, which will not print intermediate results,\
                     on example it will not list primes counted in 3rd mode, it will not show progress, and it will stop when any witness is found")
