@@ -1,0 +1,24 @@
+[project]
+name = "swar"
+version = "0.1.0"
+description = "This project converts textual data to musical notes for transmitting information through music."
+authors = [
+    {name = "Darshan Choudhary"}
+]
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "mido",
+    "pygame",
+    "click",
+    "music21"
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+
+[project.scripts]
+swar = "swar.main:swar"
