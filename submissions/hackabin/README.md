@@ -19,7 +19,7 @@ follow the steps below if you prefer building the binary for your OS yourself:
 1. download and install a non-ancient version of [golang](https://go.dev/doc/install) on your computer  
 2. clone this repo and go into the directory  
 3. run `go build -o hackabin` and you will see a `hackabin` or `hackabin.exe` file appear in that directory!  
-4. run `go install` to make `hackabin` accessible globally :)  
+4. run `go install` to make `hackabin` accessible globally :)
 
 ## project details
 1. **What is the name of your project?**
@@ -39,3 +39,6 @@ _linux and windows_
 
 6. **Does your project include a Readme file with instructions on how to use it?**
 _yes!_
+
+## additional comments
+all code snippets are saved in `~/.hackabin/.snippets.json`
