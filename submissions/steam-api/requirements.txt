@@ -9,7 +9,7 @@ greenlet==3.1.1
 idna==3.10
 kdtree==0.16
 pillow==11.1.0
-protobuf==3.20.3
+protobuf==4.25.8
 pycryptodomex==3.21.0
 requests==2.32.3
 setuptools==78.1.1
