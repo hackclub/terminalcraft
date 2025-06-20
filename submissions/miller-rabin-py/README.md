@@ -20,7 +20,7 @@ The Miller-Rabin primality test is a probabilistic algorithm used to determine i
 
 - **Visual Prime Numbers Viewer** - Explore the distribution of prime numbers visually in your terminal, with interactive navigation and prime highlighting.
 
-- **Ulam Spiral**
+- **Ulam Spiral** - Visualize prime numbers in the famous Ulam spiral plot, which can reveal surprising patterns and structures in distribution of primes.
 
 ## Compatibility
 
@@ -108,6 +108,45 @@ This will open the viewer starting from 2137, letting you explore primes visuall
 If your terminal is too small, the program will prompt you to resize it.
 
 <img src=./example-mil-rab.png>
+
+### Mode 6: Ulam Spiral Viewer
+
+The 6th mode provides an interactive visualization of the famous Ulam spiral, discovered by mathematician Stanisław Ulam in 1963. The Ulam spiral arranges natural numbers in a spiral pattern starting from the center, with prime numbers highlighted. This visualization often reveals unexpected diagonal lines and patterns in the distribution of primes.
+
+**How to use:**
+
+1. Run the program in mode 6:
+   ```
+   python miller-rabin.py 6
+   ```
+
+2. You will be prompted:
+   ```
+   Select starting position for the spiral (2):
+   ```
+   Enter the starting number for the center of the spiral (default is 2).
+
+3. The program will open a curses-based interface showing the Ulam spiral. Numbers are arranged in a spiral pattern starting from the center, with primes displayed as solid blocks (█) and composite numbers as dots (·). You can navigate and interact using your keyboard:
+
+   - **Arrow keys**: Move the cursor around the spiral to examine specific numbers
+   - **Page Up**: Increase the starting number (shifts entire spiral)
+   - **Page Down**: Decrease the starting number (shifts entire spiral)
+   - **r**: Reset the spiral to start from 2
+   - **q**: Quit the viewer
+
+4. The interface displays:
+   - Current starting number and cursor position
+   - Whether the number under cursor is prime
+   - Total count of primes visible on screen
+
+**Example:**
+```
+python miller-rabin.py 6
+Select starting position for the spiral (2): 41
+```
+This creates a spiral starting with 41 at the center, which is known to produce interesting prime patterns along certain diagonals.
+
+<img src=./ulam-example.png width=600>
 
 ### Examples:
 
