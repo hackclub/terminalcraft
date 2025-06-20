@@ -22,57 +22,99 @@ impl Operation {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Problem {
-    pub num1: i32,
-    pub num2: i32,
-    pub operator: Operation,
     pub answer: i32,
+    pub text: String,
 }
 
 impl Problem {
     pub fn new(difficulty: &DifficultySettings) -> Self {
         let mut rng = rand::thread_rng();
-        let op_idx = rng.gen_range(0..difficulty.allowed_ops.len());
-        let operator = difficulty.allowed_ops[op_idx];
 
-        let (num1, num2, answer) = match operator {
-            Operation::Add => {
-                let n1 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
-                let n2 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
-                (n1, n2, n1 + n2)
+        if difficulty.operator_count > 1 {
+            let mut numbers = Vec::new();
+            let mut operators = Vec::new();
+            let answer: i32;
+            let mut text = String::new();
+
+            let allowed_ops = [Operation::Add, Operation::Subtract];
+
+            for _ in 0..difficulty.operator_count {
+                numbers.push(rng.gen_range(difficulty.min_val..=difficulty.max_val));
             }
-            Operation::Subtract => {
-                let n1 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
-                let n2 = rng.gen_range(difficulty.min_val..=n1); // Ensure positive result
-                (n1, n2, n1 - n2)
+
+            // Generate operators
+            for _ in 0..(difficulty.operator_count - 1) {
+                let op_idx = rng.gen_range(0..allowed_ops.len());
+                operators.push(allowed_ops[op_idx]);
             }
-            Operation::Multiply => {
-                // Limit range for multiplication to avoid large numbers
-                let mul_max = (difficulty.max_val as f32).sqrt() as i32;
-                let n1 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
-                let n2 = rng.gen_range(difficulty.min_val..=mul_max);
-                (n1, n2, n1 * n2)
+
+            // Build text and calculate answer
+            text.push_str(&numbers[0].to_string());
+            let mut current_answer = numbers[0];
+
+            for i in 0..(difficulty.operator_count - 1) as usize {
+                text.push(' ');
+                text.push_str(operators[i].to_string());
+                text.push(' ');
+                text.push_str(&numbers[i + 1].to_string());
+
+                match operators[i] {
+                    Operation::Add => current_answer += numbers[i + 1],
+                    Operation::Subtract => current_answer -= numbers[i + 1],
+                    _ => {} // Should not happen
+                }
             }
-            Operation::Divide => {
-                // Ensure n2 is not zero and n1 is divisible by n2
-                let div_max = (difficulty.max_val as f32).sqrt() as i32;
-                let n1 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
-                let n2 = rng.gen_range(difficulty.min_val..=div_max);
-                (n1 * n2, n2, n1)
+            answer = current_answer;
+
+            Problem {
+                answer,
+                text,
             }
-        };
-        Problem {
-            num1,
-            num2,
-            operator,
-            answer,
+        } else {
+            let op_idx = rng.gen_range(0..difficulty.allowed_ops.len());
+            let operator = difficulty.allowed_ops[op_idx];
+
+            let (num1, num2, answer) = match operator {
+                Operation::Add => {
+                    let n1 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
+                    let n2 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
+                    (n1, n2, n1 + n2)
+                }
+                Operation::Subtract => {
+                    let n1 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
+                    let n2 = rng.gen_range(difficulty.min_val..=n1); // Ensure positive result
+                    (n1, n2, n1 - n2)
+                }
+                Operation::Multiply => {
+                    // Limit range for multiplication to avoid large numbers
+                    let mul_max = (difficulty.max_val as f32).sqrt() as i32;
+                    let n1 = rng.gen_range(difficulty.min_val..=difficulty.max_val);
+                    let n2 = rng.gen_range(difficulty.min_val..=mul_max.max(difficulty.min_val));
+                    (n1, n2, n1 * n2)
+                }
+                Operation::Divide => {
+                    // Ensure n2 is not zero and n1 is divisible by n2
+                    let n2_max = (difficulty.max_val as f32).sqrt() as i32;
+                    let n2 = rng.gen_range(
+                        difficulty.min_val.max(1)..=n2_max.max(difficulty.min_val.max(1)),
+                    );
+                    let n1_max = difficulty.max_val / n2;
+                    let n1 = rng.gen_range(difficulty.min_val..=n1_max.max(difficulty.min_val));
+                    (n1 * n2, n2, n1)
+                }
+            };
+            let text = format!("{} {} {}", num1, operator.to_string(), num2);
+            Problem {
+                answer,
+                text,
+            }
         }
     }
-    
+
     pub fn check_answer(&self, user_answer: i32) -> bool {
-        return user_answer == self.answer;
-    
+        user_answer == self.answer
     }
 }
 
@@ -146,6 +188,7 @@ pub struct DifficultySettings {
     pub allowed_ops: Vec<Operation>,
     pub input_mode: InputMode,
     pub game_mode: GameModeOption,
+    pub operator_count: u32,
 }
 
 impl Default for DifficultySettings {
@@ -161,6 +204,7 @@ impl Default for DifficultySettings {
             ],
             input_mode: InputMode::EnterToSubmit,
             game_mode: GameModeOption::Unlimited,
+            operator_count: 1,
         }
     }
 }

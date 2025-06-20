@@ -173,19 +173,28 @@ fn draw_settings_screen(model: &Model, frame: &mut Frame) {
                     "- ".dim()
                 }
                 .into(),
-                if current_settings.allowed_ops.contains(&Operation::Multiply) {
+                if current_settings.allowed_ops.contains(&Operation::Multiply) && current_settings.operator_count == 1 {
                     "* ".green()
                 } else {
                     "* ".dim()
                 }
                 .into(),
-                if current_settings.allowed_ops.contains(&Operation::Divide) {
+                if current_settings.allowed_ops.contains(&Operation::Divide) && current_settings.operator_count == 1 {
                     "/ ".green()
                 } else {
                     "/ ".dim()
                 }
                 .into(),
-                "(1-4 to Toggle)".dim().into(),
+                "(1-4 to Toggle)".into(),
+            ])
+            .alignment(Alignment::Center),
+        ),
+        // Operator Count Setting
+        ListItem::new(
+            Line::from(vec![
+                "Operator Count: ".into(),
+                current_settings.operator_count.to_string().green().bold().into(),
+                " (Press [ or ] to change)".into(),
             ])
             .alignment(Alignment::Center),
         ),

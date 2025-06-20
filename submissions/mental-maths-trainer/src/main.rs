@@ -92,6 +92,8 @@ fn handle_key_event_input(model: &mut Model, key_event: KeyEvent) {
             KeyCode::Char('4') => Msg::ToggleOperator(Operation::Divide),
             KeyCode::Char('i') | KeyCode::Char('I') => Msg::ToggleInputMode,
             KeyCode::Char('t') | KeyCode::Char('T') => Msg::ToggleTimedMode,
+            KeyCode::Char('[') => Msg::DecrementOperatorCount,
+            KeyCode::Char(']') => Msg::IncrementOperatorCount,
             _ => return,
         },
         Screen::StatsScreen => match key_event.code {

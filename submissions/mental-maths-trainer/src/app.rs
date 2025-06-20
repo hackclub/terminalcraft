@@ -26,6 +26,8 @@ pub enum Msg {
     DecrementMinVal,
     IncrementMaxVal,
     DecrementMaxVal,
+    IncrementOperatorCount,
+    DecrementOperatorCount,
     ToggleOperator(Operation),
     ToggleInputMode,
     ToggleTimedMode,
@@ -104,7 +106,7 @@ pub fn update(model: &mut Model, msg: Msg) {
                        || model.game_state.difficulty_settings.game_mode.is_estimation_mode() {
                         return;
                     }
-                    if let Some(problem) = model.game_state.active_problem {
+                    if let Some(problem) = &model.game_state.active_problem {
                         if let Ok(user_answer) = model.game_state.user_input.parse::<i32>() {
                             if problem.check_answer(user_answer) { return; }
                             model.game_state.current_score += 1;
@@ -136,7 +138,7 @@ pub fn update(model: &mut Model, msg: Msg) {
                     if !model.game_state.playing {
                         return;
                     }
-                    if let Some(problem) = model.game_state.active_problem {
+                    if let Some(problem) = &model.game_state.active_problem {
                         if let Ok(answer) = model.game_state.user_input.parse::<i32>() {
                             let is_correct = problem.check_answer(answer);
                             let mut estimation_correct = false;
@@ -154,11 +156,11 @@ pub fn update(model: &mut Model, msg: Msg) {
                                     model.game_state.current_score += 1;
                                     model.game_state.feedback_message = Some(format!("Good. The answer was {}", problem.answer));
                                 } else {
-                                    model.game_state.feedback_message = Some(format!("Incorrect. The answer was {}.", problem.answer));
+                                    model.game_state.feedback_message = Some(format!("Too far off. The answer was {}.", problem.answer));
                                 }
                             }
                             else {
-                                model.game_state.feedback_message = Some(format!("Too far off. The answer was {}.", problem.answer));
+                                model.game_state.feedback_message = Some(format!("Incorrect. The answer was {}.", problem.answer));
                             }
                             
                             // Record detailed stats
@@ -260,6 +262,16 @@ pub fn update(model: &mut Model, msg: Msg) {
                     config::save_settings(&model.difficulty_settings).unwrap_or_default();
                     model.game_state.difficulty_settings = model.difficulty_settings.clone();
                 }
+                Msg::IncrementOperatorCount => {
+                    model.difficulty_settings.operator_count += 1;
+                    config::save_settings(&model.difficulty_settings).unwrap_or_default();
+                    model.game_state.difficulty_settings = model.difficulty_settings.clone();
+                }
+                Msg::DecrementOperatorCount => {
+                    model.difficulty_settings.operator_count = (model.difficulty_settings.operator_count - 1).max(1);
+                    config::save_settings(&model.difficulty_settings).unwrap_or_default();
+                    model.game_state.difficulty_settings = model.difficulty_settings.clone();
+                }
                 Msg::ToggleOperator(op_to_toggle) => {
                     if let Some(pos) = model
                         .difficulty_settings
@@ -326,7 +338,7 @@ pub fn update(model: &mut Model, msg: Msg) {
 // Returns a formatted string for a math problem, or "None" if not present.
 pub fn get_problem_text(problem: Option<&Problem>) -> String {
     if let Some(p) = problem {
-        format!("{} {} {} = ?", p.num1, p.operator.to_string(), p.num2)
+        p.text.clone()
     } else {
         "None".to_string()
     }
