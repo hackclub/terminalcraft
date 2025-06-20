@@ -28,6 +28,13 @@ Create your own levels by reading /WorseTerminal/bughunt_level_guide.md
 
 # Installing
 
+Go to [https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.0](https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.0) and download one of the compressed files and uncompress them.
+That's it.
+
+OR
+
+* Open [https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.0](https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.0)
+
 * Click the green '\<\> Code' button
 
 ![](https://docs.github.com/assets/cb-13128/mw-1440/images/help/repository/code-button.webp "Green GitHub Code Button")
