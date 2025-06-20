@@ -317,7 +317,7 @@ while True:
             stdscr.nodelay(1)
             stdscr.timeout(1000)
             stdscr.clear()
-            global start_pos
+            start_pos
             start = start_pos
             change = 0
             pos = [1, 1]
@@ -391,10 +391,144 @@ while True:
                     pos[1] = 1
                 elif pos[1] > width_2-1:
                     pos[1] = width_2-1
-                stdscr.refresh()
-        
+                stdscr.refresh()        
         try:
             cs.wrapper(main)
         except cs.error:
             print("Terminal size is too small, please resize it to at least 70 characters wide.")
+        break
+    
+    if test == "6" or test == "6f":
+        start_pos = digits(input("Select starting position for the spiral (2): "))
+        if start_pos < 2 or start_pos is None:
+            start_pos = 2
+
+        def draw_ulam_spiral(stdscr):
+            cs.curs_set(0)  # Hide cursor
+            stdscr.nodelay(1)
+            stdscr.timeout(1000)
+            stdscr.clear()
+            
+            cs.start_color()
+            cs.init_pair(1, cs.COLOR_WHITE, cs.COLOR_BLACK)
+            cs.init_pair(2, cs.COLOR_GREEN, cs.COLOR_BLACK)  # Cursor color
+            stdscr.bkgd(' ', cs.color_pair(1))
+            
+            current_num = start_pos
+            cursor_idx = 0  # Index of cursor
+            
+            def find_cell(spiral_coords, cursor_idx, dx, dy):
+                cx, cy, _ = spiral_coords[cursor_idx]
+                best = cursor_idx
+                for i, (x, y, _) in enumerate(spiral_coords):
+                    if x == cx + dx and y == cy + dy:
+                        best = i
+                return best
+            
+            while True:
+                stdscr.clear()
+                check_size(stdscr)
+                
+                max_radius = min(height // 2 - 2, width // 2 - 2)
+                center_y, center_x = height // 2, width // 2
+                
+                spiral_coords = []
+                num = current_num
+                
+                # Start at center
+                x, y = 0, 0
+                spiral_coords.append((x, y, num))
+                num += 1
+                
+                for radius in range(1, max_radius + 1):
+                    x += 1
+                    spiral_coords.append((x, y, num))
+                    num += 1
+                    
+                    # Up
+                    for _ in range(2 * radius - 1):
+                        y -= 1
+                        spiral_coords.append((x, y, num))
+                        num += 1
+                    
+                    # Left
+                    for _ in range(2 * radius):
+                        x -= 1
+                        spiral_coords.append((x, y, num))
+                        num += 1
+                    
+                    # Down
+                    for _ in range(2 * radius):
+                        y += 1
+                        spiral_coords.append((x, y, num))
+                        num += 1
+                    
+                    # Right
+                    for _ in range(2 * radius):
+                        x += 1
+                        spiral_coords.append((x, y, num))
+                        num += 1
+                
+                if cursor_idx < 0:
+                    cursor_idx = 0
+                elif cursor_idx > len(spiral_coords) -1:
+                    cursor_idx = len(spiral_coords)-1
+                
+                # Draw the spiral
+                prime_count = 0
+                for idx, (spiral_x, spiral_y, number) in enumerate(spiral_coords):
+                    screen_y = center_y + spiral_y
+                    screen_x = center_x + spiral_x * 2  # Double spacing, beacuse it looks more square then
+                    if 1 <= screen_y < height -1 and 1 <= screen_x < width-1:
+                        is_prime = mil(number, True)[0] == False
+                        if idx == cursor_idx and is_prime:
+                            # Draw cursor
+                            stdscr.addstr(screen_y, screen_x, BLOCK_CHAR, cs.color_pair(2) | cs.A_BOLD)
+                        elif idx == cursor_idx:
+                            stdscr.addstr(screen_y, screen_x, "+", cs.color_pair(2))
+                        
+                        elif is_prime:
+                            prime_count += 1
+                            stdscr.addstr(screen_y, screen_x, BLOCK_CHAR, cs.color_pair(1))
+                        else:
+                            stdscr.addstr(screen_y, screen_x, "·", cs.color_pair(1))
+                
+                # Info
+                cursor_num = spiral_coords[cursor_idx][2]
+                info_lines = [
+                    f"Ulam Spiral - Starting from: {current_num},\
+                        Cursor: {cursor_num}  Prime: {'yes' if mil(cursor_num, True)[0] == False else 'no'}",
+                    f"Primes shown: {prime_count}",
+                ]
+                
+                for i, line in enumerate(info_lines):
+                    if i < height:
+                        stdscr.addstr(i, 0, line[:width-1], cs.color_pair(1))
+                
+                stdscr.addstr(height - 1, 0, "Controls: 'q' quit, arrows move, PGUP/PGDN change start, 'r' reset to 2", cs.color_pair(1))
+                
+                # Handle inputs
+                key = stdscr.getch()
+                if key == ord('q'):
+                    break
+                elif key == cs.KEY_PPAGE:
+                    current_num += 1
+                elif key == cs.KEY_NPAGE:
+                    current_num = max(2, current_num - 1)
+                elif key == ord('r'):
+                    current_num = 2
+                elif key == cs.KEY_UP:
+                    cursor_idx = find_cell(spiral_coords, cursor_idx, 0, -1)
+                elif key == cs.KEY_DOWN:
+                    cursor_idx = find_cell(spiral_coords, cursor_idx, 0, 1)
+                elif key == cs.KEY_LEFT:
+                    cursor_idx = find_cell(spiral_coords, cursor_idx, -1, 0)
+                elif key == cs.KEY_RIGHT:
+                    cursor_idx = find_cell(spiral_coords, cursor_idx, 1, 0)
+                stdscr.refresh()
+        
+        try:
+            cs.wrapper(draw_ulam_spiral)
+        except cs.error:
+            print("Terminal size is too small for Ulam spiral display.")
         break
