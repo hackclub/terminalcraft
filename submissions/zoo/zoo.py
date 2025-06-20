@@ -9,7 +9,7 @@ from visitor import Visitor
 from finance import Finance
 from research import ResearchManager
 from event import trigger_event
-from config import ANIMAL_CONFIG, HABITAT_CONFIG, STAFF_CONFIG, VISITOR_CONFIG, TICKET_PRICE, RESEARCH_PROJECTS, ESCAPE_CONFIG
+from config import ANIMAL_CONFIG, HABITAT_CONFIG, STAFF_CONFIG, VISITOR_CONFIG, TICKET_PRICE, RESEARCH_PROJECTS, ESCAPE_CONFIG, VIP_VISITORS
 from utils import Colors
 class Zoo:
     """Represents the zoo itself."""
@@ -24,9 +24,18 @@ class Zoo:
         self.visitors = []
         self.visitor_boost = None 
         self.reputation_penalty = None 
+        self.fossil_quest_stage = 0
+        self.fossil_analysis_start_date = None
+        self.dinosaur_exhibit_active = False
+        self.dinosaur_unlocked = False
+        self.reputation = 50  
+        self.vip_visit = None
+        self.new_birth_this_day = False
     def next_day(self):
         """Simulates the passing of a day with more detailed mechanics."""
         self.game_date += datetime.timedelta(days=1)
+        self.new_birth_this_day = False 
+        self._start_vip_visit() 
         print(f"\nA new day dawns: {self.game_date.strftime('%Y-%m-%d')}")
         time.sleep(1)
         for s in self.staff:
@@ -38,6 +47,8 @@ class Zoo:
         self._handle_breeding()
         self._simulate_visitors()
         self._process_finances()
+        self._check_fossil_analysis()
+        self._check_vip_objective() 
         trigger_event(self)
         if self.visitor_boost:
             self.visitor_boost['duration'] -= 1
@@ -81,17 +92,30 @@ class Zoo:
         time.sleep(1)
     def _update_animals_and_habitats(self):
         """Updates the state of all animals and habitats."""
+        total_happiness = 0
+        total_health = 0
         for habitat in self.habitats:
-            habitat.update() 
+            habitat.update()
+            if habitat.cleanliness < 30:
+                self.reputation = max(0, self.reputation - 0.1) 
             for animal in habitat.animals:
                 animal.update(habitat, self)
+                total_happiness += animal.happiness
+                total_health += animal.health
                 if animal.escape_risk > 0:
                     animal.escape_risk -= 1
+        if self.animals:
+            avg_happiness = total_happiness / len(self.animals)
+            if avg_happiness < 40:
+                self.reputation = max(0, self.reputation - 0.2)
+            elif avg_happiness > 80:
+                self.reputation = min(100, self.reputation + 0.15)
     def _handle_animal_deaths(self):
         """Checks for and handles animal deaths."""
         for animal in self.animals[:]:
             if animal.is_dead():
                 print(f"\nTragedy! {animal.name} the {animal.species} has passed away.")
+                self.reputation = max(0, self.reputation - 5) 
                 if animal.habitat:
                     animal.habitat.animals.remove(animal)
                 self.animals.remove(animal)
@@ -126,6 +150,11 @@ class Zoo:
             num_visitors = int(num_visitors * self.visitor_boost['multiplier'])
         if self.reputation_penalty:
             num_visitors = int(num_visitors * self.reputation_penalty['multiplier'])
+            self.reputation = max(0, self.reputation - 10) 
+            self.reputation_penalty = None 
+        if self.dinosaur_exhibit_active:
+            print(f"{Colors.INFO}The 'Mystery Dinosaur' exhibit is drawing in extra crowds!{Colors.RESET}")
+            num_visitors = int(num_visitors * 1.25)
         self.finance.add_income(num_visitors * TICKET_PRICE, 'Tickets')
         visitor_types = list(VISITOR_CONFIG.keys())
         visitor_weights = [config['spawn_weight'] for config in VISITOR_CONFIG.values()]
@@ -140,10 +169,21 @@ class Zoo:
                 v.satisfaction = 20 
                 v.thoughts.append("There was nothing to see at this zoo!")
             return
+        avg_satisfaction = 0
         for visitor in self.visitors:
             num_habitats_to_visit = random.randint(1, min(len(self.habitats), 4))
             for habitat in random.sample(self.habitats, num_habitats_to_visit):
                 visitor.visit_habitat(habitat)
+            if self.dinosaur_exhibit_active:
+                visitor.satisfaction = min(100, visitor.satisfaction + 15)
+                visitor.thoughts.append("The mystery fossil exhibit was fascinating!")
+            avg_satisfaction += visitor.satisfaction
+        if self.visitors:
+            final_avg_satisfaction = avg_satisfaction / len(self.visitors)
+            if final_avg_satisfaction > 75:
+                self.reputation = min(100, self.reputation + 0.25)
+            elif final_avg_satisfaction < 40:
+                self.reputation = max(0, self.reputation - 0.3)
         self._solicit_donations()
     def _solicit_donations(self):
         """Collects donations from visitors based on their type and satisfaction."""
@@ -184,11 +224,77 @@ class Zoo:
     def _birth_animal(self, species, habitat):
         """Creates a new baby animal."""
         config = ANIMAL_CONFIG[species]
-        name = f"{species}-baby-{random.randint(100, 999)}" 
+        name = f"{species}-baby-{random.randint(100, 999)}"
         baby = Animal(species, name, config, age=0)
         self.animals.append(baby)
         habitat.add_animal(baby)
+        self.reputation = min(100, self.reputation + 2) 
+        self.new_birth_this_day = True
         print(f"{Colors.GREEN}A new {species} has been born in the {habitat.name} habitat! Welcome, {name}!{Colors.RESET}")
+    def _start_vip_visit(self):
+        if self.vip_visit: 
+            return
+        if random.random() < VIP_VISITORS['chance']:
+            vip_data = random.choice(VIP_VISITORS['vips'])
+            objective_data = random.choice(vip_data['objectives'])
+            self.vip_visit = {
+                'name': vip_data['name'],
+                'title': vip_data['title'],
+                'objective': objective_data
+            }
+            objective_text = objective_data['text']
+            if '{animal}' in objective_text:
+                animal_species = random.choice(objective_data['params']['species'])
+                objective_text = objective_text.format(animal=animal_species)
+                self.vip_visit['objective']['target_species'] = animal_species
+            if '{habitat}' in objective_text:
+                habitat_type = random.choice(objective_data['params']['habitat_type'])
+                objective_text = objective_text.format(habitat=habitat_type)
+                self.vip_visit['objective']['target_habitat'] = habitat_type
+            print(f"\n{Colors.PURPLE}--- VIP Visitor Alert! ---{Colors.RESET}")
+            print(f"{self.vip_visit['name']}, {self.vip_visit['title']}, is visiting today!")
+            print(f"Their goal: To {objective_text}")
+            input("Press Enter to continue...")
+    def _check_vip_objective(self):
+        if not self.vip_visit:
+            return
+        objective = self.vip_visit['objective']
+        obj_type = objective['type']
+        params = objective['params']
+        reward = objective['reward']
+        success = False
+        if obj_type == 'animal_happiness':
+            target_species = self.vip_visit['objective']['target_species']
+            for animal in self.animals:
+                if animal.species == target_species and animal.happiness >= params['value']:
+                    success = True
+                    break
+        elif obj_type == 'habitat_cleanliness':
+            target_habitat = self.vip_visit['objective']['target_habitat']
+            for habitat in self.habitats:
+                if habitat.species_type == target_habitat and habitat.cleanliness >= params['value']:
+                    success = True
+                    break
+        elif obj_type == 'see_baby_animal':
+            if self.new_birth_this_day:
+                success = True
+        elif obj_type == 'animal_health':
+            target_species = self.vip_visit['objective']['target_species']
+            for animal in self.animals:
+                if animal.species == target_species and animal.health >= params['value']:
+                    success = True
+                    break
+        print(f"\n{Colors.PURPLE}--- VIP Visit Report ---{Colors.RESET}")
+        if success:
+            print(f"{self.vip_visit['name']} is delighted with your zoo!")
+            print(f"You have been awarded ${reward['money']} and your reputation has increased by {reward['reputation']} points.")
+            self.finance.add_income(reward['money'], f"VIP Bonus from {self.vip_visit['name']}")
+            self.reputation = min(100, self.reputation + reward['reputation'])
+        else:
+            print(f"{self.vip_visit['name']} was not impressed. They hope for improvements on their next visit.")
+            self.reputation = max(0, self.reputation - 2) 
+        self.vip_visit = None 
+        input("Press Enter to continue...")
     def display_summary(self):
         """Displays a summary of the zoo."""
         print("Habitats:")
@@ -206,7 +312,16 @@ class Zoo:
         print(f"\n{Colors.HEADER}--- Habitat Construction ---{Colors.RESET}")
         print(f"Available Funds: {Colors.GREEN}${self.finance.money:.2f}{Colors.RESET}")
         print("\nAvailable Habitat Types:")
-        habitat_types = list(HABITAT_CONFIG.keys())
+        habitat_types = []
+        for name, config in HABITAT_CONFIG.items():
+            if not config.get('quest_item'):
+                habitat_types.append(name)
+            elif name == 'Prehistoric Paddock' and self.dinosaur_unlocked:
+                habitat_types.append(name)
+        if not habitat_types:
+            print("No habitats available for construction.")
+            input("\nPress Enter to continue...")
+            return
         for i, habitat_type in enumerate(habitat_types):
             cost = HABITAT_CONFIG[habitat_type]['cost']
             print(f"  {i+1}. {habitat_type} - Cost: ${cost:.2f}")
@@ -240,13 +355,18 @@ class Zoo:
         print(f"Available Funds: {Colors.GREEN}${self.finance.money:.2f}{Colors.RESET}")
         available_animals = {}
         for name, config in ANIMAL_CONFIG.items():
-            if not config.get('unlockable', False):
+            is_quest_item = config.get('quest_item', False)
+            is_unlockable = config.get('unlockable', False)
+            if not is_quest_item and not is_unlockable:
                 available_animals[name] = config
         if self.research_manager.is_unlocked('Exotic Animal Acquisition'):
             unlocked_species = RESEARCH_PROJECTS['Exotic Animal Acquisition']['effect']['species']
             for species in unlocked_species:
                 if species in ANIMAL_CONFIG:
                     available_animals[species] = ANIMAL_CONFIG[species]
+        if self.dinosaur_unlocked:
+            if 'Velociraptor' in ANIMAL_CONFIG:
+                available_animals['Velociraptor'] = ANIMAL_CONFIG['Velociraptor']
         if not available_animals:
             print("\n  No animals are available for purchase right now.")
             input("\nPress Enter to return to the main menu...")
@@ -401,3 +521,53 @@ class Zoo:
         except ValueError:
             print("Invalid input.")
         time.sleep(2)
+    def _check_fossil_analysis(self):
+        """Checks if the fossil analysis is complete."""
+        if self.fossil_quest_stage == 2 and self.fossil_analysis_start_date:
+            days_passed = (self.game_date - self.fossil_analysis_start_date).days
+            if days_passed >= 3:
+                print(f"\n{Colors.EVENT}--- Fossil Analysis Complete! ---{Colors.RESET}")
+                print("The results from the university are in! You should check the 'Investigate Fossil' menu.")
+                self.fossil_quest_stage = 3
+                self.fossil_analysis_start_date = None 
+    def investigate_fossil(self):
+        """Handles the investigation of the mysterious fossil."""
+        if self.fossil_quest_stage == 1:
+            print(f"\n{Colors.HEADER}--- Mysterious Fossil ---{Colors.RESET}")
+            print("The mysterious fossil you found is waiting for your decision.")
+            print("A preliminary analysis by a local university will cost $2,000.")
+            print("This could reveal its origins or it could be just a big rock.")
+            print("\n1. Fund the analysis ($2,000)")
+            print("2. Ignore it for now")
+            choice = input("What will you do? ")
+            if choice == '1':
+                if self.finance.money >= 2000:
+                    self.finance.add_expense(2000, "Fossil Analysis")
+                    print("\nYou've sent the fossil off for analysis. The results should be back in a few days.")
+                    self.fossil_quest_stage = 2
+                    self.fossil_analysis_start_date = self.game_date
+                else:
+                    print(f"{Colors.RED}You don't have enough money for the analysis.{Colors.RESET}")
+            else:
+                print("\nThe fossil remains in storage, a mystery waiting to be solved.")
+        elif self.fossil_quest_stage == 2:
+            print("\nThe fossil is currently being analyzed. Check back in a day or two.")
+        elif self.fossil_quest_stage == 3:
+            print(f"\n{Colors.HEADER}--- Fossil Analysis Results ---{Colors.RESET}")
+            print("The analysis confirms the fossil is from a large, prehistoric creature, likely a dinosaur!")
+            print("However, the DNA is too fragmented to identify the exact species. You have two options:")
+            print("\n1. The Scientific Path: Fund a cutting-edge research project to sequence the DNA. (Cost: $10,000)")
+            print("   This is risky and expensive, but could lead to a groundbreaking discovery.")
+            print("2. The Entertainment Path: Clean and display the fossil as a 'Mystery Dinosaur' exhibit.")
+            print("   This is cheaper and will immediately boost visitor interest.")
+            choice = input("Choose a path: ")
+            if choice == '1':
+                print("\nYou've chosen the path of science! A new research project is now available.")
+                self.fossil_quest_stage = 4 
+            elif choice == '2':
+                print("\nYou've opted for showmanship. The 'Mystery Dinosaur' exhibit is now on display!")
+                self.fossil_quest_stage = 5 
+                self.dinosaur_exhibit_active = True
+            else:
+                print("You decide to wait on the decision. The fossil remains in storage.")
+        input("\nPress Enter to continue...")

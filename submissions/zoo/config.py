@@ -31,12 +31,25 @@ ANIMAL_CONFIG = {
         'preferences': {'temperature': (15, 25), 'enrichment': ['Bamboo Forest', 'Climbing Frame']},
         'lifespan': 20 * 365, 'maturity_age': 6 * 365,
         'unlockable': True
+    },
+    'Velociraptor': {
+        'price': 50000, 'food_cost': 200, 'habitat': 'Prehistoric Paddock', 'appeal': 100, 'base_happiness': 50,
+        'preferences': {'temperature': (25, 40), 'enrichment': 80},
+        'lifespan': 40 * 365, 'maturity_age': 5 * 365,
+        'attraction_bonus': 100, 
+        'required_habitat': 'Prehistoric Paddock',
+        'quest_item': True
     }
 }
 HABITAT_CONFIG = {
     'Savannah': {'cost': 2000, 'capacity': 4, 'base_temp': 25, 'base_enrichment': 40},
     'Arctic': {'cost': 2500, 'capacity': 6, 'base_temp': 0, 'base_enrichment': 30},
     'Jungle': {'cost': 1500, 'capacity': 8, 'base_temp': 28, 'base_enrichment': 60},
+    'Prehistoric Paddock': {
+        'cost': 25000, 'capacity': 4, 'security': 95, 'maintenance_cost': 1500,
+        'base_temp': 30, 'base_enrichment': 70,
+        'quest_item': True
+    }
 }
 STAFF_CONFIG = {
     'Zookeeper': {'salary': 100, 'base_skill': 50, 'description': 'Feeds animals and cleans habitats.'},
@@ -97,6 +110,10 @@ RANDOM_EVENTS = {
     'food_spoilage': {
         'chance': 0.07, 'type': 'negative', 'message': "A batch of animal food has spoiled!",
         'effect': {'type': 'financial_loss', 'amount': (200, 800)}
+    },
+    'fossil_discovery': {
+        'chance': 0.05, 'type': 'neutral', 'message': "While expanding a habitat, your team unearthed a mysterious, large fossil!",
+        'effect': {'type': 'fossil_found'}
     }
 }
 ESCAPE_CONFIG = {
@@ -104,7 +121,48 @@ ESCAPE_CONFIG = {
     'capture_cost': (2000, 5000), 
     'reputation_penalty': 25, 
     'visitor_reduction_multiplier': 0.5, 
-    'penalty_duration': 2 
+    'penalty_duration': 3
+}
+VIP_VISITORS = {
+    'chance': 0.15, 
+    'vips': [
+        {
+            'name': 'Bernard Wealthyworth',
+            'title': 'the Philanthropist',
+            'objectives': [
+                {
+                    'type': 'animal_happiness',
+                    'text': 'see a {animal} with happiness above 85.',
+                    'params': {'species': ['Lion', 'Elephant', 'Panda'], 'value': 85},
+                    'reward': {'money': 5000, 'reputation': 5}
+                },
+                {
+                    'type': 'habitat_cleanliness',
+                    'text': 'inspect the {habitat} and expects it to be pristine (cleanliness > 90).',
+                    'params': {'habitat_type': ['Savannah', 'Jungle', 'Arctic'], 'value': 90},
+                    'reward': {'money': 3000, 'reputation': 4}
+                }
+            ]
+        },
+        {
+            'name': 'Dr. Anya Sharma',
+            'title': 'the Famous Zoologist',
+            'objectives': [
+                {
+                    'type': 'see_baby_animal',
+                    'text': 'see a newborn animal.',
+                    'params': {},
+                    'reward': {'money': 4000, 'reputation': 7}
+                },
+                {
+                    'type': 'animal_health',
+                    'text': 'check on the {animal}s, hoping to see them in perfect health.',
+                    'params': {'species': ['Tiger', 'Penguin'], 'value': 100},
+                    'reward': {'money': 6000, 'reputation': 6}
+                }
+            ]
+        }
+    ]
 }
 RESEARCH_PROJECTS = {
     'Advanced Nutrition': {
@@ -118,5 +176,10 @@ RESEARCH_PROJECTS = {
     'Exotic Animal Acquisition': {
         'cost': 5000, 'description': 'Unlocks the ability to acquire rare and exotic animals.',
         'effect': {'type': 'unlock_animal', 'species': ['Tiger', 'Panda']}
+    },
+    'Prehistoric DNA Sequencing': {
+        'cost': 10000, 'description': 'A high-risk, high-reward project to sequence the DNA from the fossil.',
+        'effect': {'type': 'unlock_dinosaur'},
+        'quest_item': True
     }
 }

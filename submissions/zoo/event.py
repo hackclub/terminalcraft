@@ -28,6 +28,8 @@ def _handle_event(zoo, event_name, config):
         _handle_habitat_event(zoo, config)
     elif effect_type == 'visitor_boost':
         _handle_reputation_event(zoo, config)
+    elif effect_type == 'fossil_found':
+        _handle_quest_event(zoo, config)
     else:
         print(f"Warning: Unhandled event effect type '{effect_type}'")
 def _handle_financial_event(zoo, config):
@@ -78,3 +80,9 @@ def _handle_reputation_event(zoo, config):
     if effect['type'] == 'visitor_boost':
         zoo.visitor_boost = {'multiplier': effect['multiplier'], 'duration': effect['duration']}
         print(config['message'] + f" Expect more visitors for the next {effect['duration']} days!")
+def _handle_quest_event(zoo, config):
+    """Handles events that trigger or advance quests."""
+    effect = config['effect']
+    if effect['type'] == 'fossil_found':
+        zoo.fossil_found = True
+        print(config['message'])

@@ -12,6 +12,9 @@ class Habitat:
     def has_space(self):
         """Checks if there is space for another animal."""
         return len(self.animals) < self.capacity
+    def is_full(self):
+        """Checks if the habitat is at full capacity."""
+        return len(self.animals) >= self.capacity
     def can_breed(self):
         """Checks if the habitat contains a pair of mature, opposite-gender animals."""
         mature_males = [a for a in self.animals if a.is_mature() and a.gender == 'Male']

@@ -1,88 +1,68 @@
 # Terminal Zoo Tycoon
 
-A terminal-based zoo management simulation game. Build and manage your own zoo: construct habitats, buy animals, hire staff, conduct research, and handle random events—all from your terminal!
+A deep and engaging terminal-based zoo management simulation. Build your dream zoo, manage finances, care for animals, and navigate a world of dynamic events, challenges, and mysteries.
 
 ---
 
 ## Features
 
-- **Build and Expand**: Construct habitats (Savannah, Arctic, Jungle) and expand your zoo.
-- **Animal Management**: Buy, name, and care for animals (Lions, Penguins, Monkeys, Giraffes, and unlockable Tigers & Pandas).
-- **Staff System**: Hire and train Zookeepers and Veterinarians, each with skills and fatigue.
-- **Visitor Simulation**: Attract different visitor types (Families, Students, Animal Enthusiasts, Regulars) with unique interests and donation behaviors.
-- **Research & Development**: Unlock upgrades and new animals through research projects.
-- **Random Events**: Handle disease outbreaks, PR scandals, philanthropist visits, surprise births, and more.
-- **Financial Management**: Track income, expenses, and net profit with daily financial reports.
-- **Save/Load System**: Save your progress and continue your zoo at any time.
-- **Colorful Terminal UI**: Enhanced with colorama for a more engaging experience.
-
----
-
-## Installation
-
-1. **Clone the repository:**
-   
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+- **Zoo Simulation**: Manage everything from animal welfare and staff duties to visitor happiness and zoo finances.
+- **Reputation System**: Your zoo's reputation (0-100) is a core mechanic, influenced by animal care, visitor satisfaction, and special events. A high reputation attracts more visitors and unlocks opportunities.
+- **Multiple Game Modes**: 
+  - **Sandbox Mode**: The classic experience. Build your zoo from the ground up with full freedom.
+  - **Challenge Mode**: Test your management skills in unique scenarios like the "Rescue Zoo," where you must turn a failing park around.
+- **Engaging Quests & Events**:
+  - **The Mysterious Fossil**: Unearth a strange fossil and embark on a multi-stage quest involving research and construction to unlock a prehistoric secret.
+  - **VIP Visitors**: Host special guests with unique objectives. Fulfill their requests for big rewards!
+  - **Animal Escapes**: Keep your habitats secure! Escaped animals damage your reputation and can be costly to recover.
+  - **Random Events**: Over a dozen random events keep gameplay unpredictable, from surprise births to PR scandals.
+- **Deep Management Systems**: 
+  - **Animals & Habitats**: Care for a variety of animals, each with unique needs. Build and maintain their habitats.
+  - **Staffing**: Hire, train, and manage Zookeepers and Veterinarians.
+  - **Research**: Unlock new animals, habitat improvements, and staff efficiencies.
+- **Persistent Saves**: Save your progress and load your zoo at any time in Sandbox Mode.
+- **Colorful UI**: A clean, color-coded terminal interface for an intuitive experience.
 
 ---
 
 ## How to Play
 
-1. **Start the game:**
+1. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. **Run the Game**:
    ```bash
    python main.py
    ```
-2. **Choose an option:**
-   - New Game: Start a new zoo and enter its name.
-   - Load Game: Continue from your last save (stored in `saves/savegame.json`).
-3. **Main Menu Options:**
-   - View Detailed Reports: See animal, habitat, staff, and visitor stats.
-   - Build Habitat: Construct new habitats for animals.
-   - Buy Animal: Purchase and name animals for your zoo.
-   - Hire Staff: Recruit zookeepers and veterinarians.
-   - Manage Habitats: Upgrade habitat security.
-   - Manage Staff: Train staff to improve their skills.
-   - Research & Development: Unlock upgrades and new animals.
-   - Next Day: Progress to the next day, triggering events and visitor simulation.
-   - Save Game: Save your current progress.
-   - Exit: Quit the game.
+3. **Select a Game Mode**:
+   - **New Game**: Start a new zoo in Sandbox Mode.
+   - **Load Game**: Continue a saved Sandbox game.
+   - **Challenge Mode**: Select a pre-defined challenge scenario.
 
 ---
 
-## Animals
-- **Available from start:** Lion, Penguin, Monkey, Giraffe
-- **Unlockable via research:** Tiger, Panda
+## New Gameplay Mechanics
 
-## Habitats
-- Savannah
-- Arctic
-- Jungle
+### Reputation
+Your reputation is the measure of your zoo's success. It is affected by:
+- **Positive**: High animal happiness, clean habitats, high visitor satisfaction, new animal births.
+- **Negative**: Low animal happiness, dirty habitats, animal deaths, and animal escapes.
 
-## Staff Roles
-- Zookeeper: Feeds animals, cleans habitats
-- Veterinarian: Heals sick/injured animals
+### The Mysterious Fossil Quest
+This quest begins randomly. Once you find the fossil, you must:
+1.  **Analyze the Fossil**: A research project that takes several in-game days.
+2.  **Build the Paddock**: Construct a special "Prehistoric Paddock."
+3.  **Unlock the Dinosaur**: Complete the quest to welcome a dinosaur to your zoo!
 
-## Research Projects
-- Advanced Nutrition: Improves animal health/happiness
-- Efficient Staff Training: Reduces training cost, increases skill gain
-- Exotic Animal Acquisition: Unlocks Tiger and Panda
-
-## Random Events
-- Disease outbreak, PR scandal, philanthropist visit, surprise birth, positive press, habitat malfunction, food spoilage, and more.
-
----
-
-## Saving & Loading
-- The game auto-saves to `saves/savegame.json` when you choose "Save Game".
-- Load your zoo from the main menu.
+### VIP Visitors
+Occasionally, a VIP will visit with a specific goal (e.g., "see a Lion with 90+ happiness"). Success brings large cash and reputation bonuses, while failure leads to a small reputation penalty.
 
 ---
 
 ## Requirements
+
 - Python 3.7+
-- colorama==0.4.6
+- `colorama`
 
 ---
