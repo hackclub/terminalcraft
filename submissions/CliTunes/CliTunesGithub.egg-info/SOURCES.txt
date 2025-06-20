@@ -1,0 +1,10 @@
+README.md
+setup.py
+CliTunesGithub.egg-info/PKG-INFO
+CliTunesGithub.egg-info/SOURCES.txt
+CliTunesGithub.egg-info/dependency_links.txt
+CliTunesGithub.egg-info/entry_points.txt
+CliTunesGithub.egg-info/requires.txt
+CliTunesGithub.egg-info/top_level.txt
+clitunes/__init__.py
+clitunes/main.py

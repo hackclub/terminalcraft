@@ -1,0 +1,21 @@
+#main-content {
+    background: black;
+    color: white;
+    padding: 1;
+    border: round white;
+}
+
+.title {
+    text-style: bold;
+    padding: 1;
+    border: round green;
+}
+
+#welcome-msg {
+    color: cyan;
+    text-style: bold;
+}
+
+#form-title {
+    color: yellow;
+}
