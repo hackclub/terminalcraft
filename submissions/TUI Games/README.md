@@ -31,9 +31,10 @@ Welcome to the **TUI-Based Games** repository! 🚀 Dive into the fun with two c
 
 ## 🛠 Requirements
 - 🐍 Python 3.6 or higher
-- 🖥 A terminal or command-line interface
+- 🎮 GIT 2.50.0 or higher (For Windows)
+- 🖥  A terminal or command-line interface
+- 📔 curses module required (For Windows)
 - 🚫 No extra libraries needed!
-
 ## ⚙️ Installation
 1. Clone the repository:  
    ```bash
