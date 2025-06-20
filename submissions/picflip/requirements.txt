@@ -1,0 +1,4 @@
+Pillow>=9.0.0
+rembg>=2.0.0
+cairosvg>=2.7.0
+onnxruntime

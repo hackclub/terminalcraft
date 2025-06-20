@@ -1,0 +1,8 @@
+﻿services:
+  shelltimer.webapi:
+    image: shelltimer.webapi
+    build:
+      context: .
+      dockerfile: ShellTimer.WebApi/Dockerfile
+    ports:
+      - "8080:8080"
