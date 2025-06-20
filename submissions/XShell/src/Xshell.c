@@ -11,6 +11,10 @@
 #include "history.h"
 #include "utils.h" // For print_slow, build_prompt
 
+#ifdef _WIN32
+#include <windows.h> // For enabling ANSI escape codes
+#endif
+
 void xsh_banner(void) {
     // Get terminal width (default to 80 if we can't determine it)
     int term_width = 80;
@@ -67,7 +71,6 @@ void xsh_banner(void) {
     printf("\n%*s%s\n\n", header_padding, "", header);
 }
 
-
 // Main shell loop
 void xsh_loop(void) {
     char *line;
@@ -77,6 +80,7 @@ void xsh_loop(void) {
     do {
         char *prompt = build_prompt(); // Get dynamic prompt
         printf("%s", prompt);
+        fflush(stdout); // Ensure prompt is displayed immediately
         line = xsh_read_line();
         add_to_history(line); // Add command to history
         args = xsh_split_line(line);
@@ -104,6 +108,17 @@ int xsh_execute(char **args) {
 }
 
 int main(int argc, char **argv) {
+#ifdef _WIN32
+    // Enable virtual terminal processing for ANSI escape codes on Windows
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE) {
+        DWORD dwMode = 0;
+        if (GetConsoleMode(hOut, &dwMode)) {
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(hOut, dwMode);
+        }
+    }
+#endif
     // Load config files, if any.
     xsh_banner();
 
@@ -118,4 +133,3 @@ int main(int argc, char **argv) {
 
     return EXIT_SUCCESS;
 }
-

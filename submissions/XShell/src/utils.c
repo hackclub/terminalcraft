@@ -61,11 +61,23 @@ char* build_prompt(void) {
     }
 #endif
     
-    // Extract just the current folder name for a cleaner prompt
-    char *last_slash = strrchr(cwd, '\\');
-    if (last_slash) {
-        strcpy(short_cwd, last_slash + 1);
+    // Extract just the current folder name for a cleaner prompt (cross-platform)
+    char *last_slash = strrchr(cwd, '/');
+    char *last_backslash = strrchr(cwd, '\\');
+    char *separator = NULL;
+
+    // Find the last path separator by comparing pointer addresses
+    if (last_slash > last_backslash) {
+        separator = last_slash;
     } else {
+        separator = last_backslash;
+    }
+
+    if (separator != NULL && *(separator + 1) != '\0') {
+        // If a separator is found and it's not the last character, use the part after it
+        strcpy(short_cwd, separator + 1);
+    } else {
+        // Otherwise (no separator, or it's the last char like "C:\\"), use the full path
         strcpy(short_cwd, cwd);
     }
     
