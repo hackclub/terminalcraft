@@ -1,0 +1,5 @@
+numpy
+sounddevice
+soundfile
+blessed
+curses
