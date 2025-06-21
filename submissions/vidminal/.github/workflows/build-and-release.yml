@@ -27,7 +27,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build Executable
-        run: pyinstaller --onefile --noconfirm --add-data "BadApple.mp4:." --add-data "ffmpeg_bin.7z:." vidminal.py
+        run: pyinstaller --onefile --noconfirm --add-data "BadApple.mp4:." --add-data "linux.7z:." vidminal.py
 
       - name: Rename Executable
         run: mv dist/vidminal dist/vidminal-linux
@@ -56,7 +56,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build Executable
-        run: pyinstaller --onefile --noconfirm --add-data "BadApple.mp4;." --add-data "ffmpeg_bin.7z;." vidminal.py
+        run: pyinstaller --onefile --noconfirm --add-data "BadApple.mp4;." --add-data "windows.7z;." vidminal.py
 
       - name: Rename Executable
         run: Rename-Item -Path dist\vidminal.exe -NewName vidminal-windows.exe
@@ -85,7 +85,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build Executable
-        run: pyinstaller --onefile --noconfirm --add-data "BadApple.mp4:." --add-data "ffmpeg_bin.7z:." vidminal.py
+        run: pyinstaller --onefile --noconfirm --add-data "BadApple.mp4:." --add-data "mac.7z:." vidminal.py
 
       - name: Rename Executable
         run: mv dist/vidminal dist/vidminal-macos

@@ -1,17 +1,31 @@
 import os
 import sys
-import time
-from PIL import Image
-import threading
-import platform
-import pygame
-from moviepy import VideoFileClip
+import warnings
+warnings.filterwarnings('ignore')
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import contextlib
 import io
-import py7zr
-import queue
-import colorama
-import multiprocessing
+# Suppress stderr globally (for moviepy, pygame, etc.)
+class SuppressStderr:
+    def __enter__(self):
+        self._stderr = sys.stderr
+        sys.stderr = open(os.devnull, 'w')
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stderr.close()
+        sys.stderr = self._stderr
+
+with SuppressStderr():
+    import time
+    from PIL import Image
+    import threading
+    import platform
+    import pygame
+    from moviepy import VideoFileClip
+    import py7zr
+    import queue
+    import colorama
+    import multiprocessing
+    import json
 
 # finds stuff, works with PyInstaller too (hopefully)
 def find_resource_path(rel):
@@ -23,42 +37,45 @@ def find_resource_path(rel):
 
 # pulls ffmpeg from zip, dumps in root, sets env, done
 def extract_and_set_ffmpeg_bin():
-    zip_path = find_resource_path('ffmpeg_bin.7z')
     sysname = platform.system().lower()
     arch = platform.machine().lower()
     if sysname == 'windows':
-        ffmpeg_in_zip = 'windows/ffmpeg.exe'
+        zip_path = find_resource_path('windows.7z')
+        ffmpeg_in_zip = 'ffmpeg.exe'
         out_name = 'ffmpeg.exe'
     elif sysname == 'darwin':
-        ffmpeg_in_zip = 'mac/ffmpeg'
+        zip_path = find_resource_path('mac.7z')
+        ffmpeg_in_zip = 'ffmpeg'
         out_name = 'ffmpeg'
     elif sysname == 'linux':
+        zip_path = find_resource_path('linux.7z')
         if 'arm' in arch:
             if '64' in arch:
-                ffmpeg_in_zip = 'linux/linux-arm-64/ffmpeg'
+                ffmpeg_in_zip = 'linux-arm-64/ffmpeg'
             else:
-                ffmpeg_in_zip = 'linux/linux-armhf-32/ffmpeg'
+                ffmpeg_in_zip = 'linux-armhf-32/ffmpeg'
         elif '64' in arch:
-            ffmpeg_in_zip = 'linux/linux-64/ffmpeg'
+            ffmpeg_in_zip = 'linux-64/ffmpeg'
         else:
-            ffmpeg_in_zip = 'linux/linux-32/ffmpeg'
+            ffmpeg_in_zip = 'linux-32/ffmpeg'
         out_name = 'ffmpeg'
     else:
+        zip_path = None
         ffmpeg_in_zip = None
         out_name = 'ffmpeg'
-    if ffmpeg_in_zip:
+    if zip_path and ffmpeg_in_zip:
         out_path = os.path.abspath(out_name)
         if not os.path.exists(out_path):
             with py7zr.SevenZipFile(zip_path, 'r') as archive:
                 archive.extract(targets=[ffmpeg_in_zip], path='.')
             if sysname != 'windows':
-                os.chmod(out_path, 0o755)  # make executable, I guess
+                os.chmod(out_path, 0o755)  # make executable
         os.environ['FFMPEG_BINARY'] = out_path
     else:
         os.environ['FFMPEG_BINARY'] = 'ffmpeg'  # fallback, yolo
 
 # turns video into frames & audio, dumps in folder
-def get_stuff_from_video(vid, out, speed=24, wide=80):
+def get_stuff_from_video(vid, out, speed=24, wide=160):
     if not os.path.exists(out):
         os.makedirs(out)
     audio = os.path.join(out, 'audio.ogg')
@@ -87,18 +104,60 @@ def get_stuff_from_video(vid, out, speed=24, wide=80):
     print('Done.')
     return out, audio
 
-def pic_to_ascii_from_pil(pic, wide=80):
-    # High-fidelity ASCII ramp using only block and shading characters for smooth gradients
-    chars = "█▓▒░▌▖ "  # 7 levels, all block/shading for best depth
-    gamma = 0.8
-    contrast = 1.2
+def load_options(options_path='options.json'):
+    # Load options from options.json, fallback to defaults if missing/empty
+    defaults = {
+        'chars': "█▓▒░",
+        'gamma': 1.2,
+        'contrast': 1.5,
+        'temp': 'temp',
+        'wide': 160,
+        'fps': 24
+    }
+    if not os.path.exists(options_path):
+        with open(options_path, 'w', encoding='utf-8') as f:
+            json.dump(defaults, f, indent=2)
+        return defaults
+    try:
+        with open(options_path, 'r', encoding='utf-8') as f:
+            opts = json.load(f)
+        for k in defaults:
+            if k not in opts or opts[k] == '' or opts[k] is None:
+                opts[k] = defaults[k]
+        return opts
+    except Exception:
+        return defaults
+
+def pic_to_ascii_from_pil(pic, wide=None, high=None):
+    import shutil
     from colorama import Style
-    gray = pic.convert('L')
-    color = pic.convert('RGB')
-    ratio = gray.height / gray.width
+    opts = load_options()
+    chars = opts['chars']
+    gamma = float(opts['gamma'])
+    contrast = float(opts['contrast'])
+    # Dynamically determine width and height as 90% of terminal size if not provided
+    if wide is None or high is None:
+        try:
+            size = shutil.get_terminal_size()
+            term_w = int(size.columns * 0.9)
+            term_h = int(size.lines * 0.9)
+            if wide is None:
+                wide = max(20, term_w)
+            if high is None:
+                high = max(10, term_h)
+        except Exception:
+            if wide is None:
+                wide = 160
+            if high is None:
+                high = 24
+    # Maintain aspect ratio
+    ratio = pic.height / pic.width
     tall = int(ratio * wide * 0.55)
-    gray = gray.resize((wide, tall))
-    color = color.resize((wide, tall))
+    if tall > high:
+        tall = high
+        wide = int(tall / (ratio * 0.55))
+    gray = pic.convert('L').resize((wide, tall))
+    color = pic.convert('RGB').resize((wide, tall))
     px = list(gray.getdata())
     px_color = list(color.getdata())
     out = ''
@@ -116,10 +175,10 @@ def pic_to_ascii_from_pil(pic, wide=80):
     out += Style.RESET_ALL
     return out
 
-def pic_to_ascii(img, wide=80):
+def pic_to_ascii(img, wide=None, high=None):
     from PIL import Image
     pic = Image.open(img)
-    return pic_to_ascii_from_pil(pic, wide)
+    return pic_to_ascii_from_pil(pic, wide, high)
 
 # Multiprocessing helper for frame conversion
 
@@ -177,7 +236,7 @@ def clear_terminal():
     os.system('cls' if platform.system() == 'Windows' else 'clear')
 
 # plays ascii frames + sound, handles pause/quit
-def play_ascii_video_stream(folder, audio, speed=24, wide=80, buffer_size=24):
+def play_ascii_video_stream(folder, audio, speed=24, wide=160, buffer_size=24):
     pygame.mixer.init()
     delay = 1.0 / speed
     frames = sorted([f for f in os.listdir(folder) if f.startswith('frame_') and f.endswith('.txt')])
@@ -244,6 +303,7 @@ def get_stuff_from_video_stream(vid, out, speed=24, buffer_size=24):
         clip.audio.write_audiofile(audio, codec='libvorbis')
     frame_queue = queue.Queue(maxsize=buffer_size*2)
     total_frames = int(clip.fps * clip.duration)
+    video_duration = clip.duration  # <-- add this
     def extract_frames():
         for i, frame in enumerate(clip.iter_frames(fps=speed, dtype='uint8')):
             frame_path = os.path.join(out, f'frame_{i+1:05d}.png')
@@ -254,10 +314,10 @@ def get_stuff_from_video_stream(vid, out, speed=24, buffer_size=24):
                 pass  # Don't block extraction, just skip putting in queue
         frame_queue.put(None)  # Sentinel for end
     threading.Thread(target=extract_frames, daemon=True).start()
-    return out, audio, frame_queue, total_frames
+    return out, audio, frame_queue, total_frames, video_duration
 
 # plays ascii video + audio from stream, handles pause/quit
-def play_ascii_video_stream_streaming(folder, audio, frame_queue, total_frames, speed=24, wide=80, buffer_size=24):
+def play_ascii_video_stream_streaming(folder, audio, frame_queue, total_frames, speed=24, wide=160, buffer_size=24, video_duration=None):
     import queue as pyqueue
     pygame.mixer.init()
     delay = 1.0 / speed
@@ -327,7 +387,8 @@ def play_ascii_video_stream_streaming(folder, audio, frame_queue, total_frames, 
         if frame_path is None:
             break
         frames_buffer.append(frame_path)
-    total_time = total_frames / speed if total_frames > 0 else 0
+    # Use actual video duration if provided
+    total_time = video_duration if video_duration is not None else (total_frames / speed if total_frames > 0 else 0)
     while not stop_flag.is_set() and frames_buffer:
         # Handle rewind/forward requests
         jump = 0
@@ -414,26 +475,40 @@ def pic_from_ascii_txt(txt_path):
 # main thing, asks stuff, runs stuff
 def main():
     extract_and_set_ffmpeg_bin()  # pulls ffmpeg from zip, sets env, whatever
-    print('Turns videos into ugly terminal art. With sound.')
-    print('Made by a lazy coder. @github/SajagIN')
-    vid_input = input('Video file? (default: BadApple.mp4): ').strip()
+    from colorama import Fore, Style
+    box_width = 64
+    box_color = Fore.CYAN + Style.BRIGHT
+    text_color = Fore.YELLOW + Style.BRIGHT
+    reset = Style.RESET_ALL
+    def box_line(text, color=text_color):
+        # Remove ANSI codes for length calculation
+        import re
+        ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
+        visible = ansi_escape.sub('', text)
+        pad = box_width - 2 - len(visible)
+        return f"{box_color}║{reset}{color}{text}{' ' * pad}{reset}{box_color}║{reset}"
+    lines = [
+        "",
+        f"{box_color}╔{'═'* (box_width-2)}╗{reset}",
+        box_line("  Turns videos into ugly terminal art. With sound.  "),
+        box_line("  Made by a lazy coder. " + Fore.MAGENTA + "@github/SajagIN" + text_color + "  "),
+        box_line(f"  {Fore.GREEN}Space{reset}{text_color} = pause  {Fore.GREEN}Q{reset}{text_color} = quit  {Fore.GREEN}A/D{reset}{text_color} = rewind/forward 5s  "),
+        f"{box_color}╚{'═'* (box_width-2)}╝{reset}",
+        ""
+    ]
+    print("\n".join(lines))
+    opts = load_options('options.json')
+    vid_input = input(Fore.CYAN + Style.BRIGHT + 'Video file?' + reset + f' (default: {Fore.YELLOW}BadApple.mp4{reset}): ').strip()
     vid = find_resource_path(vid_input) if vid_input else find_resource_path('BadApple.mp4')
-    temp = input('Temp folder? (default: temp): ').strip() or 'temp'
+    temp = opts['temp']
+    width = int(opts['wide'])
+    fps = int(opts['fps'])
     try:
-        width = int(input('How wide? (default: 80): ').strip() or 80)
-    except ValueError:
-        width = 80
-    try:
-        fps = int(input('FPS? (default: 24): ').strip() or 24)
-    except ValueError:
-        fps = 24
-    print('Space = pause, Q = quit A/D = rewind/forward 5s, ←/→ = skip 1s')
-    try:
-        frames, audio, frame_queue, total_frames = get_stuff_from_video_stream(vid, temp, speed=fps, buffer_size=fps)
-        print('Streaming ASCII video...')
-        play_ascii_video_stream_streaming(frames, audio, frame_queue, total_frames, speed=fps, wide=width, buffer_size=fps)
+        frames, audio, frame_queue, total_frames, video_duration = get_stuff_from_video_stream(vid, temp, speed=fps, buffer_size=fps)
+        print(Fore.GREEN + Style.BRIGHT + 'Streaming ASCII video...' + reset)
+        play_ascii_video_stream_streaming(frames, audio, frame_queue, total_frames, speed=fps, wide=width, buffer_size=fps, video_duration=video_duration)
     except Exception as e:
-        print(f'Nope, broke: {e}')
+        print(Fore.RED + f'Nope, broke: {e}' + reset)
         sys.exit(1)
 
 if __name__ == '__main__':
