@@ -61,7 +61,7 @@ It has built in Mandelbrot, Julia, Multibrot, Burning Ship, custom formulas, col
    Press B, enter your wanted resolution (e.g. 1920x1080, 512x512), and wait for the progress bar to finish. (actually works!)
 
 ## Requirements
-
+- ⚠️ DO NOT RUN IN A READ-ONLY ENVIRONMENT! FOR THE BMP SAVING FUNCTIONALITY TO WORK, THE SUBMISSION MUST BE LOCATED IN A READ-WRITE ENVIRONMENT SUCH AS THE USER FOLDER! ⚠️
 - Python 3.13.5 (only tested on latest version, older might work without issues.)
 - [blessed](https://pypi.org/project/blessed/) (`pip install blessed`)
 ## Platform Compatibility
