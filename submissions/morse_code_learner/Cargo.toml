@@ -1,0 +1,12 @@
+[package]
+name = "morse_code_learner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.41"
+directories = "6.0.0"
+rand = "0.9.1"
+serde = "1.0.219"
+serde_derive = "1.0.219"
+toml = "0.8.23"
