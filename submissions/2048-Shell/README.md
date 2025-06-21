@@ -1,5 +1,5 @@
 # 2048-Shell
-A simple implementation of the classic 2048 game, playable directly in your terminal using a Bash shell script.
+A 2048 game with a twist, playable directly in your terminal using a Bash shell script.
 
 ## Features
 - Play 2048 in your terminal with simple keyboard commands.
