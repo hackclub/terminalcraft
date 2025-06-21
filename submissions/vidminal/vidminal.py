@@ -11,6 +11,7 @@ import io
 import py7zr
 import queue
 import colorama
+import multiprocessing
 
 # finds stuff, works with PyInstaller too (hopefully)
 def find_resource_path(rel):
@@ -57,7 +58,7 @@ def extract_and_set_ffmpeg_bin():
         os.environ['FFMPEG_BINARY'] = 'ffmpeg'  # fallback, yolo
 
 # turns video into frames & audio, dumps in folder
-def get_stuff_from_video(vid, out, speed=24):
+def get_stuff_from_video(vid, out, speed=24, wide=80):
     if not os.path.exists(out):
         os.makedirs(out)
     audio = os.path.join(out, 'audio.ogg')
@@ -65,17 +66,33 @@ def get_stuff_from_video(vid, out, speed=24):
     clip = VideoFileClip(vid)
     with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
         clip.audio.write_audiofile(audio, codec='libvorbis')
-    for i, frame in enumerate(clip.iter_frames(fps=speed, dtype='uint8')):
-        Image.fromarray(frame).save(os.path.join(out, f'frame_{i+1:05d}.png'))
+        frame_paths = []
+        for i, frame in enumerate(clip.iter_frames(fps=speed, dtype='uint8')):
+            img = Image.fromarray(frame)
+            # Reduce image size early
+            ratio = img.height / img.width
+            tall = int(ratio * wide * 0.55)
+            img = img.resize((wide, tall))
+            frame_path = os.path.join(out, f'frame_{i+1:05d}.png')
+            img.save(frame_path)
+            frame_paths.append(frame_path)
+        # Multiprocessing: convert all frames to ASCII in parallel
+        with multiprocessing.Pool() as pool:
+            ascii_frames = pool.map(convert_frame_to_ascii, [(fp, wide) for fp in frame_paths])
+        # Save ASCII frames as .txt for fast playback
+        for i, ascii_txt in enumerate(ascii_frames):
+            txt_path = os.path.join(out, f'frame_{i+1:05d}.txt')
+            with open(txt_path, 'w', encoding='utf-8') as f:
+                f.write(ascii_txt)
     print('Done.')
     return out, audio
 
-# image to ascii, not rocket science
-def pic_to_ascii(img, wide=80):
-    # Extended ASCII ramp for more depth
-    chars = "@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?i!lI;:,\"•`'. ☐"
+def pic_to_ascii_from_pil(pic, wide=80):
+    # High-fidelity ASCII ramp using only block and shading characters for smooth gradients
+    chars = "█▓▒░▌▖ "  # 7 levels, all block/shading for best depth
+    gamma = 0.8
+    contrast = 1.2
     from colorama import Style
-    pic = Image.open(img)
     gray = pic.convert('L')
     color = pic.convert('RGB')
     ratio = gray.height / gray.width
@@ -87,17 +104,30 @@ def pic_to_ascii(img, wide=80):
     out = ''
     for i, (p, rgb) in enumerate(zip(px, px_color)):
         r, g, b = rgb
+        r = int(255 * pow((r / 255), gamma) * contrast)
+        g = int(255 * pow((g / 255), gamma) * contrast)
+        b = int(255 * pow((b / 255), gamma) * contrast)
+        r = min(max(r, 0), 255)
+        g = min(max(g, 0), 255)
+        b = min(max(b, 0), 255)
         out += f'\033[38;2;{r};{g};{b}m{chars[p * (len(chars) - 1) // 255]}'
         if (i + 1) % wide == 0:
             out += Style.RESET_ALL + '\n'
     out += Style.RESET_ALL
     return out
 
-# yields ascii frames, lazy style
-def prepare_ascii_frames_stream(folder, wide=80, buffer_size=24):
-    frames = sorted([f for f in os.listdir(folder) if f.startswith('frame_') and f.endswith('.png')])
-    for f in frames:
-        yield pic_to_ascii(os.path.join(folder, f), wide)
+def pic_to_ascii(img, wide=80):
+    from PIL import Image
+    pic = Image.open(img)
+    return pic_to_ascii_from_pil(pic, wide)
+
+# Multiprocessing helper for frame conversion
+
+def convert_frame_to_ascii(args):
+    frame_path, wide = args
+    from PIL import Image
+    pic = Image.open(frame_path)
+    return pic_to_ascii_from_pil(pic, wide)
 
 # plays sound, can pause/stop, whatever
 def play_sound(audio, pause_flag, stop_flag):
@@ -150,7 +180,7 @@ def clear_terminal():
 def play_ascii_video_stream(folder, audio, speed=24, wide=80, buffer_size=24):
     pygame.mixer.init()
     delay = 1.0 / speed
-    frames = sorted([f for f in os.listdir(folder) if f.startswith('frame_') and f.endswith('.png')])
+    frames = sorted([f for f in os.listdir(folder) if f.startswith('frame_') and f.endswith('.txt')])
     total = len(frames)
     stop_flag = threading.Event()
     pause_flag = threading.Event()
@@ -194,8 +224,9 @@ def play_ascii_video_stream(folder, audio, speed=24, wide=80, buffer_size=24):
         sleep_for = tgt - now
         if sleep_for > 0:
             time.sleep(sleep_for)
-        print('\x1b[H', end='')  # move cursor home, don't ask how it works
-        print(pic_to_ascii(os.path.join(folder, frames[i]), wide), end='')
+        print('\x1b[H', end='')  # move cursor home
+        # Batch terminal output: print whole frame at once
+        print(pic_from_ascii_txt(os.path.join(folder, frames[i])), end='')
         i += 1
     stop_flag.set()
     pygame.mixer.music.stop()
@@ -217,29 +248,61 @@ def get_stuff_from_video_stream(vid, out, speed=24, buffer_size=24):
         for i, frame in enumerate(clip.iter_frames(fps=speed, dtype='uint8')):
             frame_path = os.path.join(out, f'frame_{i+1:05d}.png')
             Image.fromarray(frame).save(frame_path)
-            frame_queue.put(frame_path)
+            try:
+                frame_queue.put_nowait(frame_path)
+            except queue.Full:
+                pass  # Don't block extraction, just skip putting in queue
         frame_queue.put(None)  # Sentinel for end
     threading.Thread(target=extract_frames, daemon=True).start()
-    return out, audio, frame_queue
+    return out, audio, frame_queue, total_frames
 
 # plays ascii video + audio from stream, handles pause/quit
-def play_ascii_video_stream_streaming(folder, audio, frame_queue, speed=24, wide=80, buffer_size=24):
+def play_ascii_video_stream_streaming(folder, audio, frame_queue, total_frames, speed=24, wide=80, buffer_size=24):
+    import queue as pyqueue
     pygame.mixer.init()
     delay = 1.0 / speed
     stop_flag = threading.Event()
     pause_flag = threading.Event()
     pause_flag.clear()
+    rewind_forward = pyqueue.Queue()
 
     def keyboard_listener():
+        import platform
+        is_windows = platform.system() == 'Windows'
         while not stop_flag.is_set():
             key = getch()
+            if not key:
+                time.sleep(0.05)
+                continue
             if key == ' ':
                 if pause_flag.is_set():
                     pause_flag.clear()
                 else:
                     pause_flag.set()
-            if key in ('q', 'Q'):
+            elif key in ('q', 'Q'):
                 stop_flag.set()
+            elif key in ('a', 'A'):
+                rewind_forward.put(-5 * speed)  # rewind 5s
+            elif key in ('d', 'D'):
+                rewind_forward.put(5 * speed)   # forward 5s
+            elif is_windows:
+                # Windows arrow keys: first getch() returns '\xe0', next is code
+                if key in ('\xe0', '\x00'):
+                    next_key = getch()
+                    if next_key == 'M':  # right arrow
+                        rewind_forward.put(speed)
+                    elif next_key == 'K':  # left arrow
+                        rewind_forward.put(-speed)
+            else:
+                # Unix: arrow keys are '\x1b', '[', 'C'/'D'
+                if key == '\x1b':
+                    next1 = getch()
+                    if next1 == '[':
+                        next2 = getch()
+                        if next2 == 'C':  # right arrow
+                            rewind_forward.put(speed)
+                        elif next2 == 'D':  # left arrow
+                            rewind_forward.put(-speed)
             time.sleep(0.05)
 
     key_thread = threading.Thread(target=keyboard_listener, daemon=True)
@@ -248,6 +311,10 @@ def play_ascii_video_stream_streaming(folder, audio, frame_queue, speed=24, wide
     def play_audio_from(pos):
         pygame.mixer.music.load(audio)
         pygame.mixer.music.play(start=pos)
+
+    def format_time(t):
+        t = int(t)
+        return f"{t//3600:02}:{(t%3600)//60:02}:{t%60:02}"
 
     print('\x1b[2J', end='')  # clear screen
     start = time.time()
@@ -260,7 +327,44 @@ def play_ascii_video_stream_streaming(folder, audio, frame_queue, speed=24, wide
         if frame_path is None:
             break
         frames_buffer.append(frame_path)
+    total_time = total_frames / speed if total_frames > 0 else 0
     while not stop_flag.is_set() and frames_buffer:
+        # Handle rewind/forward requests
+        jump = 0
+        while not rewind_forward.empty():
+            jump += rewind_forward.get()
+        if jump != 0:
+            # --- Begin robust seek logic: buffer only target frame, not intermediates ---
+            target_i = max(0, min(i + jump, total_frames - 1))
+            pygame.mixer.music.pause()
+            frames_buffer.clear()
+            # Wait for the target frame to be extracted (but do not display intermediates)
+            frame_path = os.path.join(folder, f'frame_{target_i+1:05d}.png')
+            wait_count = 0
+            while not os.path.exists(frame_path):
+                print('\x1b[H', end='')
+                print('Buffering...'.center(wide), end='\n')
+                time.sleep(0.05)
+                wait_count += 1
+                if wait_count > 400:
+                    break
+            if os.path.exists(frame_path):
+                frames_buffer.append(frame_path)
+            # Fill buffer with next frames if available, always from disk
+            for idx in range(target_i+1, min(target_i+1+buffer_size, total_frames)):
+                next_path = os.path.join(folder, f'frame_{idx+1:05d}.png')
+                if os.path.exists(next_path):
+                    frames_buffer.append(next_path)
+                else:
+                    break
+            i = target_i
+            # Set start time so seek bar is correct
+            start = time.time() - i * delay
+            # Resume audio at the new position only when frame is ready
+            if frames_buffer:
+                play_audio_from(i * delay)
+            time.sleep(0.1)
+            # --- End robust seek logic ---
         if pause_flag.is_set():
             pygame.mixer.music.pause()
             paused_at = i * delay
@@ -276,24 +380,43 @@ def play_ascii_video_stream_streaming(folder, audio, frame_queue, speed=24, wide
         if sleep_for > 0:
             time.sleep(sleep_for)
         print('\x1b[H', end='')
-        print(pic_to_ascii(frames_buffer[0], wide), end='')
+        if frames_buffer:
+            print(pic_to_ascii(frames_buffer[0], wide), end='')
+        else:
+            print('Buffering...'.center(wide), end='\n')
+        # --- Seek bar with play/pause and time ---
+        play_emoji = '⏸️' if not pause_flag.is_set() else '▶️'
+        time_str = f"{format_time(i / speed)} / {format_time(total_time)}"
+        fixed_len = len(play_emoji) + 2 + 2 + len(time_str)
+        bar_width = max(1, wide - fixed_len)
+        bar_pos = int((i / (total_frames - 1)) * bar_width) if total_frames > 1 else 0
+        bar = '█' * bar_pos + '-' * (bar_width - bar_pos)
+        print(f"{play_emoji} [{bar}] {time_str}")
+        # --- End seek bar ---
         i += 1
-        frames_buffer.pop(0)
-        next_frame = frame_queue.get()
-        if next_frame is None:
-            continue
-        frames_buffer.append(next_frame)
+        if frames_buffer:
+            frames_buffer.pop(0)
+        # Always refill buffer from disk after skip
+        next_idx = i + len(frames_buffer)
+        if next_idx < total_frames:
+            next_path = os.path.join(folder, f'frame_{next_idx+1:05d}.png')
+            if os.path.exists(next_path):
+                frames_buffer.append(next_path)
     stop_flag.set()
     pygame.mixer.music.stop()
     key_thread.join()
     pygame.mixer.quit()
+
+def pic_from_ascii_txt(txt_path):
+    with open(txt_path, 'r', encoding='utf-8') as f:
+        return f.read()
 
 # main thing, asks stuff, runs stuff
 def main():
     extract_and_set_ffmpeg_bin()  # pulls ffmpeg from zip, sets env, whatever
     print('Turns videos into ugly terminal art. With sound.')
     print('Made by a lazy coder. @github/SajagIN')
-    vid_input = input('Video file? Please Enter full path (default: BadApple.mp4): ').strip()
+    vid_input = input('Video file? (default: BadApple.mp4): ').strip()
     vid = find_resource_path(vid_input) if vid_input else find_resource_path('BadApple.mp4')
     temp = input('Temp folder? (default: temp): ').strip() or 'temp'
     try:
@@ -304,11 +427,11 @@ def main():
         fps = int(input('FPS? (default: 24): ').strip() or 24)
     except ValueError:
         fps = 24
-    print('Space = pause, Q = quit')
+    print('Space = pause, Q = quit A/D = rewind/forward 5s, ←/→ = skip 1s')
     try:
-        frames, audio, frame_queue = get_stuff_from_video_stream(vid, temp, speed=fps, buffer_size=fps)
+        frames, audio, frame_queue, total_frames = get_stuff_from_video_stream(vid, temp, speed=fps, buffer_size=fps)
         print('Streaming ASCII video...')
-        play_ascii_video_stream_streaming(frames, audio, frame_queue, speed=fps, wide=width, buffer_size=fps)
+        play_ascii_video_stream_streaming(frames, audio, frame_queue, total_frames, speed=fps, wide=width, buffer_size=fps)
     except Exception as e:
         print(f'Nope, broke: {e}')
         sys.exit(1)

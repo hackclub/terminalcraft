@@ -25,6 +25,12 @@ Just download the right executable for your OS from the [Releases](https://githu
 ### No FFmpeg Setup!
 You don't need to install ffmpeg yourself . This repo ships with a compressed `ffmpeg_bin.7z` containing all the ffmpeg binaries for Windows, Mac, and Linux (even ARM stuff). The script will extract and use the right one for your system, automatically. So, yeah, just run it.
 
+## 🆕 Playback Controls
+- **Space**: Pause/Resume
+- **Q**: Quit
+- **A/D**: Rewind/Forward 5 seconds
+- **←/→ (Arrow keys)**: Skip 1 frame
+
 ## 🍿 Usage: "Watch" a Video
 Just run it. The script will ask you for everything (video file, width, fps, temp folder) like a lazy wizard. ✨
 ```bash
@@ -51,6 +57,7 @@ Just press Enter to accept the defaults, or type your own values. Easy.
 - Temporary Files: It creates a bunch of image files and an audio file. It doesn't clean them up automatically. Why? **Because I'm lazy. Delete them yourself!** 🔥🗑️
 - ffmpeg will be extracted to the script's root folder if not already there. If you delete it, it'll just get extracted again. Magic.
 - **Full video path is required (No relative path)**
+- Subtitles must be in `.srt` or `.ass` format and named the same as your video file to be detected.
 
 ## Contributing (LOL)
 Sure, if you really wanna make this "better," feel free. But honestly, it works, right? So why bother? Issues and pull requests are technically welcome, I guess. 🙄
