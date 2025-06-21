@@ -83,8 +83,11 @@ def main():
         else:
             console.print(f"[bold red]Unknown art mode: {args.art_mode}[/bold red]")
             console.print("[yellow]Available modes:[/yellow]")
-            for key in art_options.keys():
-                console.print(f"[cyan]{key}[/cyan]")
+            table = Table(style="bold white on black")
+            table.add_column("Mode", style="cyan")
+            for key, (name, _) in art_options.items():
+                table.add_row(key)
+            console.print(table)
     else:
         interactive_menu()
 if __name__ == "__main__":
