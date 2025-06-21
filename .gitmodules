@@ -1,0 +1,3 @@
+[submodule "habitify"]
+	path = habitify
+	url = https://github.com/pulas2345/habitify
