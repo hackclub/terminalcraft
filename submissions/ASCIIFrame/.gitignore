@@ -1,0 +1,43 @@
+# === OS-specific files ===
+.DS_Store
+Thumbs.db
+
+# === CMake build directories ===
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+compile_commands.json
+
+# === IDEs ===
+# CLion / JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+# === Compiled binaries ===
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+*.a
+*.lib
+
+# === Logs and temporary files ===
+*.log
+*.tmp
+*.swp
+*.bak
+
+# === Test and coverage tools ===
+*.gcda
+*.gcno
+*.gcov
+
+# === Backup files ===
+*~
