@@ -95,9 +95,9 @@ def get_stuff_from_video(vid, out, speed=24, wide=160):
             frame_paths.append(frame_path)
         # Multiprocessing: convert all frames to ASCII in parallel
         with multiprocessing.Pool() as pool:
-            ascii_frames = pool.map(convert_frame_to_ascii, [(fp, wide) for fp in frame_paths])
+            ascii_results = pool.map(convert_frame_to_ascii, [(fp, wide) for fp in frame_paths])
         # Save ASCII frames as .txt for fast playback
-        for i, ascii_txt in enumerate(ascii_frames):
+        for i, (ascii_txt, _) in enumerate(ascii_results): # Unpack only the text, ignore the actual_wide for saving
             txt_path = os.path.join(out, f'frame_{i+1:05d}.txt')
             with open(txt_path, 'w', encoding='utf-8') as f:
                 f.write(ascii_txt)
@@ -173,20 +173,20 @@ def pic_to_ascii_from_pil(pic, wide=None, high=None):
         if (i + 1) % wide == 0:
             out += Style.RESET_ALL + '\n'
     out += Style.RESET_ALL
-    return out
+    return out, wide # Return the ASCII string and the actual width used
 
 def pic_to_ascii(img, wide=None, high=None):
     from PIL import Image
     pic = Image.open(img)
-    return pic_to_ascii_from_pil(pic, wide, high)
+    return pic_to_ascii_from_pil(pic, wide, high) # This will now return (out, wide)
 
 # Multiprocessing helper for frame conversion
 
 def convert_frame_to_ascii(args):
     frame_path, wide = args
     from PIL import Image
-    pic = Image.open(frame_path)
-    return pic_to_ascii_from_pil(pic, wide)
+    pic = Image.open(frame_path) # No change here, just for context
+    return pic_to_ascii_from_pil(pic, wide) # This will now return (out, wide)
 
 # plays sound, can pause/stop, whatever
 def play_sound(audio, pause_flag, stop_flag):
@@ -265,7 +265,7 @@ def play_ascii_video_stream(folder, audio, speed=24, wide=160, buffer_size=24):
         pygame.mixer.music.play(start=pos)
 
     i = 0
-    print('\x1b[2J', end='')  # clear screen, trust me
+    print('\x1b[2J', end='')  # clear screen
     start = time.time()
     play_audio_from(0)
     while i < total and not stop_flag.is_set():
@@ -389,6 +389,9 @@ def play_ascii_video_stream_streaming(folder, audio, frame_queue, total_frames, 
         frames_buffer.append(frame_path)
     # Use actual video duration if provided
     total_time = video_duration if video_duration is not None else (total_frames / speed if total_frames > 0 else 0)
+    # Track terminal size for optimized clearing
+    import shutil
+    last_term_size = shutil.get_terminal_size()
     while not stop_flag.is_set() and frames_buffer:
         # Handle rewind/forward requests
         jump = 0
@@ -403,7 +406,8 @@ def play_ascii_video_stream_streaming(folder, audio, frame_queue, total_frames, 
             frame_path = os.path.join(folder, f'frame_{target_i+1:05d}.png')
             wait_count = 0
             while not os.path.exists(frame_path):
-                print('\x1b[H', end='')
+                # Always clear screen on seek
+                print('\x1b[2J\x1b[H', end='') # Clear screen and move cursor home
                 print('Buffering...'.center(wide), end='\n')
                 time.sleep(0.05)
                 wait_count += 1
@@ -440,16 +444,28 @@ def play_ascii_video_stream_streaming(folder, audio, frame_queue, total_frames, 
         sleep_for = tgt - now
         if sleep_for > 0:
             time.sleep(sleep_for)
-        print('\x1b[H', end='')
-        if frames_buffer:
-            print(pic_to_ascii(frames_buffer[0], wide), end='')
+        # Check terminal size
+        try:
+            term_size = shutil.get_terminal_size()
+        except Exception:
+            term_size = last_term_size
+        if term_size != last_term_size:
+            print('\x1b[2J\x1b[H', end='')  # Clear screen and move cursor home
+            last_term_size = term_size
         else:
-            print('Buffering...'.center(wide), end='\n')
+            print('\x1b[H', end='')  # Just move cursor home
+        actual_frame_wide = wide # Initialize with the requested wide, will be updated if frame is rendered
+        if frames_buffer:
+            ascii_frame_output, actual_frame_wide = pic_to_ascii(frames_buffer[0], wide)
+            print(ascii_frame_output, end='')
+        else:
+            print('Buffering...'.center(actual_frame_wide), end='\n') # Use actual_frame_wide for centering
         # --- Seek bar with play/pause and time ---
         play_emoji = '⏸️' if not pause_flag.is_set() else '▶️'
         time_str = f"{format_time(i / speed)} / {format_time(total_time)}"
-        fixed_len = len(play_emoji) + 2 + 2 + len(time_str)
-        bar_width = max(1, wide - fixed_len)
+        # Assume emoji is 2 cells wide. Total fixed width is emoji(2) + " [] "(4) + time_str
+        fixed_len = 2 + 4 + len(time_str)
+        bar_width = max(1, actual_frame_wide - fixed_len) # Use actual_frame_wide here
         bar_pos = int((i / (total_frames - 1)) * bar_width) if total_frames > 1 else 0
         bar = '█' * bar_pos + '-' * (bar_width - bar_pos)
         print(f"{play_emoji} [{bar}] {time_str}")
@@ -498,8 +514,27 @@ def main():
     ]
     print("\n".join(lines))
     opts = load_options('options.json')
-    vid_input = input(Fore.CYAN + Style.BRIGHT + 'Video file?' + reset + f' (default: {Fore.YELLOW}BadApple.mp4{reset}): ').strip()
-    vid = find_resource_path(vid_input) if vid_input else find_resource_path('BadApple.mp4')
+
+    vid_path = sys.argv[1] if len(sys.argv) > 1 else ""
+    is_from_arg = bool(vid_path)
+
+    if not vid_path:
+        # If no argument, prompt the user
+        vid_path = input(Fore.CYAN + Style.BRIGHT + 'Video file?' + reset + f' (default: {Fore.YELLOW}BadApple.mp4{reset}): ').strip()
+
+    if vid_path:
+        if is_from_arg:
+            print(Fore.CYAN + Style.BRIGHT + f"Opening: {os.path.basename(vid_path)}" + reset)
+        vid = os.path.abspath(vid_path)
+        if not os.path.exists(vid):
+            print(Fore.RED + f'Error: File not found at "{vid}"' + reset)
+            if is_from_arg:
+                time.sleep(3) # Pause for user to see error
+            sys.exit(1)
+    else:
+        # Default to the bundled BadApple.mp4
+        vid = find_resource_path('BadApple.mp4')
+
     temp = opts['temp']
     width = int(opts['wide'])
     fps = int(opts['fps'])
@@ -512,5 +547,10 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    while True:
-        main()  # run it, or not, idc
+    # If a video file is provided as a command-line argument,
+    # play it once and exit. Otherwise, loop for interactive mode.
+    if len(sys.argv) > 1:
+        main()
+    else:
+        while True:
+            main()
