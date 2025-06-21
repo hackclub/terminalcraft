@@ -1,4 +1,5 @@
 # MorseyType - Morse Code Typing Trainer
+![image](https://github.com/user-attachments/assets/4bb682e4-2be9-41ba-b92d-ee597be37980)
 
 
 MorseyType is a terminal-based Morse code typing trainer designed to help you improve your Morse code proficiency through structured practice sessions. The application presents words from common language vocabulary lists, challenges you to type them in Morse code, and provides real-time performance feedback.
