@@ -1,0 +1,5 @@
+Pillow>=9.0.0
+pygame
+moviepy
+py7zr
+colorama
