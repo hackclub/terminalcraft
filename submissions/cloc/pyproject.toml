@@ -1,0 +1,25 @@
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "plazma-cloc"
+version = "1.2.2"
+description = "cloc (Count LOC) is a terminal utility to easily count lines of code in a file / project."
+readme = "README.md"
+authors = [{ name = "CaptainDeathead", email = "unstableplazma@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["Command Line", "CLI", "Tool", "Code", "Utility", "LOC"]
+dependencies = []
+requires-python = ">3"
+
+[project.optional-dependencies]
+dev = []
+
+[project.urls]
+Homepage = "https://github.com/CaptainDeathead/cloc"
