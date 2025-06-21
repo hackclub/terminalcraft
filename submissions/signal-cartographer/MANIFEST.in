@@ -1,0 +1,23 @@
+include README.md
+include LICENSE
+include GAME_GUIDE.md
+include QUICK_START.md
+include RELEASE_NOTES.md
+include requirements.txt
+include *.py
+include *.bat
+include *.sh
+include *.ps1
+
+recursive-include signal_cartographer *.py
+recursive-include data *
+recursive-include saves *
+recursive-include instruction *
+
+global-exclude *.pyc
+global-exclude __pycache__
+global-exclude .git*
+global-exclude .venv*
+global-exclude .cursor*
+global-exclude test_*
+global-exclude *.svg 
