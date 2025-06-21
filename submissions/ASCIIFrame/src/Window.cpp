@@ -229,7 +229,7 @@ void Window::runConioh() {
         display(currentFrame);
         std::cout << "Current frame: " << currentFrame+1 << '\n';
         std::cout << "Total frames: " << framesCount << '\n';
-        std::cout << "Current selected character:" << selectedCharacter << '\n';
+        std::cout << "Current selected character:" << selectedChar << '\n';
         std::cout << "CONTROLS: \n - Move: wsad or arrow keys\n - Change Character: tab\n - Place Character: enter" << '\n';
         std::cout << " - Delete Character: backspace\n - Next frame: n\n - Previous Frame: p\n - Play animation: e" << '\n';
         std::cout << " - Menu: q" << '\n';
