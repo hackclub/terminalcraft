@@ -1,0 +1,4 @@
+rich
+numpy
+questionary
+scipy
