@@ -1,0 +1,3 @@
+[submodule "thousand-most-common-words"]
+	path = thousand-most-common-words
+	url = https://github.com/SMenigat/thousand-most-common-words.git
