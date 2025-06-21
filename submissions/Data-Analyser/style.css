@@ -1,0 +1,10 @@
+Button {
+    background: transparent;
+    border: round white;
+    color: white;
+    margin: 1;
+}
+
+Button:hover {
+    color: yellow;
+}
