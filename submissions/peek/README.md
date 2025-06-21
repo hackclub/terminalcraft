@@ -179,6 +179,9 @@ Found a bug? Want a new feature? Open an issue through the [Issues](https://gith
 - [rich](https://github.com/Textualize/rich/), a fantastic library for terminal
 formatting
 
+- [Typer](https://typer.tiangolo.com/), a CLI library that's literally heaven compared
+to argparse
+
 - [TheFuzz](https://github.com/seatgeek/thefuzz), insanely easy Levenshtein Distance-based
 fuzzy string matching
 
