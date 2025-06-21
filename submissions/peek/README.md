@@ -20,12 +20,15 @@ without a file extension
 ## Downloading a binary
 
 Grab yourself a binary from the [Releases](https://github.com/hs7t/peek/releases/) 
-tab on my repo, or the binaries.zip file in this folder.. They're available for three 
+tab on my repo, or the binaries/ folder right here[^1]. They're available for three 
 platforms:
 
 - for Windows: `peek-windows-[x86_64 or arm64].exe`
 - for macOS: `peek-macos-[arm64 or x86_64]`
 - for Linux (x86-64 / arm64): `peek-linux-[x86_64 or arm64]`
+
+[^1]: Linux binaries are only available from my repo's Releases tab due to 
+GitHub's file size limitations.
 
 ### Linux and Mac
 
