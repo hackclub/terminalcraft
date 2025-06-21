@@ -28,7 +28,7 @@ TerminalWriter is a self-contained, terminal-only Python application for authori
 Run this command in PowerShell to install TerminalWriter:
 
 ```powershell
-mkdir -Force "$env:USERPROFILE\terminalwriter" | Out-Null; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/username/terminalwriter/main/terminalwriter.py" -OutFile "$env:USERPROFILE\terminalwriter\terminalwriter.py"; pip install colorama markdown reportlab ebooklib beautifulsoup4 Pillow; Set-Content -Path "$env:USERPROFILE\terminalwriter.bat" -Value "@echo off`r`npython `"$env:USERPROFILE\terminalwriter\terminalwriter.py`" %*"; Set-Content -Path "$env:USERPROFILE\tw.bat" -Value "@echo off`r`npython `"$env:USERPROFILE\terminalwriter\terminalwriter.py`" %*"; $env:PATH += ";$env:USERPROFILE"; [Environment]::SetEnvironmentVariable("PATH", "$($env:PATH)", "User"); Write-Output "TerminalWriter installed! Run 'terminalwriter' or 'tw' from any terminal."
+mkdir -Force "$env:USERPROFILE\terminalwriter" | Out-Null; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/foglomon/terminalwriter/main/terminalwriter.py" -OutFile "$env:USERPROFILE\terminalwriter\terminalwriter.py"; pip install colorama markdown reportlab ebooklib beautifulsoup4 Pillow; Set-Content -Path "$env:USERPROFILE\terminalwriter.bat" -Value "@echo off`r`npython `"$env:USERPROFILE\terminalwriter\terminalwriter.py`" %*"; Set-Content -Path "$env:USERPROFILE\tw.bat" -Value "@echo off`r`npython `"$env:USERPROFILE\terminalwriter\terminalwriter.py`" %*"; $env:PATH += ";$env:USERPROFILE"; [Environment]::SetEnvironmentVariable("PATH", "$($env:PATH)", "User"); Write-Output "TerminalWriter installed! Run 'terminalwriter' or 'tw' from any terminal."
 ```
 
 ### Linux (Bash)
@@ -36,7 +36,7 @@ mkdir -Force "$env:USERPROFILE\terminalwriter" | Out-Null; Invoke-WebRequest -Ur
 Run this command in a terminal to install TerminalWriter:
 
 ```bash
-mkdir -p ~/terminalwriter && curl -s https://raw.githubusercontent.com/username/terminalwriter/main/terminalwriter.py -o ~/terminalwriter/terminalwriter.py && pip install colorama markdown reportlab ebooklib beautifulsoup4 Pillow && echo -e '#!/bin/bash\npython ~/terminalwriter/terminalwriter.py "$@"' > ~/terminalwriter.sh && chmod +x ~/terminalwriter.sh && sudo ln -sf ~/terminalwriter.sh /usr/local/bin/terminalwriter && sudo ln -sf ~/terminalwriter.sh /usr/local/bin/tw && echo "TerminalWriter installed! Run 'terminalwriter' or 'tw' from any terminal."
+mkdir -p ~/terminalwriter && curl -s https://raw.githubusercontent.com/foglomon/terminalwriter/main/terminalwriter.py -o ~/terminalwriter/terminalwriter.py && pip install colorama markdown reportlab ebooklib beautifulsoup4 Pillow && echo -e '#!/bin/bash\npython ~/terminalwriter/terminalwriter.py "$@"' > ~/terminalwriter.sh && chmod +x ~/terminalwriter.sh && sudo ln -sf ~/terminalwriter.sh /usr/local/bin/terminalwriter && sudo ln -sf ~/terminalwriter.sh /usr/local/bin/tw && echo "TerminalWriter installed! Run 'terminalwriter' or 'tw' from any terminal."
 ```
 
 ## Usage
