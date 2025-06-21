@@ -103,7 +103,7 @@ def list():
     """List all tracked repositories."""
     config = load_config()
     if not config["repos"]:
-        print("[yellow]No repositories being tracked.[/yellow]")
+        console.print("[yellow]No repositories being tracked.[/yellow]")
         raise typer.Exit()
 
     table = Table(title="Tracked Git Repositories", expand=True, show_lines=True)
