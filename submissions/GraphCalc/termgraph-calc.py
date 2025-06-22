@@ -1,5 +1,6 @@
-USE_ARGPARSE = True
+USE_ARGPARSE = True #doesnt work as False
 USE_OS = True
+PYINSTALLER_COMPILED = False
 if USE_ARGPARSE:
     import argparse
     parser = argparse.ArgumentParser()
@@ -93,7 +94,7 @@ def multisum(multiInput):
     for i in multiInput:
         asteriskRes = 1
         asterisk = multisplit(i[1], ["*","/"])
-        if True:
+        if False:
             print(asterisk)
         for a in asterisk:
             if a[1] == 0:
@@ -104,7 +105,7 @@ def multisum(multiInput):
                 asteriskRes /= float(a[1])
             else:
                 asteriskRes *= float(a[1])
-        if True:
+        if False:
             print(f"from {i[1]} to {asteriskRes}")
         secondInput.append((i[0],asteriskRes)) #multiply before summing
     print(secondInput)
@@ -124,7 +125,7 @@ def math_solve(math, x, xChar="x"):
                 toChange = substitute(changeMath,str(x),i,i+1)
                 break
             i += 1
-        if True:
+        if False:
             print(toChange)
         changeMath = toChange
     print(changeMath)
@@ -149,36 +150,57 @@ def getArg(argname,arguments=()): #do not use, it doesn't work :(
         return input(f"Choose {argname}:\n")
 def termgraph_calc_begin():
     if USE_ARGPARSE:
-        parser.add_argument("--function",type=str,default="x*x/4")
+        parser.add_argument("--function",type=str,default="x*x/4",help="your function, allowed operators are + - * /")
         parser.add_argument("--x-offset",default=0,type=float)
-        parser.add_argument("--x-range",default=6,type=float)
+        parser.add_argument("--x-range",default=8,type=float)
         if USE_OS:
-            parser.add_argument("--run", default=False,type=bool)
+            parser.add_argument("--run", default=False,type=bool,help="directly run termgraph to render the graph")
+            parser.add_argument("--label",default=True,type=bool,help="add labels to x axis of samples")
+            parser.add_argument("--x-space",default=False,type=int)
         parser.add_argument("--file",default="function.csv",type=str)
+        parser.add_argument("--sample",default=16,type=int,help="number of function samples taken")
         arguments = parser.parse_args()
     else:
         arguments = ()
-    sampleSize = 9
+    if PYINSTALLER_COMPILED:
+        print("just spin up a venv or something")
+    sampleSize = arguments.sample
     rangeStep = arguments.x_range/sampleSize
     samplePlaces = []
     sampleY = []
     csvText = ""
     for i in range(sampleSize-1):
-        samplePlaces.append(round(i*rangeStep+getArg("x_offset",arguments),3))
-    print(samplePlaces)
+        samplePlaces.append(round(i*rangeStep+getArg("x_offset",arguments),2))
     functionArg = arguments.function
-    print(functionArg)
+    csvXLabel = ""
     for i in samplePlaces:
         sampleY.append(math_solve(functionArg,i))
+        csvXLabel += str(i)
+        csvXLabel += ","
+    csvXLabel = csvXLabel[:-1] #remove last comma
+    print(csvXLabel)
     print(sampleY)
     for i in sampleY[:-1]:
         csvText += str(i)
         csvText += ","
     csvText += str(sampleY[-1])
-    with open(getArg("file",arguments), "w") as file:
+    with open(arguments.file, "w") as file:
         file.write(csvText)
     if USE_OS and arguments.run:
         import os
-        os.system(f"python termgraph.py {arguments.file}")
+        if arguments.label:
+            argsXLabel = f"--x-labels {csvXLabel}"
+        else:
+            argsXLabel = ""
+        if arguments.x_space:
+            print(f"spacex! {arguments.x_space}")
+            argsXSpace = f"--x-space {arguments.x_space}"
+        else:
+            argsXSpace = ""
+        if PYINSTALLER_COMPILED:
+            os.system(f"./termgraph {argsXSpace} {argsXLabel} {arguments.file}")
+        else:
+            os.system(f"python termgraph.py {argsXSpace} {argsXLabel} {arguments.file}")
+    print(f"\n")
 if __name__ == "__main__":
     termgraph_calc_begin()
