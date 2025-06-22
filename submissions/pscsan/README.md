@@ -84,6 +84,7 @@ pscan -v
 
 ### Sample Output
 
+On macOS:
 ```
 ┌─────────────────────┬──────────────────────────────────────┐
 │ Property            │ Value                                │
@@ -92,7 +93,19 @@ pscan -v
 │ Architecture        │ arm64                                │
 │ Hardened Runtime    │ true                                 │
 │ Rosetta Translated  │ false                                │
-│ Base Address        │ 0x0000000100000000                   │
+│ Base Address        │ 0x0000000000000000                   │
+└─────────────────────┴──────────────────────────────────────┘
+```
+
+On Linux:
+```
+┌─────────────────────┬──────────────────────────────────────┐
+│ Property            │ Value                                │
+├─────────────────────┼──────────────────────────────────────┤
+│ Task Name           │ example_process                      │
+│ Architecture        │ aarch64                              │
+│ ASLR Enabled        │ true                                 │
+│ Base Address        │ 0x0000000000000000                   │
 └─────────────────────┴──────────────────────────────────────┘
 ```
 
