@@ -26,8 +26,8 @@ A feature-rich command-line interface (CLI) task management tool built in Python
 ## Installation 🛠️
 1. **Clone the Repository**  
    ```bash
-   git clone https://github.com/yourusername/advanced-task-manager-cli.git
-   cd advanced-task-manager-cli
+   git clone https://github.com/kaustubhkharvi/task-manager.git
+   cd task-manager
    ```
 2. **Install Dependencies**  
    Ensure you have Python 3.6+ installed. No additional libraries are required as the script uses the standard library. 🐍
