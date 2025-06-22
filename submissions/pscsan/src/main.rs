@@ -9,7 +9,7 @@ mod delegates;
 #[command(disable_version_flag = true)]
 struct Cli {
     #[arg(short, long, help = "Process ID to scan")]
-    pid: u32,
+    pid: Option<u32>,
 
     #[arg(short = 'v', long, help = "Show version information")]
     version: bool,
@@ -39,8 +39,11 @@ fn main() {
 
     let result = if cli.version {
         scanner.version()
+    } else if let Some(pid) = cli.pid {
+        scanner.scan(pid)
     } else {
-        scanner.scan(cli.pid)
+        eprintln!("Error: Process ID is required");
+        std::process::exit(1);
     };
 
     if let Err(e) = result {
