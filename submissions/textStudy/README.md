@@ -1,10 +1,58 @@
 # **textStudy** - Video Content Analysis Tool
-A study tool for who don't love videos, by converting into educational materials (markdown, LaTex, or pdf), summarizies, or preparing questions. works on local videos/ videos url by Advanced AI models, and APIs
+A study tool for those who don't love videos, by converting into educational materials (markdown, LaTex, or pdf), summaries, or preparing questions. works on local videos/ videos url by Advanced AI models, and APIs
 
-## Table of Content
+## Table of 
+- ### **[Installation](#installation)**
 - ### **[Features](#features)**
 - ### **[Commands](#commands-1)**
 
+## Installation
+### For macOS and Windows download from releases and run
+---
+### For Linux
+#### Clone the repository
+```bash
+git clone https://github.com/mohamedNadyS/textStudy.git
+```
+#### Open the Directory
+```bash
+cd textStudy
+```
+#### install the requirments
+```bash
+pip install sentencepiece --prefer-binary
+pip install . --break-system-packages
+```
+#### *that requires >=3.8,<3.12 python , pip, pyenv, ffmpeg, and git*
+#### if not avalible follow the next
+----
+```bash
+# Debian/Ubuntu
+sudo apt install python3.11 python3.11-venv python3.11-distutils git ffmpeg -y
+curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
+
+# Fedora/RHEL/CentOS/Rocky
+sudo dnf install python3.11 python3.11-pip git ffmpeg -y
+
+# openSUSE
+sudo zypper install python3.11 python3.11-pip git ffmpeg
+
+
+# to creat enviroment if python 3.11 if this didn't succes in all this systems run the next
+cd /tmp
+curl -O https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz
+tar -xf Python-3.11.9.tgz
+cd Python-3.11.9
+./configure --enable-optimizations
+make -j$(nproc)
+sudo make altinstall
+
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install . --break-system-packages  # or just `pip install .` if not root
+
+```
 
 ## 📋 Features
 
