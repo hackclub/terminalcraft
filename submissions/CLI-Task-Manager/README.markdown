@@ -33,7 +33,7 @@ A feature-rich command-line interface (CLI) task management tool built in Python
    Ensure you have Python 3.6+ installed. No additional libraries are required as the script uses the standard library. 🐍
 3. **Run the Script**  
    ```bash
-   python task_manager.py
+   python3 main.py
    ```
 
 ## Usage 🎮
