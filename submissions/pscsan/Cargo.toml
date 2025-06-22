@@ -9,7 +9,6 @@ opt-level = 3
 rpath = false
 lto = "fat"
 strip = "symbols"
-panic = "abort"
 
 [profile.dev.package."*"]
 opt-level = 3
