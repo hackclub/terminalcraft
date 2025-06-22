@@ -1,0 +1,10 @@
+[package]
+name = "autoFAL"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.40", features = ["derive"] }
+lettre = "0.11"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
