@@ -1,4 +1,5 @@
 USE_ARGPARSE = True
+USE_OS = True
 if USE_ARGPARSE:
     import argparse
     parser = argparse.ArgumentParser()
@@ -116,13 +117,13 @@ def multisum(multiInput):
 def math_solve(math, x, xChar="x"):
     xPositions = []
     i = 0
-    for l in math:
-        if l == xChar:
-            xPositions.append(i)
-        i += 1
     changeMath = math
-    for bleh in xPositions:
-        toChange = substitute(changeMath,str(x),bleh,bleh+1)
+    while xChar in changeMath:
+        while i < len(changeMath):
+            if changeMath[i] == xChar:
+                toChange = substitute(changeMath,str(x),i,i+1)
+                break
+            i += 1
         if True:
             print(toChange)
         changeMath = toChange
@@ -139,28 +140,45 @@ def tests():
     mathRes = math_solve("2*x+2*5-6/x","3")
     mathRes2 = math_solve("2*x+2*5-6/x","2")
     print((mathRes,mathRes2))
-def getArg(argname,args=()):
+def getArg(argname,arguments=()): #do not use, it doesn't work :(
     if USE_ARGPARSE:
-        return exec(f"args.{argname}")
+        res = 0
+        exec(f"res = arguments.{argname}")
+        return res
     else:
         return input(f"Choose {argname}:\n")
 def termgraph_calc_begin():
     if USE_ARGPARSE:
-        parser.add_argument("function",type=string,default="x*x/4")
+        parser.add_argument("--function",type=str,default="x*x/4")
         parser.add_argument("--x-offset",default=0,type=float)
         parser.add_argument("--x-range",default=6,type=float)
-        parser.add_argument("--file",default="function.csv",type=string)
-        arguments = parser.start()
+        if USE_OS:
+            parser.add_argument("--run", default=False,type=bool)
+        parser.add_argument("--file",default="function.csv",type=str)
+        arguments = parser.parse_args()
     else:
         arguments = ()
     sampleSize = 9
     rangeStep = arguments.x_range/sampleSize
     samplePlaces = []
     sampleY = []
+    csvText = ""
     for i in range(sampleSize-1):
-        samplePlaces.append(i*rangeStep+arguments.x_offset)
+        samplePlaces.append(round(i*rangeStep+getArg("x_offset",arguments),3))
     print(samplePlaces)
+    functionArg = arguments.function
+    print(functionArg)
     for i in samplePlaces:
-        sampleY.append(math_solve(arguments.function),i)
-    
-tests()
+        sampleY.append(math_solve(functionArg,i))
+    print(sampleY)
+    for i in sampleY[:-1]:
+        csvText += str(i)
+        csvText += ","
+    csvText += str(sampleY[-1])
+    with open(getArg("file",arguments), "w") as file:
+        file.write(csvText)
+    if USE_OS and arguments.run:
+        import os
+        os.system(f"python termgraph.py {arguments.file}")
+if __name__ == "__main__":
+    termgraph_calc_begin()
