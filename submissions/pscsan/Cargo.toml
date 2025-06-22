@@ -1,0 +1,26 @@
+[package]
+name = "pscan"
+version = "0.1.0"
+rust-version = "1.85.1"
+edition = "2024"
+
+[profile.release]
+opt-level = 3
+rpath = false
+lto = "fat"
+strip = "symbols"
+panic = "abort"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+[dependencies] # We're putting all the global/core dependencies here
+clap = { version = "4.5.40", features = ["derive"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+psutil = "5.2.0"
+mach2 = "0.4.2"
+libc = "0.2.174"
