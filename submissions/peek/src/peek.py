@@ -9,7 +9,7 @@ from display import printFilePreviewTable
 
 
 console = Console()
-app = typer.Typer()
+app = typer.Typer(add_completion=False)
 debugMode = False
 
 @app.command()
@@ -17,7 +17,7 @@ def peek(
         query: str = typer.Argument("", help="A file name to look for."), 
         directory: str = typer.Option(".", "-d", "--directory", help="A directory to look for files in."), 
         sorting: str = typer.Option("recency", "-s", "--sorting", help="A property by which to sort files: 'recency'/'size'/'alphabetic'."),
-        pattern: str = typer.Option("*", "-p", "--pattern", help="A glob-style pattern to filter files by."),
+        pattern: str = typer.Option("*", "-p", "--pattern", help="A glob-style pattern to filter files by. Don't forget to escape wildcards if your shell uses expansion."),
         verbose: bool = typer.Option(False, "-v", "--verbose", help="Print more lines per file."),
         high_accuracy: bool = typer.Option(True, "-ha/-la", "--high-accuracy/--low-accuracy", help="Prioritize accuracy in search and file detection."),
         highlighting: bool = typer.Option(True, "-hi/-nhi", "--highlighting/--no-highlighting", help="Use syntax highlighting."),
@@ -25,6 +25,9 @@ def peek(
         debug_flag: bool = typer.Option(False, "-db", "--debug", help="Enable debugging mode.")
     ):
     config.debugMode = debug_flag
+
+    if pattern.startswith("\\"):
+        pattern = pattern[1:]
 
     workingDir = Path(directory).resolve()
     if not workingDir.exists():
@@ -43,7 +46,7 @@ def peek(
         filesInDir = listTextFiles(workingDir, pattern=pattern, sorting=sorting)
         matchingFiles = fetchMatchingFiles(filesInDir, query=query, binary_filter_accuracy=accuracy)
     except Exception as e:
-        closeWithError()
+        closeWithError(exception_object=e)
         return
     
 

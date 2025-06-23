@@ -8,8 +8,8 @@ def listTextFiles(directory, pattern="*", sorting="recency"):
     """
 
     results = []
-    for p in directory.iterdir():
-        if p.match(pattern) and p.is_file():
+    for p in directory.glob(pattern):
+        if p.is_file():
             results.append(p)
 
     if sorting == "recency":
