@@ -1,18 +1,14 @@
 # Cargo.toml
 [dependencies]
-crossterm = "0.27"
-device_query = "0.2.5"
-rand = "0.8.5"
-serde_json = "1.0.109"
-serde = { version = "1.0", features = ["derive"] }
-clap = "4.5.40"
+crossterm = "0.29.0"
+rand = "0.9.1"
+serde_json = "1.0.140"
 
 [package]
-name = "speedtester"
+name = "morseytype-cli"
 version = "0.1.0"   
 edition = "2021"
 
-
 [profile.dev]
-opt-level = 0
+opt-level = 3
 debug = false

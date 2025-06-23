@@ -1,5 +1,6 @@
-# MorseyType - Morse Code Typing Trainer
+# MorseyType-cli - Morse Code Typing Trainer
 
+NOTE: it's a little bit less advanced, but fully x11-less version of my previous project, that you can find [here](https://github.com/piter231/morseytype/), where you only use space to write . and -, instead of D and K.
 
 MorseyType is a terminal-based Morse code typing trainer designed to help you improve your Morse code proficiency through structured practice sessions. The application presents words from common language vocabulary lists, challenges you to type them in Morse code, and provides real-time performance feedback.
 
@@ -9,26 +10,27 @@ MorseyType is a terminal-based Morse code typing trainer designed to help you im
 - ⏱ Real-time performance tracking with WPM (Words Per Minute) calculation
 - 🌍 Support for multiple languages via included word lists
 - 📊 Dynamic Morse code reference table for quick lookup
-- ⚙️ Adjustable threshold for dot/dash distinction
 - 📈 Real-time feedback on your Morse input and decoding
 
 ## Run
-in order to run it, just run
+IMPORTANT: you need at least 30-lines height terminal, otherwise some strange graphic glitches may occur
+
+in order to run it, just run (made for aarch64 architecture, works perfectly on rpi zero)
 ```bash
-chmod +x speedtester
-./speedtester
+chmod +x morseytype-cli
+./morseytype-cli
 ```
 in the directory with the thousand-most-common-words folder and its content.
 
 ## Dependencies
-its dependency is x11, should be installed by default, otherwise just install libx11 using your os package manager.
+just run by cargo, all dependencies should be installed by default
 
 ## Installation
 
 1. Clone the repository with submodules:
 ```bash
-git clone --recurse-submodules https://github.com/piter231/morseytype.git
-cd morseytype
+git clone --recurse-submodules https://github.com/piter231/morseytype-cli.git
+cd morseytype-cli
 ```
 
 2. Build the application:
@@ -40,19 +42,19 @@ cargo build --release
 
 ### Basic Command
 ```bash
-cargo run -- [LANGUAGE_CODE] [WORD_COUNT] [THRESHOLD_MS]
+cargo run -- [LANGUAGE_CODE] [WORD_COUNT]
 ```
 
 ### Examples
 ```bash
-# English (default), 10 words, 150ms threshold
+# English (default), 10 words
 cargo run
 
-# Polish, 5 words, 200ms threshold
-cargo run -- pl 5 200
+# Polish, 5 words
+cargo run -- pl 5
 
-# German, 15 words, 100ms threshold
-cargo run -- de 15 100
+# German, 15 words
+cargo run -- de 15
 ```
 
 ### Parameters
@@ -60,12 +62,12 @@ cargo run -- de 15 100
 |----------------|---------|-------------|
 | LANGUAGE_CODE  | `en`    | Language code (e.g., en, pl, de) |
 | WORD_COUNT     | `10`    | Number of words to practice |
-| THRESHOLD_MS   | `150`   | Duration threshold in milliseconds to distinguish dots (.) and dashes (-) |
 
 ### Key Bindings
 | Key          | Function |
 |--------------|----------|
-| `Space`      | Press and release quickly for dot (.), hold longer for dash (-) |
+| `D`          | dot (.) |
+| `K`          | dash (-) |
 | `F`          | Insert letter separator (/) |
 | `J`          | Insert word separator (space) |
 | `;`          | Backspace (remove last character) |
@@ -91,11 +93,13 @@ Special thanks to [SMenigat](https://github.com/SMenigat) for creating and maint
 
 1. **Font Requirements**: The application currently only supports Latin-based character sets. Non-Latin languages may not display correctly in the terminal.
 
-2. **Input Handling**: The application uses precise timing to distinguish between dots (.) and dashes (-). The default threshold is 150ms, but you can adjust this based on your typing speed and preference.
-
-3. **Performance**: The real-time WPM calculation is based on completed words. The final average WPM is calculated based on the total time taken to complete all words.
+2. **Performance**: The real-time WPM calculation is based on completed words. The final average WPM is calculated based on the total time taken to complete all words.
 
 ## Development Journey
+
+Simplified version of main project, that I mentioned at the beginning. Sadly, you can't precisely measure the duration of button being pressed being in fully cli mode, but its still pretty fun project.
+
+OLD PART:
 
 The main inspiration to make this project was watching the experienced morse operator on the video, and how quickly he does his job.
 Developing MorseyType was a challenging but rewarding experience. One of the most difficult aspects was implementing the precise timing mechanism for distinguishing between dots and dashes. After several iterations of trial and error with different timing approaches, I finally succeeded in creating a reliable system that:

@@ -1,10 +1,12 @@
-use device_query::{DeviceQuery, DeviceState, Keycode};
-use std::{thread, time::{Duration, Instant}};
-use std::io::{self, Write};
+use std::{
+    io::{self, Write},
+    time::{Duration, Instant},
+};
 use crossterm::{
-    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen, Clear, ClearType},
     cursor::MoveTo,
-    execute
+    event::{self, Event, KeyCode, KeyEvent},
+    execute,
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen, Clear, ClearType},
 };
 use std::collections::HashMap;
 use std::env;
@@ -12,8 +14,7 @@ use std::fs::File;
 use std::io::BufReader;
 use serde_json::Value;
 use rand::seq::SliceRandom;
-use rand::thread_rng;
-
+use rand::rng;
 
 fn morse_mapping() -> HashMap<&'static str, char> {
     let mut map = HashMap::new();
@@ -150,7 +151,7 @@ fn load_words(language_code: &str, count: usize) -> Vec<String> {
         }
     }
     
-    let mut rng = thread_rng();
+    let mut rng = rng();
     words.shuffle(&mut rng);
     words.into_iter().take(count).collect()
 }
@@ -159,7 +160,6 @@ fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
     let language_code = args.get(1).map(|s| s.as_str()).unwrap_or("en");
     let word_count = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(10);
-    let threshold_ms = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(150);
     
     let words = load_words(language_code, word_count);
     let mut current_word_index = 0;
@@ -187,9 +187,6 @@ fn main() -> io::Result<()> {
     execute!(stdout, MoveTo(0, line))?;
     println!("Words to type: {}", word_count);
     line += 1;
-    execute!(stdout, MoveTo(0, line))?;
-    println!("Press Threshold: {} ms", threshold_ms);
-    line += 1;
     
     let stats_line = line;
     line += 1;
@@ -199,7 +196,10 @@ fn main() -> io::Result<()> {
     println!("Exit: Press 'Q' or 'Esc'");
     line += 1;
     execute!(stdout, MoveTo(0, line))?;
-    println!("Space: Short press (.) / Long press (-)");
+    println!("Dot (.): Press 'D'");
+    line += 1;
+    execute!(stdout, MoveTo(0, line))?;
+    println!("Dash (-): Press 'K'");
     line += 1;
     execute!(stdout, MoveTo(0, line))?;
     println!("F: Insert '/' (letter separator)");
@@ -241,41 +241,92 @@ fn main() -> io::Result<()> {
     print!("Decoded: ");
     stdout.flush()?;
 
-    let device_state = DeviceState::new();
-    let mut prev_space_pressed = false;
-    let mut prev_f_pressed = false;
-    let mut prev_j_pressed = false;
-    let mut prev_semicolon_pressed = false;
-    
-    let mut space_press_time: Option<Instant> = None;
-    let mut completed = false;
-    
     let start_time = Instant::now();
     let mut last_update = Instant::now();
     const UPDATE_INTERVAL: Duration = Duration::from_millis(100);
 
-    loop {
-        let keys = device_state.get_keys();
-        
-        if keys.contains(&Keycode::Q) || keys.contains(&Keycode::Escape) {
-            break;
+    'main_loop: loop {
+        let timeout = UPDATE_INTERVAL
+            .checked_sub(last_update.elapsed())
+            .unwrap_or(Duration::from_secs(0));
+
+        if event::poll(timeout)? {
+            let event = event::read()?;
+            if let Event::Key(KeyEvent { code, .. }) = event {
+                match code {
+                    KeyCode::Char('d') => {
+                        morse_output.push('.');
+                        decoded_text = decode_morse(&morse_output);
+                    }
+                    KeyCode::Char('k') => {
+                        morse_output.push('-');
+                        decoded_text = decode_morse(&morse_output);
+                    }
+                    KeyCode::Char('f') => {
+                        morse_output.push('/');
+                        decoded_text = decode_morse(&morse_output);
+                    }
+                    KeyCode::Char('j') => {
+                        morse_output.push(' ');
+                        decoded_text = decode_morse(&morse_output);
+                    }
+                    KeyCode::Char(';') => {
+                        if !morse_output.is_empty() {
+                            morse_output.pop();
+                            decoded_text = decode_morse(&morse_output);
+                        }
+                    }
+                    KeyCode::Char('q') | KeyCode::Esc => {
+                        break 'main_loop;
+                    }
+                    _ => {}
+                }
+
+                execute!(stdout, MoveTo(10, current_morse_line))?;
+                execute!(stdout, Clear(ClearType::UntilNewLine))?;
+                print!("{}", morse_output);
+
+                execute!(stdout, MoveTo(10, decoded_line))?;
+                execute!(stdout, Clear(ClearType::UntilNewLine))?;
+                print!("{}", decoded_text);
+                stdout.flush()?;
+
+                if decoded_text.trim() == words[current_word_index] {
+                    current_word_index += 1;
+                    if current_word_index < words.len() {
+                        morse_output.clear();
+                        decoded_text.clear();
+
+                        execute!(stdout, MoveTo(0, word_line))?;
+                        execute!(stdout, Clear(ClearType::UntilNewLine))?;
+                        println!("Type this word: {}", words[current_word_index]);
+
+                        execute!(stdout, MoveTo(10, current_morse_line))?;
+                        execute!(stdout, Clear(ClearType::UntilNewLine))?;
+                        execute!(stdout, MoveTo(10, decoded_line))?;
+                        execute!(stdout, Clear(ClearType::UntilNewLine))?;
+                        stdout.flush()?;
+                    } else {
+                        break 'main_loop;
+                    }
+                }
+            }
         }
-        
+
         let now = Instant::now();
-        if now.duration_since(last_update) > UPDATE_INTERVAL {
+        if now.duration_since(last_update) >= UPDATE_INTERVAL {
             last_update = now;
             
-            let elapsed = start_time.elapsed();
-            let elapsed_secs = elapsed.as_secs_f64();
-            let wpm = if elapsed_secs > 0.0 {
-                (current_word_index as f64 / elapsed_secs) * 60.0
+            let elapsed = start_time.elapsed().as_secs_f64();
+            let wpm = if elapsed > 0.0 {
+                (current_word_index as f64 / elapsed) * 60.0
             } else {
                 0.0
             };
             
             execute!(stdout, MoveTo(0, stats_line))?;
             execute!(stdout, Clear(ClearType::UntilNewLine))?;
-            print!("Elapsed: {:.1}s", elapsed_secs);
+            print!("Elapsed: {:.1}s", elapsed);
             
             execute!(stdout, MoveTo(0, wpm_line))?;
             execute!(stdout, Clear(ClearType::UntilNewLine))?;
@@ -283,112 +334,6 @@ fn main() -> io::Result<()> {
             
             stdout.flush()?;
         }
-        
-        let space_pressed = keys.contains(&Keycode::Space);
-        match (space_pressed, prev_space_pressed) {
-            (true, false) => {
-                space_press_time = Some(Instant::now());
-            },
-            (false, true) => {
-                if let Some(start) = space_press_time {
-                    let duration = start.elapsed();
-                    
-                    if duration.as_millis() <= threshold_ms {
-                        morse_output.push('.');
-                    } else {
-                        morse_output.push('-');
-                    }
-                    
-                    execute!(stdout, MoveTo(10, current_morse_line))?;
-                    execute!(stdout, Clear(ClearType::UntilNewLine))?;
-                    print!("{}", morse_output);
-                    
-                    decoded_text = decode_morse(&morse_output);
-                    execute!(stdout, MoveTo(10, decoded_line))?;
-                    execute!(stdout, Clear(ClearType::UntilNewLine))?;
-                    print!("{}", decoded_text);
-                    
-                    stdout.flush()?;
-                }
-            },
-            _ => {}
-        }
-        prev_space_pressed = space_pressed;
-        
-        let f_pressed = keys.contains(&Keycode::F);
-        if !f_pressed && prev_f_pressed {
-            morse_output.push('/');
-            
-            execute!(stdout, MoveTo(10, current_morse_line))?;
-            execute!(stdout, Clear(ClearType::UntilNewLine))?;
-            print!("{}", morse_output);
-            
-            decoded_text = decode_morse(&morse_output);
-            execute!(stdout, MoveTo(10, decoded_line))?;
-            execute!(stdout, Clear(ClearType::UntilNewLine))?;
-            print!("{}", decoded_text);
-            
-            stdout.flush()?;
-        }
-        prev_f_pressed = f_pressed;
-        
-        let j_pressed = keys.contains(&Keycode::J);
-        if !j_pressed && prev_j_pressed {
-            morse_output.push(' ');
-            
-            execute!(stdout, MoveTo(10, current_morse_line))?;
-            execute!(stdout, Clear(ClearType::UntilNewLine))?;
-            print!("{}", morse_output);
-            
-            decoded_text = decode_morse(&morse_output);
-            execute!(stdout, MoveTo(10, decoded_line))?;
-            execute!(stdout, Clear(ClearType::UntilNewLine))?;
-            print!("{}", decoded_text);
-            
-            stdout.flush()?;
-        }
-        prev_j_pressed = j_pressed;
-        
-        let semicolon_pressed = keys.contains(&Keycode::Semicolon);
-        if !semicolon_pressed && prev_semicolon_pressed && !morse_output.is_empty() {
-            morse_output.pop();
-            
-            execute!(stdout, MoveTo(10, current_morse_line))?;
-            execute!(stdout, Clear(ClearType::UntilNewLine))?;
-            print!("{}", morse_output);
-            
-            decoded_text = decode_morse(&morse_output);
-            execute!(stdout, MoveTo(10, decoded_line))?;
-            execute!(stdout, Clear(ClearType::UntilNewLine))?;
-            print!("{}", decoded_text);
-            
-            stdout.flush()?;
-        }
-        prev_semicolon_pressed = semicolon_pressed;
-        
-        if !completed && decoded_text.trim() == words[current_word_index] {
-            completed = true;
-            
-            current_word_index += 1;
-            if current_word_index < words.len() {
-                morse_output.clear();
-                decoded_text.clear();
-                completed = false;
-                
-                execute!(stdout, MoveTo(0, word_line))?;
-                execute!(stdout, Clear(ClearType::UntilNewLine))?;
-                println!("Type this word: {}", words[current_word_index]);
-                
-                execute!(stdout, MoveTo(10, current_morse_line))?;
-                execute!(stdout, Clear(ClearType::UntilNewLine))?;
-                execute!(stdout, MoveTo(10, decoded_line))?;
-                execute!(stdout, Clear(ClearType::UntilNewLine))?;
-            } else {
-                break;
-            }
-        }
-        
-        thread::sleep(Duration::from_millis(5));
     }
 
     let elapsed_time = start_time.elapsed();
