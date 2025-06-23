@@ -1,5 +1,3 @@
-The Requirements packages for the tools are:
-
 cryptography>=41.0.0
 requests>=2.31.0
 pyperclip>=1.8.2
