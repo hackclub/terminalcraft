@@ -1,6 +1,7 @@
 import typer
 from pathlib import Path
 import shutil
+import os
 
 from rich.console import Console
 from rich.table import Table
@@ -97,6 +98,45 @@ def main(ctx: typer.Context):
     """Git Glance: A simple CLI tool to track and manage multiple git repositories."""
     if ctx.invoked_subcommand is None:
         print_banner()
+
+@app.command()
+def scan(dir: str = typer.Argument(None, help="Directory to recursively scan for Git Repositories")):
+    """Scan a directory recusrively for Git repositories and add them to the tracking list."""
+    base_path = Path(dir).expanduser().resolve()
+    if not base_path.exists():
+        console.print(f"[bold red]Error: Directory: '{dir}' does not exist.[/bold red]")
+        raise typer.Exit(1)
+    
+    found_repos = []
+    for root, dirs, files in os.walk(base_path):
+        if ".git" in dirs:
+            repo_path = Path(root).resolve()
+            found_repos.append(repo_path)
+            dirs[:] = []
+    
+    if not found_repos:
+        console.print(f"[bold yellow]No Git Repositories found in '{dir}'.[/bold yellow]")
+        return
+    
+    console.print(f"[bold cyan]Found {len(found_repos)} Git Repositories:[/bold cyan]")
+
+    config = load_config()
+    tracked_paths = {Path(r["path"]).resolve() for r in config.get("repos", [])}
+
+    for repo_path in found_repos:
+        if repo_path in tracked_paths:
+            console.print(f"[yellow]• Skipping already tracked repo: {repo_path}[/yellow]")
+            continue
+
+        default_alias = repo_path.name
+        console.print(f"\n[bold]Repository:[/bold] {repo_path}")
+        alias = typer.prompt("Enter an alias for this repo", default=default_alias)
+
+        try:
+            add_repo(str(repo_path), alias)
+            console.print(f"[green]✓ Added {alias}[/green]")
+        except ValueError as e:
+            console.print(f"[red]✗ Failed to add {alias}[/red]: {e}")
 
 @app.command()
 def list():

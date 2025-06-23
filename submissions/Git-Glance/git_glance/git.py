@@ -16,6 +16,7 @@ def is_git_repo(path: str) -> bool:
     try:
         output = run_git_command(path, ["rev-parse", "--is-inside-work-tree"])
         return output == "true"
+    
     except RuntimeError:
         return False
     
@@ -71,8 +72,12 @@ def get_detailed_repo_info(path: str) -> dict:
 def fetch_repo(path: str) -> None:
     try:
         run_git_command(path, ["fetch"])
-    except subprocess.CalledProcessError as e:
-        raise ValueError(f"Failed to fetch repo at {path}: {e}")
+    except RuntimeError as e:
+        error_msg = str(e)
+        if "Repository not found" in error_msg:
+            raise ValueError(f"[red]✗ Remote repository not found for '{Path(path).name}'[/red]")
+        else:
+            raise ValueError(f"[red]✗ Fetch failed for '{Path(path).name}':[/red] {error_msg}")
 
 def get_repo_status(path: str) -> dict:
     path_obj = Path(path).expanduser().resolve()

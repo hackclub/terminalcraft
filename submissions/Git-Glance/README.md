@@ -1,5 +1,5 @@
 # Git-Glance
-> A simple yet powerful CLI tool to glance over multiple repositories
+> A simple yet powerful CLI tool to glance over multiple Repositories
 ```
     ██████╗ ██╗████████╗      ██████╗ ██╗      █████╗ ███╗   ██╗ ██████╗███████╗
     ██╔════╝ ██║╚══██╔══╝     ██╔════╝ ██║     ██╔══██╗████╗  ██║██╔════╝██╔════╝
@@ -9,8 +9,8 @@
     ╚═════╝ ╚═╝   ╚═╝         ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝
 ```
 ## Features
-- Quickly see the status of multiple repositories
-- Track/untrack repositories by path and alias
+- Quickly see the status of multiple Repositories
+- Track/untrack Repositories by path and alias
 - See fetch/pull/push info, latest commit, author, and more
 - Beautiful Rich + Tree UI Layout
 - Simple CLI with Typer and Rich
@@ -68,15 +68,20 @@ Adds a Git Repository to the tracking list
 git-glance add <path-to-repo> <alias>
 # Example: git-glance add ~/projects/my-cool-repo cool-repo
 ```
+#### Scan a Directory to Add a Repository
+Recursively scans a directory for Git Repositories and adds them to be tracked
+```bash
+git-glance scan <a-directory>
+```
 #### Remove a Repository
-Removes a repo from the tracking list
+Removes a Repository from the tracking list
 ```bash
 git-glance remove --path <path>
 # or
 git-glance remove --alias <alias>
 ```
 #### Fetch Remote Updates
-Performs a `git-fetch` on all tracked repositories to check for upstream changes
+Performs a `git-fetch` on all tracked Repositories to check for upstream changes
 ```bash
 git-glance fetch
 ```
