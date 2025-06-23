@@ -28,10 +28,17 @@ DIVIDER_COLOR = Fore.BLUE
 def clear_screen():
     """Clear the terminal screen."""
     os.system('cls' if os.name == 'nt' else 'clear')
+import re
+def strip_ansi_codes(s: str) -> str:
+    """Strips ANSI escape codes from a string."""
+    return re.sub(r'\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]', '', s)
 def slow_print(text: str, delay: float = 0.02, color: str = ""):
     """Print text slowly, character by character, for dramatic effect."""
     for char in text:
-        sys.stdout.write(color + char if COLORS_AVAILABLE else char)
+        output_char = color + char if COLORS_AVAILABLE else char
+        if COLORS_AVAILABLE and "\x1b" in output_char and os.name == 'nt': 
+            output_char = strip_ansi_codes(output_char)
+        sys.stdout.write(output_char)
         sys.stdout.flush()
         time.sleep(delay)
     print()
@@ -94,4 +101,7 @@ def create_box(text: str, width: int = 80, color: str = DIVIDER_COLOR) -> str:
         padding = ' ' * (box_width - len(line) - 4)
         result.append(f"{color}┃ {line}{padding} ┃")
     result.append(bottom)
-    return '\n'.join(result) 
+    final_box = '\n'.join(result)
+    if COLORS_AVAILABLE and "\x1b" in final_box and os.name == 'nt': 
+        final_box = strip_ansi_codes(final_box)
+    return final_box
