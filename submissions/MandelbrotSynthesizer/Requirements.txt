@@ -1,0 +1,8 @@
+1-Pygame
+pip install pygame
+
+2-textual
+pip install textual
+
+3-textual_canvas
+pip install textual_canvas
