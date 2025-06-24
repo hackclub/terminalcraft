@@ -9,6 +9,12 @@ use rand::{seq::SliceRandom, rngs::ThreadRng};
 use serde_derive::{Serialize, Deserialize};
 use serde::{Deserialize, Serialize};
 use chrono;
+use rodio::{source::SineWave, OutputStream, Sink, Source};
+use std::thread;
+
+
+const DOT_DURATION_MS: u64 = 80;
+const DASH_DURATION_MS: u64 = 500;
 
 const MORSE_MAPPING: [(char, &str); 36] = [
     ('A', ".-"), ('B', "-..."), ('C', "-.-."), ('D', "-.."), ('E', "."), ('F', "..-."),
@@ -35,6 +41,42 @@ impl Default for AppConfig {
             known_chars: vec![],
         }
     }
+}
+
+fn play_morse_code(morse_code: &str) {
+    let (_stream, stream_handle) = match OutputStream::try_default() {
+        Ok(stream) => stream,
+        Err(e) => {
+            eprintln!("Error creating audio output: {}", e);
+            return;
+        }
+    };
+    
+    let sink = match Sink::try_new(&stream_handle) {
+        Ok(sink) => sink,
+        Err(e) => {
+            eprintln!("Error creating audio sink: {}", e);
+            return;
+        }
+    };
+
+    for symbol in morse_code.chars() {
+        match symbol {
+            '.' => play_beep(&sink, DOT_DURATION_MS),
+            '-' => play_beep(&sink, DASH_DURATION_MS),
+            ' ' => thread::sleep(std::time::Duration::from_millis(3 * DOT_DURATION_MS)),
+            _ => {}
+        }
+        thread::sleep(std::time::Duration::from_millis(DOT_DURATION_MS));
+    }
+}
+
+fn play_beep(sink: &Sink, duration_ms: u64) {
+    let source = SineWave::new(600.0)
+        .take_duration(std::time::Duration::from_millis(duration_ms))
+        .amplify(0.2);
+    sink.append(source);
+    thread::sleep(std::time::Duration::from_millis(duration_ms));
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
@@ -249,6 +291,11 @@ impl MorseTutor {
         } else {
             println!("✗ Incorrect! Correct code: {} (your: {})", morse_code, input);
         }
+
+        let morse_audio = morse_code.clone();
+        thread::spawn(move || {
+            play_morse_code(&morse_audio);
+        });
         
         correct
     }
