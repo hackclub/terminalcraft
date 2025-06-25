@@ -66,11 +66,11 @@ int main(void)
                 printf(LABEL("Equation") "y = ax^2 + bx + c\n");
 
                 printf("Enter a: ");
-                scanf("%lld", &a);
+                scanf("%" PRId64, &a);
                 printf("Enter b: ");
-                scanf("%lld", &b);
+                scanf("%" PRId64, &b);
                 printf("Enter c: ");
-                scanf("%lld", &c);
+                scanf("%" PRId64, &c);
 
                 equation = std::make_shared<StandardEquation>(a, b, c);
                 break;
@@ -78,11 +78,11 @@ int main(void)
                 printf(LABEL("Equation") "y = a(x - h)^2 + k\n");
 
                 printf("Enter a: ");
-                scanf("%lld", &a);
+                scanf("%" PRId64, &a);
                 printf("Enter b: ");
-                scanf("%lld", &h);
+                scanf("%" PRId64, &h);
                 printf("Enter c: ");
-                scanf("%lld", &k);
+                scanf("%" PRId64, &k);
 
                 equation = std::make_shared<VertexEquation>(a, h, k);
                 break;
@@ -90,11 +90,11 @@ int main(void)
                 printf(LABEL("Equation") "y = a(x - p)(x - q)\n");
 
                 printf("Enter a: ");
-                scanf("%lld", &a);
+                scanf("%" PRId64, &a);
                 printf("Enter p: ");
-                scanf("%lld", &p);
+                scanf("%" PRId64, &p);
                 printf("Enter q: ");
-                scanf("%lld", &q);
+                scanf("%" PRId64, &q);
 
                 equation = std::make_shared<InterceptEquation>(a, p, q);
                 break;
@@ -109,7 +109,7 @@ int main(void)
 
     printf("\n");
 
-    printf(LABEL("Equation") "y = %lldx^2 + %lldx + %lld\n", equation->getA(), equation->getB(), equation->getC());
+    printf(LABEL("Equation") "y = " "%" PRId64 "x^2 + " "%" PRId64 "x + " "%" PRId64 "\n", equation->getA(), equation->getB(), equation->getC());
 
     double discriminant = equation->getDiscriminant();
     printf(LABEL("Discriminant") "%f ", discriminant);
