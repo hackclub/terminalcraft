@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Button, Input, Static, Footer
+from textual.widgets import Header, Button, Input, Static, Footer, Select
 from textual.containers import Vertical, Horizontal
 
 class Data_Anlyzer(App):
@@ -11,6 +11,11 @@ class Data_Anlyzer(App):
         self.df = None
         self.file_ext = None
         self.file_path = None
+        self.selected_column = None
+        self.selected_row = None
+        self.new_value = None
+        self.colsort=None
+
     def compose(self)-> ComposeResult:
         yield Header()
         yield Vertical(
@@ -34,6 +39,7 @@ class Data_Anlyzer(App):
             Button("6. Save data",id="save"),
             id="qs1_2"
         )
+        yield Button("Edit Data", id="edit")
         yield Horizontal(
             Button("Ascending", id="ascend"), Button("Descending", id="descend"), id="sorting"
         )
@@ -44,7 +50,32 @@ class Data_Anlyzer(App):
             Static("Enter search value", id="inputqs"),
             Input(placeholder="eg.270, Ahmed", id="input"), Button("Submit Search", id="submit_search"),id="searchinput"
         )
+        yield Vertical(
+            Static("columnname", id="df"),
+            Static("Enter the column name", id="columnname"),
+            Input(placeholder="Items", id="inputcolumn"), 
+            Button("Submit column", id="columnbutton"),id="columninput"
+        )
+        yield Vertical(
+            Static("rowname", id="row"),
+            Static("Enter the row name", id="rowname"),
+            Input(placeholder="1/35", id="inputrow"), 
+            Button("Submit row", id="rowbutton"),id="rowinput"
+        )
+        yield Vertical(
+            Static("value", id="value"),
+            Static("Enter the the new value", id="valuename"),
+            Input(placeholder="e.g. 37.5", id="inputvalue"), 
+            Button("Submit value", id="valuebutton"),id="valueinput"
+        )
+        yield Vertical(
+                        Input(placeholder="item/id", id="sortcol"), Button("submit column", id="subcol"), id="sortincol"
+        )
+        
         yield Footer()
+
+
+
     def on_mount(self)-> None:
         self.query_one("#qs1", Static).display=True
         self.query_one("#file_path", Input).display=True
@@ -58,8 +89,11 @@ class Data_Anlyzer(App):
         self.query_one("#sorting", Horizontal).display=False
         self.query_one("#null", Horizontal).display=False
         self.query_one("#searchinput",Vertical).display=False
-
-
+        self.query_one("#edit",Button).display=False
+        self.query_one("#columninput", Vertical).display=False
+        self.query_one("#rowinput", Vertical).display=False
+        self.query_one("#valueinput", Vertical).display=False
+        self.query_one("#sortincol", Vertical).display=False
 
 
             
@@ -77,9 +111,16 @@ class Data_Anlyzer(App):
         self.query_one("#sorting", Horizontal).display=False
         self.query_one("#null", Horizontal).display=False
         self.query_one("#searchinput", Vertical).display=False
+        self.query_one("#edit", Button).display=False
+        self.query_one("#columninput", Vertical).display=False
+        self.query_one("#rowinput", Vertical).display=False
+        self.query_one("#valueinput", Vertical).display=False
+        self.query_one("#sortincol", Vertical).display=False
 
-   # def on_select_changed(self, event: Select.Changed):
-        #slvalue=event.value 
+
+
+
+
     def on_button_pressed(self, event: Button.Pressed):
         self.current_action=event.button.id
         output=self.query_one("#output", Static)
@@ -92,6 +133,7 @@ class Data_Anlyzer(App):
         null=self.query_one("#null", Horizontal)
         inputi=self.query_one("#input", Input)
         search_container=self.query_one("#searchinput", Vertical)
+        edit=self.query_one("#edit",Button)
         label2.display=False
         output.display=False
         label.display=False
@@ -101,7 +143,7 @@ class Data_Anlyzer(App):
         sortchoice.display=False
         null.display=False
         search_container.display=False
-        if self.df is not None
+        if self.df is not None:
             if event.button.id=="whole":
                 self.clear()
                 label.update("The data is below")
@@ -123,10 +165,11 @@ class Data_Anlyzer(App):
                 qs12.display=True
             elif event.button.id=="sort":
                 self.clear()
-                label.update("Choose your sorting way")
+                label.update("Choose your column")
+                label2.update(str(self.df.columns))
+                self.query_one("#sortincol", Vertical).display=True
                 label.display=True
-                sorting.display=True
-                label2.display=False
+                label2.display=True
             
             elif event.button.id == "search":
                 self.clear()
@@ -134,9 +177,16 @@ class Data_Anlyzer(App):
                 self.query_one("#searchinput", Vertical).display = True
                 self.query_one("#menu_label", Static).update("🔍 Enter a value to search for:")
                 self.query_one("#menu_label", Static).display = True
-    
-    
-    
+            
+            
+            elif event.button.id=="edit":
+                self.clear()
+                self.query_one("#columninput").display=True
+                column=self.query_one("#df", Static)
+                column.update(str(self.df.columns))
+                column.display=True
+
+
             
             elif event.button.id=="nullcheck":
                 self.clear()
@@ -153,19 +203,19 @@ class Data_Anlyzer(App):
                     qs12.display=True
             elif event.button.id == "save":
                 self.clear()
-    
+
                 sortchoice.display = True
                 label2.display = True
                 qs11.display = True
                 qs12.display = True
-    
+
                 if not self.file_path:
                     sortchoice.update(" No file loaded to save.")
                     return
-    
+
                 file_root, ext = os.path.splitext(self.file_path)
                 new_path = f"{file_root}_updated{ext}"
-    
+
                 try:
                     if self.file_ext == ".csv":
                         self.df.to_csv(new_path, index=False)
@@ -176,18 +226,18 @@ class Data_Anlyzer(App):
                     else:
                         sortchoice.update("Unsupported file format.")
                         return
-    
+
                     sortchoice.update(f"✅ Data saved successfully to: {new_path}")
                 except Exception as e:
                     sortchoice.update(f"Data was not saved {e}")
-    
-    
+
+
         #secondry buttons
             elif event.button.id=="ascend":
                 self.clear()
-                sortchoice.update("The data is sorted ascendingly below:")
+                sortchoice.update("The data is sorted descendingly below:")
                 sortchoice.display=True
-                self.df = self.df.sort_values(by=list(self.df.columns), ascending=True)
+                self.df=self.df.sort_values(by=self.colsort, ascending=True)
                 output.update(str(self.df))
                 output.display=True
                 sorting.display=False
@@ -200,7 +250,7 @@ class Data_Anlyzer(App):
                 self.clear()
                 sortchoice.update("The data is sorted descendingly below:")
                 sortchoice.display=True
-                self.df = self.df.sort_values(by=list(self.df.columns), ascending=False)
+                self.df = self.df.sort_values(by=self.colsort, ascending=False)
                 output.update(str(self.df))
                 output.display=True
                 sorting.display=False
@@ -214,7 +264,7 @@ class Data_Anlyzer(App):
                 sortchoice.update("Missing data is now filled with zeros")
                 sortchoice.display=True
                 null.display=False
-                self.df=self.df.fillna(0, inplace=True)
+                self.df=self.df.fillna(0)
                 output.update(str(self.df))
                 output.display=True
                 label2.update("Choose a process")
@@ -238,7 +288,7 @@ class Data_Anlyzer(App):
                 input_widget = self.query_one("#input", Input)
                 output = self.query_one("#output", Static)
                 search_value = input_widget.value.strip()
-    
+
                 if not search_value:
                     output.update("❌ Search value cannot be empty.")
                 else:
@@ -246,24 +296,48 @@ class Data_Anlyzer(App):
                     mask = self.df.astype(str).apply(
                     lambda row: row.str.contains(search_value, case=False, na=False),
                     axis=1)
-    
+
                     results = self.df[mask.any(axis=1)]
-    
+
                     if not results.empty:
                         output.update(str(results))
                     else:
                         output.update("No match found.")
-    
+
                 output.display = True
                 self.query_one("#searchinput", Vertical).display = False
                 label = self.query_one("#menu_label", Static)
                 label.update("Rows including the value you searched are below:")
                 label.display = True
-    
+
                 self.query_one("#again", Static).update("Choose a process")
                 self.query_one("#again", Static).display = True
                 self.query_one("#qs1_1", Horizontal).display = True
                 self.query_one("#qs1_2", Horizontal).display = True
+
+
+            elif event.button.id=="rowbutton":
+                self.clear()
+                self.query_one("#valueinput", Vertical).display=True
+            elif event.button.id=="columnbutton":
+                self.clear()
+                self.query_one("#rowinput", Vertical).display=True
+            elif event.button.id == "valuebutton":
+                self.clear()
+                self.df.at[int(self.selected_row), self.selected_column] = self.new_value
+                output.update(str(self.df.iloc[int(self.selected_row)]))
+                output.display = True
+                label2.update("Choose a process")
+                label2.display=True
+                qs11.display= True
+                qs12.display=True
+            elif event.button.id=="subcol":
+                self.clear()
+                label.update("Choose how to sort")
+                label.display=True
+                sorting.display=True
+
+
         else:
             output.update("Data is not uploaded")
             
@@ -307,6 +381,7 @@ class Data_Anlyzer(App):
                 label.display=True
                 qs11.display=True
                 qs12.display=True
+                self.query_one("#edit", Button).display=True
             except Exception as e:
                 status_widget.update(f"File is not uploaded {e}")
         
@@ -325,7 +400,14 @@ class Data_Anlyzer(App):
                 output.update(str(matches))
             else:
                 output.update("No match found.")
-
+        elif event.input.id == "inputcolumn":
+            self.selected_column = event.value.strip()
+        elif event.input.id == "inputrow":
+            self.selected_row = event.value.strip()
+        elif event.input.id == "inputvalue":
+            self.new_value = event.value.strip()
+        elif event.input.id=="sortcol":
+            self.colsort=event.value.strip()
 
         
 
