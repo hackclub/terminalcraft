@@ -79,9 +79,9 @@ int main(void)
 
                 printf("Enter a: ");
                 scanf("%" PRId64, &a);
-                printf("Enter b: ");
+                printf("Enter h: ");
                 scanf("%" PRId64, &h);
-                printf("Enter c: ");
+                printf("Enter k: ");
                 scanf("%" PRId64, &k);
 
                 equation = std::make_shared<VertexEquation>(a, h, k);
@@ -109,7 +109,7 @@ int main(void)
 
     printf("\n");
 
-    printf(LABEL("Equation") "y = " "%" PRId64 "x^2 + " "%" PRId64 "x + " "%" PRId64 "\n", equation->getA(), equation->getB(), equation->getC());
+    printf(LABEL("Equation (Standard Form)") "y = " "%" PRId64 "x^2 + " "%" PRId64 "x + " "%" PRId64 "\n", equation->getA(), equation->getB(), equation->getC());
 
     double discriminant = equation->getDiscriminant();
     printf(LABEL("Discriminant") "%f ", discriminant);
