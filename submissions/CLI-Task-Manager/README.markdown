@@ -13,15 +13,23 @@ A feature-rich command-line interface (CLI) task management tool built in Python
 ## Features ✨
 - **Task Management**: Add, edit, delete, and toggle task completion. ✅✏️🗑️
 - **Task Details**: Set titles, descriptions, priorities (low/medium/high), due dates, categories, progress (0-100%), effort hours, dependencies, and recurrence (none/daily/weekly). 📝📅🔧
-- **Sorting and Filtering**: Sort by priority, due date, or creation time; filter by category. 🔄🔍
+- **Gamification**: Earn points for completing tasks (10 base points + 5 for high priority + 5 for timeliness), with milestones (e.g., 50 points triggers a celebration 🎆).
+- **Milestone Help**: Press 'h' in the Check Milestones section to view current points, milestone history, and reward breakdown.
+- **AI Suggestions**: During task creation, get AI-suggested titles and descriptions based on category, with a post-creation suggestion for full task details (title, description, priority, due date, progress) that can be accepted and edited.
 - **Search**: Search tasks by keyword with date range filters. 🔎📅
 - **Export/Import**: Export tasks to JSON or CSV, and import from the same formats. 📤📥
 - **Dashboard**: View task statistics (total, completed, overdue). 📊📈
+- **Cloud Sync**: Simulate cloud sync (to/from a local file) with future API readiness.
 - **Categories**: Manage custom task categories. 🗂️
 - **Undo**: Undo the last task deletion. 🔙
+- **Avatars**: Set a custom ASCII avatar.
 - **Animations**: Loading screen with progress bar and idle wave pattern animation. 🎬🌊
 - **Persistence**: Tasks are saved to a JSON file with automatic backups. 💾🔧
 - **Notifications**: In-app alerts for tasks due within 1 hour. 🔔⏰
+
+## ❌ Removed Features
+
+- **Sort Tasks**: Removed due to user feedback; sorting by priority, due date, or creation time is no longer available
 
 ## Installation 🛠️
 1. **Clone the Repository**  
@@ -51,7 +59,16 @@ A feature-rich command-line interface (CLI) task management tool built in Python
 
 ![image](images/image.png) 📷
 ![image](images/image(1).png) 📷
-![image](images/image(2).png) 📷
+![image](images/image(2).PNG) 📷
+
+## 📂 File Structure
+
+- `main.py`: Main application script.
+- `users.json`: Stores user data and tasks.
+- `shared_tasks.json`: Collaborative task file.
+- `cloud_tasks.json`: Simulated cloud sync file.
+- `backup_tasks_*.json`: Automatic backups with timestamps.
+- `backup_users_*.json`: User data backups with timestamps.
 
 ## Contributing 🤝
 1. Fork the repository. 🍴
