@@ -2,18 +2,18 @@
 
 echo "📦 Installing Terminal Talks..."
 
-# Install Python dependencies
-echo "🔧 Installing Python dependencies..."
-python3 -m pip install --user -r requirements.txt
+# Install Python dependencies forcefully
+echo "🔧 Installing Python dependencies "
+python3 -m pip install --user --break-system-packages --force-reinstall -r requirements.txt
 
 # Define install target
 TARGET="$HOME/.local/bin"
 CMD_NAME="terminal-talks"
 
-# Create directory if it doesn't exist
+# Create target directory if needed
 mkdir -p "$TARGET"
 
-# Copy executable
+# Copy script
 if cp terminal-talks "$TARGET/$CMD_NAME"; then
     chmod +x "$TARGET/$CMD_NAME"
     echo "✅ Installed to $TARGET/$CMD_NAME"
@@ -25,13 +25,14 @@ else
     exit 1
 fi
 
-# Check if $TARGET is in PATH
+# Warn if not in PATH
 if ! echo "$PATH" | grep -q "$TARGET"; then
     echo ""
     echo "⚠️ $TARGET is not in your PATH."
     echo "Add this line to your ~/.bashrc or ~/.zshrc:"
     echo 'export PATH="$HOME/.local/bin:$PATH"'
+    echo "Then run: source ~/.bashrc"
 else
-    echo "🚀 You can now run the tool using:"
-    echo "    terminal-talks"
+    echo "🚀 You can now run the tool by typing:"
+    echo "    $CMD_NAME"
 fi
