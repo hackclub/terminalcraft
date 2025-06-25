@@ -19,7 +19,7 @@ int64_t Equation::getC(void) const
 
 double Equation::getVertexX(void) const
 {
-    return -b / 2*a;
+    return (-b) / (2*(double)a);
 }
 
 double Equation::getVertexY(void) const
