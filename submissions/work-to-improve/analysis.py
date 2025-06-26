@@ -3,8 +3,6 @@ import json
 import datetime
 
 
-
-
 def divideData(keyList):
     # initializing database
     aafa = ["switchTab", "copy", "paste", "type"] # stands for "action avalible for analysis"
@@ -80,10 +78,11 @@ def analysisStops(keyList, dividedActionList, aafa):
     lastEnd = keyList[0][1]
     lastStart = keyList[0][1]
     actionsConsideredActive = ["copy", "paste", "type"]
-    dividedActionList = [[action for action in dividedActionList[i]] for i in actionsConsideredActive]
+    dividedActionList = [action for i in actionsConsideredActive for action in dividedActionList[i]]
     dividedActionList.sort(key = lambda x : x[0])
     # check each stop and active time and adds then together
-    for _, unixTime in keyList:
+    ##################################################################
+    for _, unixTime in keyList:# make keyList dividedActionList later
         # if your stoped for too long
         if unixTime - lastEnd > shortestStop:
             stops.append((lastEnd, unixTime, unixTime - lastEnd))
