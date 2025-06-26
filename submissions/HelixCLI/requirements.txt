@@ -1,0 +1,5 @@
+groq
+rich
+dotenv
+colorama
+re
