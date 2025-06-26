@@ -1,0 +1,8 @@
+# Core dependencies
+textual>=0.44.0  # Modern TUI library replacing curses
+
+# Optional dependencies for enhanced experience
+# windows-curses>=2.3.0; sys_platform == "win32"  # Legacy - no longer needed with textual
+
+# Development dependencies (optional)
+# pytest>=6.0  # For running tests
