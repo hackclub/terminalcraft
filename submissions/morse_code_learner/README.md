@@ -11,6 +11,7 @@ A command-line application for learning Morse code through encoding practice wit
 - **Performance Tracking**: Detailed statistics for each session
 - **Progress Saving**: Automatic saving of learning progress between sessions
 - **Adaptive Difficulty**: Automatic progression based on performance
+- **Audio**: Playing Morse code as audio
 
 
 ## Installation
