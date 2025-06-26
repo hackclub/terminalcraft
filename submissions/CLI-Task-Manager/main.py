@@ -12,10 +12,9 @@ import sys
 import logging
 from queue import Queue
 import shutil
-import os
 import re
 
-# Configures logging
+# Configure logging
 logging.basicConfig(filename='task_manager.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -32,16 +31,16 @@ RESET = "\033[0m"
 class Task:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     title: str = ""
-    description: str = ""  # It Now supports Markdown
+    description: str = ""  # Now supports Markdown
     priority: str = "low"
     due_date: str = datetime.now().isoformat()
     category: str = "general"
     completed: bool = False
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    progress: int = 0  # 0%-100%
+    progress: int = 0  # 0-100%
     effort_hours: float = 1.0
     dependencies: List[str] = field(default_factory=list)
-    recurring: str = "none"  # 'daily', 'weekly', OR 'none'
+    recurring: str = "none"  # 'daily', 'weekly', 'none'
 
 @dataclass
 class User:
@@ -92,7 +91,7 @@ class TaskManager:
     def _save_tasks(self):
         self._save_users()
         self._backup_tasks()
-        self._sync_shared_tasks()  # Syncs with shared file
+        self._sync_shared_tasks()  # Sync with shared file
 
     def _backup_tasks(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -230,7 +229,7 @@ class TaskManager:
                     print(f"{RED}Error: Invalid input. {e}{RESET}")
             else:
                 print(f"{GREEN}Returning to main menu...{RESET}")
-                return  # Exit to main menu if 'n' is given
+                return  # Exit to main menu if 'n'
 
         except ValueError as e:
             print(f"{RED}Error: {e}{RESET}")
@@ -600,12 +599,12 @@ class TaskManager:
         if action == "t":
             self._save_cloud_tasks()
             print(f"{GREEN}Tasks synced to cloud!{RESET}")
-            # Placeholder for API call (on-standby)
+            # Placeholder for API call (standby)
             # self._sync_with_api(action="upload")
         elif action == "f":
             self._sync_cloud_tasks()
             print(f"{GREEN}Tasks synced from cloud!{RESET}")
-            # Placeholder for API call (on-standby)
+            # Placeholder for API call (standby)
             # self._sync_with_api(action="download")
         else:
             print(f"{RED}Invalid choice. Use 't' or 'f'.{RESET}")
@@ -653,6 +652,33 @@ class TaskManager:
         print(f"{CYAN}Next Milestone: 50 points (triggers celebration!){RESET}")
         input(f"{YELLOW}Press Enter to continue...{RESET}")
 
+    def show_analytics(self):
+        print(f"{GREEN}Selected: Show Analytics{RESET}")
+        tasks = self._load_tasks()
+        if not tasks:
+            print(f"{YELLOW}No tasks available for analysis.{RESET}")
+            input(f"{YELLOW}Press Enter to continue...{RESET}")
+            os.system('cls' if os.name == 'nt' else 'clear')
+            return
+
+        total_tasks = len(tasks)
+        completed_tasks = sum(1 for t in tasks if t.completed)
+        completion_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+        overdue_tasks = sum(1 for t in tasks if not t.completed and datetime.fromisoformat(t.due_date) < datetime.now())
+        avg_effort_hours = sum(t.effort_hours for t in tasks) / total_tasks if total_tasks > 0 else 0
+        high_priority_tasks = sum(1 for t in tasks if t.priority == "high")
+        avg_progress = sum(t.progress for t in tasks) / total_tasks if total_tasks > 0 else 0
+
+        print(f"{CYAN}=== Task Analytics ==={RESET}")
+        print(f"{CYAN}Total Tasks: {total_tasks}{RESET}")
+        print(f"{GREEN}Completed Tasks: {completed_tasks} ({completion_rate:.1f}%) {RESET}")
+        print(f"{RED}Overdue Tasks: {overdue_tasks}{RESET}")
+        print(f"{CYAN}Average Effort Hours: {avg_effort_hours:.1f} hours{RESET}")
+        print(f"{MAGENTA}High Priority Tasks: {high_priority_tasks} ({high_priority_tasks/total_tasks*100:.1f}%) {RESET}")
+        print(f"{YELLOW}Average Progress: {avg_progress:.1f}%{RESET}")
+        input(f"{YELLOW}Press Enter to continue...{RESET}")
+        os.system('cls' if os.name == 'nt' else 'clear')
+
     def run(self):
         tasks = self._load_tasks()
         last_input_time = time.time()
@@ -687,7 +713,8 @@ class TaskManager:
             print(f"{BLUE}14. Team Shoutout{RESET}")
             print(f"{BLUE}15. Sync with Cloud{RESET}")
             print(f"{BLUE}16. Check Milestones{RESET}")
-            print(f"{BLUE}17. Exit{RESET}")
+            print(f"{BLUE}17. Show Analytics{RESET}")
+            print(f"{BLUE}18. Exit{RESET}")
 
             while not queue.empty():
                 print(self.notification_queue.get())
@@ -695,7 +722,7 @@ class TaskManager:
             if time.time() - last_input_time > 15:
                 self.idle_animation(last_input_time, queue)
 
-            choice = input(f"{YELLOW}Enter your choice (1-17): {RESET}")
+            choice = input(f"{YELLOW}Enter your choice (1-18): {RESET}")
             last_input_time = time.time()
 
             if choice == "1":
@@ -753,6 +780,8 @@ class TaskManager:
             elif choice == "16":
                 self.check_milestones()
             elif choice == "17":
+                self.show_analytics()
+            elif choice == "18":
                 print(f"{GREEN}Selected: Exit{RESET}")
                 print(f"{YELLOW}Exiting...{RESET}")
                 break
