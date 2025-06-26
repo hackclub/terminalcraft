@@ -2,7 +2,8 @@ import subprocess, sys, time, os
 
 PACKAGES = {
     "termcolor": "termcolor",
-    "colorama": "colorama"
+    "colorama": "colorama",
+    "textblob": "textblob"
 }
 
 def install_package(package_name):
@@ -53,11 +54,27 @@ def check_and_install_dependencies():
     else:
         print("One or more packages could not be installed. Please review the errors above.")
 
+def install_corpora():
+    try:
+        from textblob import Word
+        Word("test").definitions  # Attempt access to force loading
+    except LookupError:
+        print("Downloading required corpora for TextBlob...")
+        try:
+            from textblob import download_corpora
+            download_corpora.download_all()
+            print("   [OK] Corpora downloaded.")
+        except Exception as e:
+            print(f"   [ERROR] Failed to download corpora: {e}")
+            print("Try running requirements.py again.")
+        
+
 if __name__ == "__main__":
     if os.name == 'nt':
         os.system('title Dependency Installer')
 
     check_and_install_dependencies()
+    install_corpora()
     
     print("\nThis window will close in 5 seconds...")
     time.sleep(5)

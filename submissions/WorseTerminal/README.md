@@ -7,45 +7,31 @@ Create your own levels by reading /WorseTerminal/bughunt_level_guide.md
 
 * Colorama
 * Termcolor
+* Textblob
 
 # Previews
 ## Windows
-<img src="images/win1.png" width="500"/>
-<img src="images/win2.png" width="500"/>
-<img src="images/win3.png" width="500"/>
-<img src="images/win4.png" width="500"/>
-<img src="images/win5.png" width="500"/>
+![](/images/win1.png)
+![](/images/win2.png)
+![](/images/win3.png)
+![](/images/win4.png)
+![](/images/win5.png)
 
 ## Linux
-<img src="images/linux1.png" width="500"/>
-<img src="images/linux2.png" width="500"/>
-<img src="images/linux3.png" width="500"/>
+![](/images/linux1.png)
+![](/images/linux2.png)
+![](/images/linux3.png)
 
 ## MacOS
-<img src="images/mac1.png" width="500"/>
-<img src="images/mac2.png" width="500"/>
-<img src="images/mac3.png" width="500"/>
+![](/images/mac1.png)
+![](/images/mac2.png)
+![](/images/mac3.png)
 
 # Installing
 
-Go to [https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.0](https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.0) and download one of the compressed files and uncompress them.
+Go to [https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.1](https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.1) and download one of the compressed files and uncompress them.
+
 That's it.
-
-OR
-
-* Open [https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.0](https://github.com/tharakeshrajesh/WorseTerminal/releases/tag/v1.0)
-
-* Click the green '\<\> Code' button
-
-![](https://docs.github.com/assets/cb-13128/mw-1440/images/help/repository/code-button.webp "Green GitHub Code Button")
-
-* Next click on Download ZIP
-
-<img src="images/download.png">
-
-* Unzip the downloaded ZIP file
-
-* Delete this README.md and the images folder, run requirements.py, run main.py, and enjoy!
 
 ## Authors
 

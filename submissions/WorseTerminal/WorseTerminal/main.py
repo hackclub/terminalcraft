@@ -1,9 +1,10 @@
-import os, configparser, sys, threading, time, subprocess, urllib.request, random, base64, hashlib, string
+import os, configparser, sys, threading, time, subprocess, urllib.request, random, string
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 
 try:
     from colorama import init
+    from textblob import TextBlob
     from termcolor import colored
 except Exception:
     print("Please run requirements.py first", "yellow")
@@ -13,7 +14,6 @@ operatingsys = sys.platform
 
 if operatingsys == "win32":
     from colorama import just_fix_windows_console
-
     just_fix_windows_console()
 init()
 
@@ -36,7 +36,7 @@ try:
                 "yellow",
             )
         )
-        config["General"] = {"termcolor": "white", "termname": "Type termname"}
+        config["General"] = {"termcolor": "white", "termname": "WorseTerminal v1.1"}
         config.add_section("Shortcuts")
         with open(configfile, "w") as file:
             config.write(file)
@@ -44,7 +44,7 @@ except FileNotFoundError:
     print(
         colored("The settings file does not exist! A new one will be created.", "red")
     )
-    config["General"] = {"termcolor": "white", "termname": "Type termname"}
+    config["General"] = {"termcolor": "white", "termname": "WorseTerminal v1.1"}
     with open(configfile, "w") as file:
         config.write(file)
 except Exception as e:
@@ -164,26 +164,37 @@ class bughunt:
                 ).lower()
                 if solve == "hint":
                     hint()
-                elif any(word in answerkeywords for word in solve.split()):
-                    print(
-                        colored(
-                            "That's right! Explanation:\n"
-                            + bughuntconfig[level].get(
-                                "explanation", "No explanation."
-                            ),
-                            termcolor,
-                        )
-                    )
-                    self.getinput()
                 elif solve == "exit":
                     print(colored("Exiting.", termcolor))
                     self.getinput()
                 elif solve == "code":
                     print(colored(code, termcolor))
+                elif len(solve.strip().split(" ")) > 4:
+                    solve = TextBlob(solve)
+                    tags = [tag for word, tag in solve.tags]
+                    if any(word in answerkeywords for word in solve.split()) and any(tag.startswith("NN") for tag in tags) and any(tag.startswith("VB") for tag in tags):
+                        print(
+                            colored(
+                                "That's right! Explanation:\n"
+                                + bughuntconfig[level].get(
+                                    "explanation", "No explanation provided."
+                                ),
+                                termcolor,
+                            )
+                        )
+                        self.getinput()
+                    else:
+                        print(
+                            colored(
+                                "That isn't quite right, keep trying. Use 'hint' for a hint.",
+                                termcolor,
+                            )
+                        )
+                        getsolve()
                 else:
                     print(
                         colored(
-                            "That isn't quite right, keep trying. Use 'hint' for a hint.",
+                            "Your answer isn't long enough! Explain more. Use 'hint' for a hint.",
                             termcolor,
                         )
                     )
@@ -288,7 +299,7 @@ def help():
         },
         "Fun & Games": {
             "bughunt": "Starts the 'Bughunt' code-debugging game.",
-            "hackermode": "Launches a simulated 'hacker' interface.",
+            "hackermode": "Launches a fake, simulated 'hacker' interface.",
         },
     }
 
@@ -300,7 +311,7 @@ def help():
         for command, description in cmds.items():
             padding = " " * (max_len - len(command))
             print(
-                colored(f"  {command}{padding} : ", "yellow")
+                colored(f"  {command}{padding} : ", f"{'light_blue' if command == 'bughunt' else 'yellow'}")
                 + colored(description, termcolor)
             )
 
