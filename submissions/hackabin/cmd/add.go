@@ -9,6 +9,8 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
+
+	"math/rand"
 )
 
 type Snippet struct {
@@ -28,14 +30,12 @@ var addCmd = &cobra.Command{
 		var code string
 
 		if fileContent, err := os.ReadFile(codeInput); err == nil {
-			// If it's a valid file path, use file content
 			code = string(fileContent)
 		} else {
-			// Otherwise, treat it as inline code
 			code = codeInput
 		}
 
-		var theID = fmt.Sprintf("%d", time.Now().UnixNano())
+		var theID = RandString(15) // dont change the number here bc pocketbase will fuck up otherwise
 
 		snippet := Snippet{
 			ID:        theID,
@@ -84,4 +84,14 @@ func saveSnippet(s Snippet) {
 
 	newData, _ := json.MarshalIndent(snippets, "", "  ")
 	_ = os.WriteFile(file, newData, 0644)
+}
+
+func RandString(n int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letters[r.Intn(len(letters))]
+	}
+	return string(b)
 }

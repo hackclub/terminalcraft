@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"hackabin/pocketbasehelper"
+
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
@@ -26,18 +28,25 @@ const orphmoji_scared = `
       ..;:.................         
 `
 
+var globalFlag bool
+
 var removeCmd = &cobra.Command{
 	Use:   "remove <id>",
-	Short: "Remove a snippet by ID",
+	Short: "Remove a snippet by ID (locally or globally)",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		id := args[0]
+
+		if globalFlag {
+			pocketbasehelper.RemoveSnippet(id)
+			return
+		}
+
 		snippets := loadSnippets()
 
 		if len(snippets) == 0 {
-			ascii = orphmoji_scared
 			fmt.Println("❌ No snippets found.")
-			fmt.Println(ascii)
+			fmt.Println(orphmoji_scared)
 			return
 		}
 
@@ -50,9 +59,8 @@ var removeCmd = &cobra.Command{
 		}
 
 		if index == -1 {
-			ascii = orphmoji_scared
 			fmt.Println(lipgloss.NewStyle().SetString("Snippet not found.").Foreground(lipgloss.Color("#ec3750")).Italic(true).Bold(true))
-			fmt.Println(ascii)
+			fmt.Println(orphmoji_scared)
 			return
 		}
 
@@ -64,6 +72,7 @@ var removeCmd = &cobra.Command{
 }
 
 func init() {
+	removeCmd.Flags().BoolVarP(&globalFlag, "global", "g", false, "Remove snippet from PocketBase instead of locally")
 	rootCmd.AddCommand(removeCmd)
 }
 
