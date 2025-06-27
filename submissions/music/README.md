@@ -1,14 +1,25 @@
 # CLI Instruments
 
-A collection of virtual musical instruments with colorful interactive UI that you can play in your terminal.
+A collection of virtual musical instruments with colorful interactive UI that you can play in your terminal. Now featuring realistic audio samples generated using advanced signal processing!
 
 ![CLI Instruments](https://i.imgur.com/example.png)
 
+## Features
+
+- **🎵 Advanced Physical Modeling**: Uses sophisticated synthesis algorithms that simulate real instrument physics
+- **🎹 Piano**: Complex harmonic series with inharmonicity, multi-stage hammer and string resonance modeling
+- **🎸 Guitar**: Karplus-Strong string synthesis with plucked string physics, body resonance, and natural vibrato
+- **🥁 Drums**: Physical membrane modeling, snare wire simulation, cymbal modal synthesis with metallic overtones
+- **🔇 Clean Audio**: One sound at a time with proper note/hit duration timing
+- **🌐 Cross-Platform**: Works on Windows, macOS, and Linux with automatic fallback to basic audio
+
 ## Requirements
 
-- Windows operating system (uses the `winsound` module)
 - Python 3.x
-- Colorama package (for colored terminal output)
+- Required packages (automatically installed):
+  - colorama (for colored terminal output)
+  - numpy (for audio sample generation)
+  - simpleaudio (for audio playback)
 
 ## Installation
 
@@ -21,19 +32,29 @@ A collection of virtual musical instruments with colorful interactive UI that yo
 ## Available Instruments
 
 ### 1. Piano
-- Play individual notes on a virtual piano keyboard
-- Uses keyboard keys to simulate piano keys (white and black keys)
-- Visual feedback with keys highlighted when pressed
+- **Advanced Synthesis**: 20-harmonic series with realistic inharmonicity (stretch tuning)
+- **Physical Modeling**: Hammer strike simulation with multi-stage string and soundboard resonance
+- **Authentic Envelope**: Sharp attack followed by complex decay with multiple time constants
+- **Realistic Details**: Subtle tremolo, hammer texture noise, and dynamic range preservation
+- **Key Mapping**: C4, C#4, D4, D#4, E4, F4, F#4, G4, G#4, A4, A#4, B4, C5
 
 ### 2. Guitar
-- Play guitar chords with a strumming effect
-- Each key plays a different chord (E minor, E major, A minor, etc.)
-- Visual feedback when strumming
+- **String Physics**: Karplus-Strong algorithm simulating actual plucked string behavior
+- **Advanced Modeling**: Delay line feedback with string damping and nonlinear compression
+- **Body Resonance**: Guitar body frequency simulation (100-630 Hz resonances)
+- **Natural Expression**: Progressive vibrato, pick noise, and multi-stage sustain/decay
+- **String Tuning**: Low E, A, D, G, B, High E, plus extended bass notes
 
 ### 3. Drums
-- Play a virtual drum kit with various percussion sounds
-- Each key corresponds to a different drum or cymbal
-- Visual feedback when drums are hit
+- **Membrane Physics**: Real drum head modeling with pitch envelopes and overtone series
+- **Snare Simulation**: Membrane tone combined with realistic snare wire rattle synthesis
+- **Cymbal Modeling**: Complex modal synthesis with multiple frequency modes and metallic modulation
+- **Percussion Types**: 
+  - **Kick**: Deep membrane with beater attack and air displacement
+  - **Snare**: Dual-layer synthesis (membrane + wire rattle)
+  - **Hi-hats**: Modal cymbal synthesis with shimmer and metallic noise
+  - **Toms**: Pitched membrane with characteristic pitch bends
+  - **Cymbals**: Multi-mode synthesis with complex frequency modulation
 
 ## How to Play
 

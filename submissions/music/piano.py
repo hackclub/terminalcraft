@@ -3,14 +3,31 @@ import os
 import time
 import threading
 import msvcrt
+import math
+import random
 try:
-    import winsound
     from colorama import init, Fore, Back, Style
     init(autoreset=True)  
-except ImportError:
-    print("This program requires the winsound and colorama modules.")
+except ImportError as e:
+    print("This program requires the colorama module.")
     print("Please install colorama using: pip install colorama")
+    print(f"Error: {e}")
     sys.exit(1)
+try:
+    from audio import get_ultra_realistic_piano_sample
+    AUDIO_AVAILABLE = True
+    AUDIO_TYPE = "High Quality Audio"
+    def play_piano_note(frequency, duration=1.0, velocity=0.8):
+        """Play piano note using high quality synthesis"""
+        sample = get_ultra_realistic_piano_sample(frequency, duration, velocity)
+        sample.play()
+except ImportError:
+    from audio_fallback import audio_engine
+    AUDIO_AVAILABLE = False
+    AUDIO_TYPE = "Fallback Audio"
+    def play_piano_note(frequency, duration=1.0, velocity=0.8):
+        """Play piano note using fallback audio"""
+        audio_engine.play_piano_note(frequency, duration)
 PIANO_KEYS = {
     'a': 261.63,  
     'w': 277.18,  
@@ -44,6 +61,7 @@ NOTE_NAMES = {
 NOTE_DURATION = 300
 pressed_keys = set()
 last_note = ""
+currently_playing = False  
 def clear_screen():
     """Clear the terminal screen."""
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -103,19 +121,21 @@ def draw_keyboard():
           Style.BRIGHT + Fore.WHITE + last_note)
 def play_note(frequency, key):
     """Play a note with the given frequency."""
-    global last_note
+    global last_note, currently_playing
+    if currently_playing:
+        return
     pressed_keys.add(key)
     last_note = f"{NOTE_NAMES[key]} ({key})"
-    try:
-        freq_int = max(37, min(32767, int(frequency)))
-        winsound.Beep(freq_int, NOTE_DURATION)
-    except Exception as e:
-        try:
-            winsound.Beep(1000, 100)
-        except:
-            pass
-    if key in pressed_keys:
-        pressed_keys.remove(key)
+    currently_playing = True
+    velocity = 0.7 + random.uniform(0, 0.3)  
+    play_piano_note(frequency, duration=2.0, velocity=velocity)
+    def reset_playing():
+        global currently_playing
+        time.sleep(0.4)  
+        currently_playing = False
+        if key in pressed_keys:
+            pressed_keys.remove(key)
+    threading.Thread(target=reset_playing, daemon=True).start()
 def show_splash_screen():
     """Show a splash screen with the piano logo."""
     clear_screen()
@@ -138,16 +158,21 @@ def main():
     clear_screen()
     draw_keyboard()
     print(Style.BRIGHT + Fore.GREEN + "\nStart playing! Press ESC to exit." + Style.RESET_ALL)
+    last_redraw = 0
     while True:
+        current_time = time.time()
         if msvcrt.kbhit():
             key = msvcrt.getch().decode('utf-8', errors='ignore').lower()
             if ord(key) == 27:
                 print(Style.BRIGHT + Fore.GREEN + "\nThanks for playing!")
                 break
             if key in PIANO_KEYS:
-                threading.Thread(target=play_note, args=(PIANO_KEYS[key], key)).start()
-                clear_screen()
-                draw_keyboard()
+                threading.Thread(target=play_note, args=(PIANO_KEYS[key], key), daemon=True).start()
+                if current_time - last_redraw > 0.1:
+                    clear_screen()
+                    draw_keyboard()
+                    last_redraw = current_time
+        time.sleep(0.05)
         time.sleep(0.01)
 if __name__ == "__main__":
     try:

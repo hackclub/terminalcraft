@@ -49,9 +49,9 @@ def display_menu():
     print(Style.BRIGHT + Fore.CYAN + "=" * 70)
     print("\n" + Style.BRIGHT + Fore.GREEN + " Select an instrument to play:" + Style.RESET_ALL + "\n")
     instruments = [
-        ("1", "Piano", "piano", "Play a virtual piano keyboard with single notes"),
-        ("2", "Guitar", "guitar", "Play guitar chords with a strumming effect"),
-        ("3", "Drums", "drums", "Play a virtual drum kit with various percussion sounds"),
+        ("1", "Piano", "piano", "Play a virtual piano keyboard with realistic notes"),
+        ("2", "Guitar", "guitar", "Play guitar strings with authentic string sounds"),
+        ("3", "Drums", "drums", "Play a virtual drum kit with realistic percussion"),
         ("q", "Quit", None, "Exit the program")
     ]
     for key, name, module, description in instruments:
@@ -70,6 +70,22 @@ def display_menu():
     print("\n" + Style.BRIGHT + Fore.CYAN + "-" * 70 + Style.RESET_ALL)
 def main():
     """Main function to run the CLI instruments program."""
+    try:
+        import audio
+        print(Style.BRIGHT + Fore.GREEN + "🎵 High Quality Audio Loaded!" + Style.RESET_ALL)
+        print(Style.BRIGHT + Fore.CYAN + "   → Piano: Realistic string harmonics" + Style.RESET_ALL)
+        print(Style.BRIGHT + Fore.CYAN + "   → Guitar: String physics modeling" + Style.RESET_ALL) 
+        print(Style.BRIGHT + Fore.CYAN + "   → Drums: Real drum sounds" + Style.RESET_ALL)
+    except ImportError:
+        try:
+            from audio_fallback import ADVANCED_AUDIO
+            if ADVANCED_AUDIO:
+                print(Style.BRIGHT + Fore.GREEN + "✓ Basic audio loaded!" + Style.RESET_ALL)
+            else:
+                print(Style.BRIGHT + Fore.YELLOW + "⚠ Using simple beeps. Install numpy and pygame for better sound." + Style.RESET_ALL)
+        except:
+            print(Style.BRIGHT + Fore.RED + "⚠ Audio system unavailable." + Style.RESET_ALL)
+    print()
     while True:
         display_menu()
         choice = input(Style.BRIGHT + Fore.GREEN + "\nEnter your choice: " + Style.RESET_ALL).lower()

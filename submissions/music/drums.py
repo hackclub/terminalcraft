@@ -4,24 +4,105 @@ import time
 import threading
 import msvcrt
 import random
+import math
 try:
-    import winsound
     from colorama import init, Fore, Back, Style
     init(autoreset=True)  
-except ImportError:
-    print("This program requires the winsound and colorama modules.")
+except ImportError as e:
+    print("This program requires the colorama module.")
     print("Please install colorama using: pip install colorama")
+    print(f"Error: {e}")
     sys.exit(1)
+try:
+    from audio import get_ultra_realistic_drum_sample
+    AUDIO_AVAILABLE = True
+    AUDIO_TYPE = "High Quality Audio"
+    def play_drum_hit(drum_type, velocity=0.8, duration=1.0):
+        """Play drum hit using high quality synthesis"""
+        sample = get_ultra_realistic_drum_sample(drum_type, duration, velocity)
+        sample.play()
+except ImportError:
+    from audio_fallback import audio_engine
+    AUDIO_AVAILABLE = False
+    AUDIO_TYPE = "Fallback Audio"
+    def play_drum_hit(drum_type, velocity=0.8, duration=1.0):
+        """Play drum hit using fallback audio"""
+        audio_engine.play_drum_hit(drum_type, duration)
 DRUMS = {
-    'a': [(60, 150), (40, 100)],                   
-    's': [(1200, 20), (800, 40), (400, 60)],       
-    'd': [(2000, 10), (1800, 5)],                  
-    'f': [(1800, 80), (1600, 60), (1400, 40)],     
-    'g': [(500, 70), (450, 50), (400, 30)],        
-    'h': [(400, 70), (350, 50), (300, 30)],        
-    'j': [(300, 70), (250, 50), (200, 30)],        
-    'k': [(1500, 100), (1200, 80), (900, 60), (600, 40)],  
-    'l': [(1000, 70), (800, 60), (600, 50)],       
+    'a': 'kick',      
+    's': 'snare',     
+    'd': 'hihat_closed',  
+    'f': 'hihat_open',    
+    'g': 'tom1',      
+    'h': 'tom2',      
+    'j': 'tom3',      
+    'k': 'crash',     
+    'l': 'ride',      
+}
+DRUM_SOUNDS = {
+    'kick': {
+        'base_freq': 60,
+        'attack_freq': 80,
+        'decay_freq': 45,
+        'duration': 250,
+        'has_thump': True
+    },
+    'snare': {
+        'base_freq': 200,
+        'attack_freq': 300,
+        'decay_freq': 150,
+        'duration': 180,
+        'has_rattle': True
+    },
+    'hihat_closed': {
+        'base_freq': 8000,
+        'attack_freq': 12000,
+        'decay_freq': 6000,
+        'duration': 80,
+        'has_shimmer': True
+    },
+    'hihat_open': {
+        'base_freq': 6000,
+        'attack_freq': 9000,
+        'decay_freq': 4000,
+        'duration': 300,
+        'has_shimmer': True
+    },
+    'tom1': {
+        'base_freq': 300,
+        'attack_freq': 350,
+        'decay_freq': 250,
+        'duration': 220,
+        'has_thump': False
+    },
+    'tom2': {
+        'base_freq': 200,
+        'attack_freq': 240,
+        'decay_freq': 160,
+        'duration': 280,
+        'has_thump': False
+    },
+    'tom3': {
+        'base_freq': 150,
+        'attack_freq': 180,
+        'decay_freq': 120,
+        'duration': 350,
+        'has_thump': False
+    },
+    'crash': {
+        'base_freq': 4000,
+        'attack_freq': 6000,
+        'decay_freq': 3000,
+        'duration': 800,
+        'has_shimmer': True
+    },
+    'ride': {
+        'base_freq': 3000,
+        'attack_freq': 4000,
+        'decay_freq': 2500,
+        'duration': 400,
+        'has_shimmer': True
+    }
 }
 DRUM_NAMES = {
     'a': 'Kick',
@@ -37,6 +118,7 @@ DRUM_NAMES = {
 active_drums = {}
 last_drum = ""
 redraw_needed = True
+currently_playing = False  
 def clear_screen():
     """Clear the terminal screen."""
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -102,24 +184,34 @@ def draw_drums():
     print(Style.BRIGHT + Fore.CYAN + "-" * 70)
     print(Style.BRIGHT + Fore.YELLOW + "Last played drum: " + 
           Style.BRIGHT + Fore.WHITE + last_drum)
-def play_drum_sound(freq, duration):
-    """Play a single drum sound component."""
-    try:
-        freq_int = max(37, min(32767, int(freq)))
-        winsound.Beep(freq_int, duration)
-    except Exception as e:
-        pass
-def play_drum(sound_components, key):
-    """Play a drum sound with the given frequency and duration."""
-    global active_drums, last_drum, redraw_needed
+def play_drum(drum_type, key):
+    """Play a drum sound - prevent overlapping hits."""
+    global active_drums, last_drum, redraw_needed, currently_playing
+    if currently_playing:
+        return
     active_drums[key] = time.time()
     last_drum = f"{DRUM_NAMES[key]} ({key.upper()})"
     redraw_needed = True
-    for freq, duration in sound_components:
-        freq_variation = random.uniform(0.98, 1.02)
-        threading.Thread(target=play_drum_sound, 
-                        args=(freq * freq_variation, duration)).start()
-        time.sleep(0.01)
+    currently_playing = True
+    velocity = 0.6 + random.uniform(0, 0.4)  
+    durations = {
+        'kick': 1.2,
+        'snare': 0.8,
+        'hihat_closed': 0.3,
+        'hihat_open': 1.5,
+        'tom1': 1.0,
+        'tom2': 1.1,
+        'tom3': 1.3,
+        'crash': 3.0,
+        'ride': 2.0
+    }
+    duration = durations.get(drum_type, 1.0)
+    play_drum_hit(drum_type, velocity=velocity, duration=duration)
+    def reset_playing():
+        global currently_playing
+        time.sleep(0.3)  
+        currently_playing = False
+    threading.Thread(target=reset_playing, daemon=True).start()
 def show_splash_screen():
     """Show a splash screen with the drums logo."""
     clear_screen()
@@ -144,8 +236,8 @@ def main():
     print(Style.BRIGHT + Fore.GREEN + "\nStart playing! Press ESC to exit." + Style.RESET_ALL)
     last_redraw_time = 0
     while True:
-        current_time = time.time()
-        if redraw_needed and current_time - last_redraw_time > 0.1:
+        current_time = time.time()        
+        if redraw_needed and current_time - last_redraw_time > 0.15:  
             clear_screen()
             draw_drums()
             redraw_needed = False
@@ -156,10 +248,10 @@ def main():
                 print(Style.BRIGHT + Fore.GREEN + "\nThanks for playing!")
                 break
             if key in DRUMS:
-                threading.Thread(target=play_drum, args=(DRUMS[key], key)).start()
-        time.sleep(0.01)
+                threading.Thread(target=play_drum, args=(DRUMS[key], key), daemon=True).start()
+        time.sleep(0.05)  
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print(Style.BRIGHT + Fore.GREEN + "\nThanks for playing!") 
+        print(Style.BRIGHT + Fore.GREEN + "\nThanks for playing!")
