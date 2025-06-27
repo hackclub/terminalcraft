@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meet-zone"
+version = "1.0.2"
+description = "Terminal app for finding optimal meeting times across time zones"
+requires-python = ">=3.10"
+dependencies = [
+	"textual>=0.38.1",
+	"pytz>=2023.3",
+	"zoneinfo;python_version<'3.9'"
+]
+authors = [
+    {name = "Meet-Zone Team"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Office/Business :: Scheduling"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/meet-zone"
+"Bug Tracker" = "https://github.com/yourusername/meet-zone/issues"
+
+[project.scripts]
+meet-zone = "meet_zone.__main__:main"
