@@ -78,8 +78,8 @@ def view_gene_info():
     os.system('cls' if os.name == 'nt' else 'clear')
     show_banner()
 
-    name = Prompt.ask("Enter Gene Symbol", choices=list(GENES.keys()))
-    local_info = GENES[name].get("info", {})
+    name = Prompt.ask("Enter Gene Symbol").strip().upper()
+    local_info = GENES.get(name, {}).get("info", {})
     
     if local_info:
         summary = (
@@ -113,7 +113,7 @@ def view_gene_info():
 
     # external facts from groq
     fact_prompt = (
-        f"List 5 short bullet-point facts about the human gene '{name}', "
+        f"List 5 short bullet-point facts about the human gene '{name}' "
         f"including role, regulation, disease connection, etc. "
         f"Highlight keywords in **bold**. No introductions or conclusions."
     )
@@ -123,8 +123,8 @@ def view_gene_info():
             messages=[{"role": "user", "content": fact_prompt}]
         )
     facts_raw = facts_response.choices[0].message.content.strip()
-    bullet_lines = [line.strip() for line in facts_raw.splitlines() if line.strip()]
-    formatted_facts = "\n".join([format_bold(line) for line in bullet_lines[:6]])
+    bullet_lines = [line.strip("-• ") for line in facts_raw.splitlines() if line.strip()]
+    formatted_facts = "\n".join([f"- {format_bold(line)}" for line in bullet_lines[:6]])
 
     # show summ and facts - fetch from groq ofc
     console.print(Panel(summary, title=f"[bold yellow]{name} Summary", border_style="yellow"))
@@ -134,9 +134,27 @@ def view_gene_structure():
     console.clear()
     show_banner()
 
-    name = Prompt.ask("Gene symbol", choices=list(GENES.keys()))
-    gene_data = GENES[name]
-    sequence = gene_data["sequence"]
+    name = Prompt.ask("Enter Gene Symbol").strip().upper()
+
+    if name in GENES:
+        gene_data = GENES[name]
+        sequence = gene_data["sequence"]
+    else:
+        # fetch gene sequence from groq
+        prompt = (
+            f"Provide the DNA sequence of the human gene '{name}' (only exons and introns), "
+            f"in plain text (uppercase letters A/T/G/C only) with no additional comments."
+        )
+        with Live(Spinner("dots", text="Fetching gene structure..."), refresh_per_second=10):
+            response = groq.chat.completions.create(
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                messages=[{"role": "user", "content": prompt}]
+            )
+        sequence = re.sub(r"[^ATGC]", "", response.choices[0].message.content.upper())
+
+        if not sequence or len(sequence) < 30:
+            console.print(f"[bold red]Gene '{name}' not found or AI returned invalid sequence.[/]")
+            return
 
     loading_bar(task_name="Rendering Structure")
     console.clear()
@@ -148,10 +166,10 @@ def view_gene_structure():
     gc_content = round((gc_count / length) * 100, 2)
     at_content = round((at_count / length) * 100, 2)
 
-    structure = """
-[bold magenta] ┌───────────────────────────────────────────────────────────┐[/bold magenta]
+    structure = f"""
+[bold magenta] ┌─────────────────────────────────────────────────────────────┐[/bold magenta]
 [bold magenta] │[/bold magenta] 5' ▶  [blue]PROMOTER[/blue] ━▶ [green]5' UTR[/green] ━▶ [yellow]EXON 1[/yellow] ━▶ [cyan]INTRON[/cyan] ━▶ [yellow]EXON 2[/yellow] ━▶ [green]3' UTR[/green] ◀ 3' [bold magenta]│[/bold magenta]
-[bold magenta] └───────────────────────────────────────────────────────────┘[/bold magenta]
+[bold magenta] └─────────────────────────────────────────────────────────────┘[/bold magenta]
 
 [bold white]  DNA[/bold white] ➝ [blue]Transcription[/blue] ➝ [green]mRNA[/green] ➝ [yellow]Translation[/yellow] ➝ [red]Protein[/red]
 """
@@ -170,7 +188,6 @@ def view_gene_structure():
     syntax = Syntax(sequence, "text", theme="monokai", line_numbers=True, word_wrap=False)
     console.print(Panel(syntax, title=f"{name} - Full Sequence", border_style="magenta"))
 
-
 def transcribe(seq: str) -> str:
     return seq.replace("T", "U")
 
@@ -178,53 +195,106 @@ def translate(seq: str) -> str:
     protein = "".join(CODON.get(seq[i:i+3], "?") for i in range(0, len(seq), 3))
     return protein
 
-
-## submenu for translations from DNA to RNA or Protein
 def translation_menu():
-    choice = Prompt.ask("1) DNA→RNA  2) DNA→Protein  Q) Back", choices=["1","2","Q"])
+    choice = Prompt.ask("1) DNA→RNA  2) DNA→Protein  Q) Back", choices=["1", "2", "Q"])
     if choice == "Q":
         return
-    name = Prompt.ask("Gene symbol", choices=list(GENES.keys()))
-    seq = GENES[name]["sequence"]
-    loading_bar(task_name="Translating" if choice=="2" else "Transcribing")
+
+    name = Prompt.ask("Enter Gene Symbol").strip().upper()
+
+    if name in GENES:
+        seq = GENES[name]["sequence"]
+    else:
+        # fetch gene sequence from groq if not found in data.json
+        prompt = (
+            f"Give only the DNA sequence of the human gene '{name}' (exons + introns) "
+            f"in uppercase using A/T/G/C only. No extra text or formatting."
+        )
+        with Live(Spinner("dots", text="Fetching gene sequence..."), refresh_per_second=10):
+            response = groq.chat.completions.create(
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                messages=[{"role": "user", "content": prompt}]
+            )
+        seq = re.sub(r"[^ATGC]", "", response.choices[0].message.content.upper())
+
+        if not seq or len(seq) < 30:
+            console.print(f"[bold red]Invalid or empty sequence for gene '{name}'.[/]")
+            return
+
+    loading_bar(task_name="Translating" if choice == "2" else "Transcribing")
+
     if choice == "1":
         result = transcribe(seq)
         title = f"{name} → RNA"
     else:
         result = translate(seq)
         title = f"{name} → Protein"
-    console.print(Panel(Syntax(result, "text", theme="monokai", word_wrap=True), title=f"[green]{title}"))
+
+    syntax_block = Syntax(result, "text", theme="monokai", word_wrap=True)
+    console.print(Panel(syntax_block, title=f"[green]{title}", border_style="cyan"))
 
 def simulate_mutation():
-    name = Prompt.ask("Gene symbol", choices=list(GENES.keys()))
-    base_seq = GENES[name]["sequence"]
+    name = Prompt.ask("Enter Gene Symbol").strip().upper()
+
+    if name in GENES:
+        base_seq = GENES[name]["sequence"]
+    else:
+        # fetch gene sequence from groq
+        prompt = (
+            f"Give only the DNA sequence of the human gene '{name}' (exons + introns) "
+            f"in uppercase using A/T/G/C only. No extra text or formatting."
+        )
+        with Live(Spinner("dots", text="Getting gene sequence..."), refresh_per_second=10):
+            response = groq.chat.completions.create(
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                messages=[{"role": "user", "content": prompt}]
+            )
+        base_seq = re.sub(r"[^ATGC]", "", response.choices[0].message.content.upper())
+
+        if not base_seq or len(base_seq) < 30:
+            console.print(f"[bold red]Invalid or empty sequence for gene '{name}'.[/]")
+            return
+
     seq = list(base_seq)
-    mut = Prompt.ask("Mutation type", choices=["insertion","deletion","substitution"])
+    mut = Prompt.ask("Mutation type", choices=["insertion", "deletion", "substitution"])
     pos = IntPrompt.ask("Position (1-based)", default=random.randint(1, len(seq)))
+
     if pos < 1 or pos > len(seq):
-        console.print("[red]Invalid position![/]")
+        console.print("[bold red]Invalid position![/]")
         return
+
     pos0 = pos - 1
     loading_bar(task_name="Simulating mutation")
     orig = seq[pos0]
+
     if mut == "insertion":
-        base = Prompt.ask("Base to insert", choices=["A","T","C","G"])
+        base = Prompt.ask("Base to insert", choices=["A", "T", "C", "G"])
         seq.insert(pos0, base)
-        desc = f"Inserted {base} at {pos}"
+        desc = f"Inserted {base} at position {pos}"
     elif mut == "deletion":
         seq.pop(pos0)
-        desc = f"Deleted {orig} at {pos}"
-    else:
-        base = Prompt.ask("Substitute with", choices=["A","T","C","G"], default=orig)
+        desc = f"Deleted {orig} at position {pos}"
+    else: 
+        base = Prompt.ask("Substitute with", choices=["A", "T", "C", "G"], default=orig)
         seq[pos0] = base
-        desc = f"Substitution {orig}→{base} at {pos}"
-    newseq = "".join(seq)
-    highlight = (
-        newseq[:pos0]
-        + f"{Back.RED}{newseq[pos0]}{Style.RESET_ALL}"
-        + newseq[pos0+1:]
+        desc = f"Substituted {orig} → {base} at position {pos}"
+
+    new_seq = "".join(seq)
+    highlighted_seq = (
+        new_seq[:pos0] +
+        f"[black on red]{new_seq[pos0]}[/]" +
+        new_seq[pos0 + 1:]
     )
-    console.print(Panel(Text(highlight), title=f"[red]Mutation result[/]: {desc}"))
+
+    # do proper formating
+    text_obj = Text.from_markup(highlighted_seq)
+
+    console.print(Panel.fit(
+        text_obj,
+        title=f"[red]Mutation Result[/] — {desc}",
+        border_style="red",
+        padding=(1, 2)
+    ))
 
 def bio_assistant():
     console.print(Panel("[bold blue]Ask your biology question below:[/]"))
