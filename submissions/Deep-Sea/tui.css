@@ -1,0 +1,13 @@
+#main-container {
+    height: 1fr;
+}
+#log {
+    width: 3fr;
+}
+#status {
+    width: 1fr;
+    border: round white;
+}
+#command-input {
+    height: 3;
+}
