@@ -1,0 +1,5 @@
+rich>=14.0.0
+typer>=0.16.0
+psutil>=7.0.0
+click>=8.2.1
+requests>=2.25.0 
