@@ -1,0 +1,207 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - 'test-release'  
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libssl-dev build-essential pkg-config nlohmann-json3-dev
+
+    - name: Build
+      run: |
+        make BUILD_TYPE=release LDFLAGS="-static -lssl -lcrypto -static-libgcc -static-libstdc++" clean all
+    
+    - name: Verify static linking
+      run: |
+        echo "Checking Linux binary dependencies:"
+        ldd bin/hackatime-doctor || echo "Fully static binary (no dynamic dependencies)"
+        
+    - name: Package
+      run: |
+        mkdir -p dist
+        cp bin/hackatime-doctor dist/
+        cp install.sh dist/ 
+        cp uninstall.sh dist/ 
+        cp README.md dist/ 2>/dev/null || true
+        cp LICENSE* dist/ 2>/dev/null || true
+        cd dist
+        tar -czf hackatime-doctor-${{ github.ref_name }}-linux-x86_64.tar.gz *
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-binary
+        path: dist/*.tar.gz
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          choco install -y make mingw
+
+          git clone https://github.com/Microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg integrate install
+          .\vcpkg\vcpkg install nlohmann-json:x64-windows openssl:x64-windows
+          echo "VCPKG_ROOT=$pwd\vcpkg" >> $env:GITHUB_ENV
+
+      - name: Set up environment
+        run: |
+          $mingwPath = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
+          $vcpkgPath = "$pwd\vcpkg\installed\x64-windows"
+          $projectPath = $pwd.Path
+          echo "PATH=$mingwPath;$env:PATH" >> $env:GITHUB_PATH
+          echo "PROJECT_ROOT=$projectPath" >> $env:GITHUB_ENV
+          echo "VCPKG_INSTALLED=$vcpkgPath" >> $env:GITHUB_ENV
+          echo "CPPFLAGS=-I$vcpkgPath\include -I$projectPath -I$projectPath\src -I$projectPath\include" >> $env:GITHUB_ENV
+          echo "LDFLAGS=-L$vcpkgPath\lib -static -llibssl -llibcrypto -lws2_32 -lcrypt32 -static-libgcc -static-libstdc++" >> $env:GITHUB_ENV
+
+      - name: Verify paths
+        run: |
+          ls $env:PROJECT_ROOT
+          ls $env:PROJECT_ROOT/include
+          ls $env:PROJECT_ROOT/src
+          ls $env:VCPKG_INSTALLED/include
+          ls $env:VCPKG_INSTALLED/include/openssl
+          ls $env:VCPKG_INSTALLED/lib
+
+      - name: Build
+        run: |
+          make BUILD_TYPE=release CXX=g++ CXXFLAGS="-std=c++17 $env:CPPFLAGS" LDFLAGS="$env:LDFLAGS" clean all
+
+      - name: Package
+        run: |
+          mkdir dist
+          copy bin\hackatime-doctor.exe dist
+          copy README.md dist 2>nul || echo "README not found"
+          copy LICENSE* dist 2>nul || echo "LICENSE not found"
+          cd dist
+          7z a hackatime-doctor-$env:GITHUB_REF_NAME-windows-x64.zip *
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binary
+          path: dist\hackatime-doctor-*-windows-x64.zip
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install build dependencies
+        run: |
+          brew install pkg-config nlohmann-json
+          
+      - name: Detect architecture and build static OpenSSL
+        run: |
+          ARCH=$(uname -m)
+          echo "Building for architecture: $ARCH"
+          
+          curl -L https://www.openssl.org/source/openssl-3.0.12.tar.gz -o openssl-3.0.12.tar.gz
+          tar -xzf openssl-3.0.12.tar.gz
+          cd openssl-3.0.12
+          
+          if [ "$ARCH" = "arm64" ]; then
+            echo "Configuring for ARM64 (Apple Silicon)"
+            ./Configure darwin64-arm64-cc no-shared no-dso no-pic --prefix=$PWD/static-install
+          else
+            echo "Configuring for x86_64 (Intel)"
+            ./Configure darwin64-x86_64-cc no-shared no-dso no-pic --prefix=$PWD/static-install
+          fi
+          
+          make -j$(sysctl -n hw.ncpu)
+          make install
+          
+          echo "OPENSSL_STATIC_DIR=$PWD/static-install" >> $GITHUB_ENV
+          echo "MACOS_ARCH=$ARCH" >> $GITHUB_ENV
+          
+      - name: Build
+        run: |
+          export OPENSSL_STATIC_DIR=$PWD/openssl-3.0.12/static-install
+          export JSON_ROOT_DIR=$(brew --prefix nlohmann-json)
+          
+          export CXXFLAGS="-std=c++17 -stdlib=libc++ -I$OPENSSL_STATIC_DIR/include -I$JSON_ROOT_DIR/include -I$(pwd) -I$(pwd)/src -I$(pwd)/include"
+          export LDFLAGS="$OPENSSL_STATIC_DIR/lib/libssl.a $OPENSSL_STATIC_DIR/lib/libcrypto.a -framework Security -framework CoreFoundation"
+          
+          make BUILD_TYPE=release \
+            CXXFLAGS="$CXXFLAGS" \
+            LDFLAGS="$LDFLAGS" \
+            clean all
+      
+      - name: Verify static linking
+        run: |
+          echo "Checking macOS binary dependencies:"
+          otool -L bin/hackatime-doctor
+          echo ""
+          echo "Checking for OpenSSL symbols in binary:"
+          nm bin/hackatime-doctor | grep -i ssl | head -5 || echo "OpenSSL statically linked"
+      
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp bin/hackatime-doctor dist/
+          cp install.sh dist/
+          cp uninstall.sh dist/
+          cp README.md dist/ 2>/dev/null || true
+          cp LICENSE* dist/ 2>/dev/null || true
+          cd dist
+          
+          if [ "$MACOS_ARCH" = "arm64" ]; then
+            tar -czf hackatime-doctor-${{ github.ref_name }}-macos-arm64.tar.gz *
+          else
+            tar -czf hackatime-doctor-${{ github.ref_name }}-macos-x86_64.tar.gz *
+          fi
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-binary
+          path: dist/*.tar.gz
+
+  release:
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')  
+    permissions:
+      contents: write
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: artifacts/*
+        draft: false
+        prerelease: false
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        body: |
+          ## hackatime-doctor ${{ github.ref_name }}
+          Download the appropriate file for your platform:
+          - **Linux**: `hackatime-doctor-${{ github.ref_name }}-linux-x86_64.tar.gz`
+          - **Windows**: `hackatime-doctor-${{ github.ref_name }}-windows-x86_64.zip`  
+          - **macOS Intel**: `hackatime-doctor-${{ github.ref_name }}-macos-x86_64.tar.gz`
+          - **macOS Apple Silicon**: `hackatime-doctor-${{ github.ref_name }}-macos-arm64.tar.gz`
+          
+          All binaries are statically linked for maximum portability.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
