@@ -1,0 +1,5 @@
+colorama==0.4.6
+numpy==1.26.0
+simpleaudio==1.0.4
+pygame>=2.0.0
+pydub>=0.25.0
