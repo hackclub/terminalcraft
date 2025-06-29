@@ -34,6 +34,21 @@ def load_config() -> Config:
     with open(config_path, 'r') as f:
         return json.load(f)
     
+def find_repo_by_alias(alias: str) -> dict:
+    config = load_config()
+    for repo in config["repos"]:
+        if repo.get("alias") == alias:
+            return repo
+    return None
+    
+def find_repo_by_path(path: str) -> dict:
+    config = load_config()
+    target = Path(path).expanduser().resolve()
+    for repo in config.get("repos", []):
+        if Path(repo["path"]).expanduser().resolve() == target:
+            return repo
+    return None
+
 def save_config(config: Config):
     config_path = get_config_path()
     with open(config_path, 'w') as f:

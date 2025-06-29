@@ -101,6 +101,65 @@ Shows detailed info for one repo inlcuding:
 git-glance status --only <alias>
 # Example: git-glance status --only cool-repo
 ```
+#### Remove Invalid or Deleted Git Repositories from the Tracking List
+Goes through the tracking list for paths that don't exist or paths that are not Git Repositories
+```bash
+git-glance clean
+```
+#### Manage Git Config File
+Reset or ask to show the git config file in a rich format
+```bash
+git-glance --reset True
+# or
+git-glance --show True
+```
+#### Rename Aliases
+Rename the alias of a tracked Repository
+```bash
+git-glance <old-alias> <new-alias>
+```
+#### Open a Repository
+Opens a tracked Repository in the system file manager
+```bash
+git-glance <alias>
+```
+#### Commit Summary
+Show latest N commits for tracked Repositories or a single Repository (default N = 5)
+```bash
+git-glance commit-summary
+# or
+git-glance commit-summary --alias <alias>
+# or 
+git-glance commit-summary --alias <alias> --count <N-value>
+```
+#### Difference
+Show uncommitted changes (diff) for one or all tracked Repositories
+```bash
+git-glance diff
+# or
+git-glance diff <alias>
+```
+#### Get Stale Repositories
+Shows Repositories with no commits in the last N days (default N = 10)
+```bash
+git-glance stale
+# or
+git-glance --days <N-value>
+```
+#### Pull from Remote
+Pull latest changes from remote for all or specific Repository
+```bash
+git-glance pull
+# or
+git-glance pull --only <alias>
+```
+#### Push to Remote
+Push local commits to remote for all or specific Repository
+```bash
+git-glance push
+# or
+git-glance push --only <alias>
+```
 ### Help
 Get list of all commands available to use
 ```bash

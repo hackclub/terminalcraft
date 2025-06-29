@@ -1,5 +1,7 @@
+import json
 import typer
 from pathlib import Path
+from datetime import datetime, timedelta, timezone
 import shutil
 import os
 
@@ -8,9 +10,10 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.tree import Tree
 from rich.text import Text
+from rich.syntax import Syntax
 
-from .config import add_repo, remove_repo, load_config
-from .git import get_repo_status, is_git_repo, fetch_repo, get_detailed_repo_info
+from config import add_repo, remove_repo, load_config, save_config, get_config_path, find_repo_by_alias, find_repo_by_path
+from git import get_repo_status, is_git_repo, fetch_repo, get_detailed_repo_info, open_repo, get_recent_commits, diff_repo, get_last_commit_date, run_git_command
 
 
 app = typer.Typer()
@@ -121,10 +124,9 @@ def scan(dir: str = typer.Argument(None, help="Directory to recursively scan for
     console.print(f"[bold cyan]Found {len(found_repos)} Git Repositories:[/bold cyan]")
 
     config = load_config()
-    tracked_paths = {Path(r["path"]).resolve() for r in config.get("repos", [])}
 
     for repo_path in found_repos:
-        if repo_path in tracked_paths:
+        if find_repo_by_path(str(repo_path)):
             console.print(f"[yellow]• Skipping already tracked repo: {repo_path}[/yellow]")
             continue
 
@@ -137,6 +139,243 @@ def scan(dir: str = typer.Argument(None, help="Directory to recursively scan for
             console.print(f"[green]✓ Added {alias}[/green]")
         except ValueError as e:
             console.print(f"[red]✗ Failed to add {alias}[/red]: {e}")
+
+@app.command()
+def clean():
+    """Remove invalid or deleted Git Repos from the tracking list"""
+    config = load_config()
+    repos = config.get("repos", [])
+    valid_repos = []
+
+    removed = 0
+    for repo in repos:
+        if Path(repo["path"]).exists() and is_git_repo(repo["path"]):
+            valid_repos.append(repo)
+        else:
+            console.print(f"[red]✗ Removed invalid repo:[/red] {repo['alias']} ({repo['path']})")
+            removed += 1
+
+    config["repos"] = valid_repos
+    save_config(config)
+
+    if removed == 0:
+        console.print("[green]✔ All tracked repos are valid.[/green]")
+    else:
+        console.print(f"[bold yellow]Cleaned {removed} invalid entries from config.[/bold yellow]")
+
+@app.command()
+def config(
+    reset: bool = typer.Option(False, "--reset", "-r", help="Reset config and removed all tracked repositories"),
+    show: bool = typer.Option(False, "--show", help="Display raw config JSON")
+):
+    """Manage Git-Glance configuration: show or reset config file"""
+    if reset and show:
+        console.print("[bold red]Error:[/bold red] You can only use one of '--reset' or '--show' at a time")
+        raise typer.Exit(1)
+    
+    config_path = get_config_path()
+    
+    if reset:
+        confirm = typer.confirm("Are you sure you want to delete all tracked repos and reset config?")
+        if confirm:
+            config_path.unlink(missing_ok=True)
+            console.print("[bold red]✔ Config reset. All tracked repositories removed.[/bold red]")
+        else:
+            console.print("[yellow]Reset cancelled.[/yellow]")
+        return
+    
+    if show:
+        config = load_config()
+        pretty = json.dumps(config, indent=2)
+        syntax = Syntax(pretty, "json", word_wrap=True, line_numbers=True)
+        console.print(Panel(syntax, title="[bold]Current Configuration[bold]", expand=True))
+
+@app.command()
+def rename(
+    old_alias: str = typer.Argument(..., help="Current alias of the repo you want to rename"),
+    new_alias: str = typer.Argument(..., help="New alias to assign to the repo")
+):
+    """Rename the alias of a tracked repository"""
+    config = load_config()
+    repos = config.get("repos", [])
+
+    if find_repo_by_alias(new_alias):
+        console.print(f"[bold red]Error:[/bold red] An alias '{new_alias}' already exists.")
+        raise typer.Exit(1)
+    
+    repo = find_repo_by_alias(old_alias)
+    if not repo:
+        console.print(f"[bold red]Error:[/bold red] No repository found with alias '{old_alias}'")
+        raise typer.Exit(1)
+    
+
+    repo["alias"] = new_alias
+    save_config(config)
+    console.print(f"[bold green]✔ Renamed repository from '{old_alias}' to '{new_alias}'[/bold green]")
+
+@app.command()
+def open(alias: str = typer.Argument(..., help="Alias of the repository to open")):
+    """Open a tracked repo in the system file manager"""
+    repo = find_repo_by_alias(alias)
+    if not repo:
+        console.print(f"[bold red]Error:[/bold red] No repository found with alias '{alias}'")
+        raise typer.Exit(1)
+    
+    try:
+        open_repo(repo["path"])
+        console.print(f"[green]✔ Opened repository '{alias}' in file manager[/green]")
+    except Exception as e:
+        console.print(f"[red]✗ Failed to open repository '{alias}': {e}[/red]")
+
+@app.command()
+def commit_summary(
+    alias: str = typer.Option(None, help="Alias of specific repo (optional)"),
+    count: int = typer.Option(5, help="Number of recent commits to show per repo")
+):
+    """Show latest N commits for tracked repositories"""
+    config = load_config()
+    repos = config.get("repos", [])
+
+    if alias:
+        repo = find_repo_by_alias(alias)
+        if not repo:
+            console.print(f"[bold red]Error:[/bold red] No repository found with alias '{alias}'")
+            raise typer.Exit(1)
+        repos = [repo]
+    
+    for repo in repos:
+        path = repo["path"]
+        repo_alias = repo["alias"]
+        try:
+            log = get_recent_commits(path, count)
+            syntax = Syntax(log, "bash", theme="ansi_dark", line_numbers=False, word_wrap=True)
+            console.print(Panel(syntax, title=f"[bold magenta]{repo_alias}[/bold magenta]", expand=True))
+        except Exception as e:
+            console.print(f"[red]✗ Failed to get commits for {repo_alias}[/red]: {e}")
+
+@app.command()
+def diff(alias: str = typer.Option(None, help="Alias of a single repo to view diff for")):
+    """Show uncommitted changes (diff) for one or all tracked repositories"""
+    config = load_config()
+    repos = config.get("repos", [])
+
+    if not repos:
+        console.print("[yellow]No repositories are being tracked.[/yellow]")
+        raise typer.Exit()
+    
+    if alias:
+        repo = find_repo_by_alias(alias)
+        if not repo:
+            console.print(f"[bold red]Error:[/bold red] No repository found with alias '{alias}'")
+            raise typer.Exit(1)
+        
+        try:
+            diff_output = diff_repo(repo["path"])
+            if not diff_output.strip():
+                console.print(f"[green]✓ No changes in '{alias}'[/green]")
+            else:
+                syntax = Syntax(diff_output, "diff", theme="ansi_dark", line_numbers=False)
+                console.print(Panel(syntax, title=f"[bold cyan]Diff: {alias}[/bold cyan]", expand=True))
+        except Exception as e:
+            console.print(f"[red]✗ Failed to get diff for {alias}: {e}[/red]")
+        return
+    
+
+    for repo in repos:
+        try:
+            diff_output = diff_repo(repo["path"])
+            if not diff_output.strip():
+                continue
+            syntax = Syntax(diff_output, "diff", theme="ansi_dark", line_numbers=False)
+            console.print(Panel(syntax, title=f"[bold cyan]Diff: {repo['alias']}[/bold cyan]", expand=True))
+        except Exception as e:
+            console.print(f"[red]✗ Failed to get diff for {repo['alias']}: {e}[/red]")
+
+@app.command()
+def stale(days: int = typer.Option(10, help="Threshold in days in order to consider a repo stale")):
+    """Show repositories with no commits in the last N days"""
+    config = load_config()
+    repos = config.get("repos", [])
+
+    if not repos:
+        console.print("[yellow]No repositories are being tracked.[/yellow]")
+        raise typer.Exit()
+    
+    threshold = datetime.now(timezone.utc) - timedelta(days=days)
+    stale_repos = []
+
+    for repo in repos:
+        try:
+            last_commit = get_last_commit_date(repo["path"])
+            if last_commit < threshold:
+                stale_repos.append((repo, last_commit))
+        except Exception as e:
+            console.print(f"[red]✗ Failed to check last commit for {repo['alias']}: {e}[/red]")
+    
+    if not stale_repos:
+        console.print("[green]✔ No stale repositories found.[/green]")
+        return
+    
+    table = Table(title=f"Stale Repositories (> {days} days)", expand=True)
+    table.add_column("Alias", style="cyan")
+    table.add_column("Path", style="dim")
+    table.add_column("Last Commit", style="red")
+
+    for repo, date in stale_repos:
+        table.add_row(repo["alias"], repo["path"], date.strftime("%Y-%m-%d"))
+
+    console.print(table)
+    
+@app.command()
+def pull(only: str = typer.Option(None, help="Alias of a specific repo to pull")):
+    """Pull latest changes from remote for all or specific repo"""
+    config = load_config()
+    repos = config.get("repos", [])
+
+    if only:
+        repo = find_repo_by_alias(only)
+        if not repo:
+            console.print(f"[red]✗ No repo found with alias '{only}'[/red]")
+            raise typer.Exit(1)
+        try:
+            run_git_command(repo["path"], "pull")
+            console.print(f"[green]✔ Pulled latest changes for '{only}'[/green]")
+        except Exception as e:
+            console.print(f"[red]✗ Pull failed for '{only}': {e}[/red]")
+        return
+    
+    console.print("[cyan]Pulling latest changes for all repos...[/cyan]")
+    for repo in repos:
+        try:
+            run_git_command(repo["path"], "pull")
+            console.print(f"[green]✔ Pulled '{repo['alias']}'[/green]")
+        except Exception as e:
+            console.print(f"[red]✗ Pull failed for '{repo['alias']}': {e}[/red]")
+
+@app.command()
+def push(only: str = typer.Option(None, help="Alias of a specific repo to push")):
+    """Push local commits to remote for all or specific repo"""
+    config = load_config()
+    repos = config.get("repos", [])
+    if only:
+        repo = find_repo_by_alias(only)
+        if not repo:
+            console.print(f"[red]✗ No repo found with alias '{only}'[/red]")
+            raise typer.Exit(1)
+        try:
+            run_git_command(repo["path"], ["push"])
+            console.print(f"[green]✔ Pushed local commits for '{only}'[/green]")
+        except Exception as e:
+            console.print(f"[red]✗ Push failed for '{only}': {e}[/red]")
+        return
+
+    console.print("[cyan]Pushing local commits for all repos...[/cyan]")
+    for repo in repos:
+        try:
+            run_git_command(repo["path"], ["push"])
+            console.print(f"[green]✔ Pushed '{repo['alias']}'[/green]")
+        except Exception as e:
+            console.print(f"[red]✗ Push failed for '{repo['alias']}': {e}[/red]")
 
 @app.command()
 def list():
@@ -179,7 +418,7 @@ def status(only: str = typer.Option(None, help="Alias of a single repo to show f
     """Show status of all tracked git repositories"""
     config = load_config()
     if only:
-        repo = next((r for r in config["repos"] if r["alias"] == only), None)
+        repo = find_repo_by_alias(only)
         if not repo:
             console.print(f"[bold red]Error: No repo with alias '{only}' found.[/bold red]")
             raise typer.Exit(1)

@@ -1,4 +1,7 @@
+import platform
+import os
 import subprocess
+from datetime import datetime
 from pathlib import Path
 
 def run_git_command(path: str, args: list[str]) -> str:
@@ -20,6 +23,37 @@ def is_git_repo(path: str) -> bool:
     except RuntimeError:
         return False
     
+def open_repo(path: str) -> None:
+    resolved = Path(path).expanduser().resolve()
+    if not resolved.exists():
+        raise ValueError(f"Path does not exist: {resolved}")
+    
+    system = platform.system()
+
+    try:
+        if system == "Windows":
+            os.startfile(str(resolved))
+        elif system == "Darwin":
+            subprocess.run(["open", str(resolved)], check=True)
+        elif system == "Linux":
+            subprocess.run(["xdg-open", str(resolved)], check=True)
+    except subprocess.CalledProcessError:
+        raise RuntimeError(f"Failed to open repository at {resolved}")
+    
+def get_recent_commits(path: str, count: int = 5) -> str:
+    try:
+        output = run_git_command(path, ["log", f"-n{count}", "--pretty=format:%C(yellow)%h %Cgreen%ad %Creset%s", "--date=short"])
+        return output or "[dim]No commits found.[/dim]"
+    except Exception as e:
+        raise RuntimeError(f"Failed to fetch commits: {e}")
+    
+def diff_repo(path: str) -> str:
+    return run_git_command(path, ["diff"])
+
+def get_last_commit_date(path: str) -> datetime:
+    output = run_git_command(path, ["log", "-1", "--format=%cI"])
+    return datetime.fromisoformat(output.strip())
+
 def get_detailed_repo_info(path: str) -> dict:
     path_obj = Path(path).expanduser().resolve()
     info = {
