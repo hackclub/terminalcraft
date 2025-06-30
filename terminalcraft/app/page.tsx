@@ -109,6 +109,7 @@ Get ready to build and publish your own terminal program and earn a **Raspberry 
 9. 🚫 Do not build just a wrapper around another tool
 10. 🚫 Creating a wrapper around multiple tools or games is not accepted
 11. 🚫 Simple tools that are generally not accepted include: todo cli, timers, simple Q/A type applications 
+12. You are expected to spend 11 or more hours on your project. You must track your time with hackatime. 
 
 ### Tools You Can Use:
 - **Textualize** (Recommended for web sharing)
