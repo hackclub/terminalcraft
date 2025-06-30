@@ -12,8 +12,8 @@ from rich.tree import Tree
 from rich.text import Text
 from rich.syntax import Syntax
 
-from config import add_repo, remove_repo, load_config, save_config, get_config_path, find_repo_by_alias, find_repo_by_path
-from git import get_repo_status, is_git_repo, fetch_repo, get_detailed_repo_info, open_repo, get_recent_commits, diff_repo, get_last_commit_date, run_git_command
+from .config import add_repo, remove_repo, load_config, save_config, get_config_path, find_repo_by_alias, find_repo_by_path
+from .git import get_repo_status, is_git_repo, fetch_repo, get_detailed_repo_info, open_repo, get_recent_commits, diff_repo, get_last_commit_date, run_git_command
 
 
 app = typer.Typer()
