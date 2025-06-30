@@ -9,6 +9,7 @@ TerminalTalks is an **offline, voice-powered command suggestion tool** for Linux
 - ⚡ **Simple one-command install** script  
 - 🔧 Easy to modify and expand command set  
 - 🐧 Beginner-friendly, works on most Linux systems  
+- Supports theme switching
 
 ## 🛠️ How It Works  
 1. Run `terminal-talks` from any terminal  

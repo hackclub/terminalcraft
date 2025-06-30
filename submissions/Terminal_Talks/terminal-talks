@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-os.environ["VOSK_LOG_LEVEL"] = "-1"  # Vosk logs
-
 import queue
 import sounddevice as sd
 import vosk
@@ -10,21 +8,44 @@ import sys
 import subprocess
 import json
 
-# Model path
-MODEL_PATH = "model"
-if not os.path.exists(MODEL_PATH):
-    print(f"❗ Model not found at {MODEL_PATH}")
-    sys.exit(1)
+# Hide Vosk logging
+os.environ["VOSK_LOG_LEVEL"] = "-1"
 
-model = vosk.Model(MODEL_PATH)
-q = queue.Queue()
+# ==== THEME SELECTOR ====
 
-def callback(indata, frames, time, status):
-    if status:
-        print(status, file=sys.stderr)
-    q.put(bytes(indata))
+def select_theme():
+    print("\n🎨 Choose a Terminal Theme:")
+    print("1. Dark")
+    print("2. Light")
+    print("3. Hacker (Matrix-style green)")
 
-def get_speech():
+    choice = input("Enter your choice (1/2/3): ").strip()
+    theme_scripts = {
+        "1": "themes/dark.sh",
+        "2": "themes/light.sh",
+        "3": "themes/hacker.sh"
+    }
+
+    if choice in theme_scripts:
+        subprocess.run(["bash", theme_scripts[choice]])
+    else:
+        print("❌ Invalid choice.")
+
+# ==== MATRIX MODE ====
+
+def enter_matrix_mode():
+    subprocess.run(["bash", "scripts/matrix.sh"])
+
+# ==== SPEECH RECOGNITION ====
+
+def get_speech(model):
+    q = queue.Queue()
+
+    def callback(indata, frames, time, status):
+        if status:
+            print(status, file=sys.stderr)
+        q.put(bytes(indata))
+
     with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16',
                            channels=1, callback=callback):
         print("🎤 Speak now (press Ctrl+C to stop)...")
@@ -36,6 +57,8 @@ def get_speech():
                 result = json.loads(rec.Result())
                 return result.get("text", "")
 
+# ==== MAN PAGE QUERY ====
+
 def query_man_db(query):
     try:
         result = subprocess.run(["man", "-k", query], capture_output=True, text=True)
@@ -44,9 +67,8 @@ def query_man_db(query):
         if not lines or lines[0].strip() == "":
             return "❌ No matching commands found in man pages."
 
-        # Collect suggestions
         suggestions = ["✅ Suggestions:"]
-        for line in lines[:10]:  # Top 10 only
+        for line in lines[:10]:  # Limit to top 10
             parts = line.split(" - ", 1)
             if len(parts) == 2:
                 cmd_info = parts[0].strip()
@@ -59,11 +81,33 @@ def query_man_db(query):
     except Exception as e:
         return f"\n⚠️ Error querying man: {e}"
 
-# --- MAIN ---
-if __name__ == "__main__":
+# ==== MAIN PROGRAM ====
+
+def run_main():
+    MODEL_PATH = "model"
+    if not os.path.exists(MODEL_PATH):
+        print(f"❗ Model not found at: {MODEL_PATH}")
+        sys.exit(1)
+
+    model = vosk.Model(MODEL_PATH)
     try:
-        text = get_speech()
+        text = get_speech(model)
         print(f"\n📝 You said: {text}")
         print(query_man_db(text))
     except KeyboardInterrupt:
         print("\n👋 Exiting.")
+
+# ==== ENTRY POINT ====
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1].lower()
+        if cmd == "theme":
+            select_theme()
+        elif cmd == "matrix":
+            enter_matrix_mode()
+        else:
+            print(f"⚠️ Unknown option: {cmd}")
+            print("Usage: terminal-talks [theme | matrix]")
+    else:
+        run_main()
