@@ -1,8 +1,3 @@
-import pynput
-import json
-import datetime
-
-
 def divideData(keyList):
     # initializing database
     aafa = ["switchTab", "copy", "paste", "type"] # stands for "action avalible for analysis"
@@ -48,8 +43,9 @@ def divideData(keyList):
                 longTerm["type"] = None
                 skipNext = True # if typing continues, still checking the next one. howeven if typing stoped that means skiping next one
                 continue
-    # json.dump(actions, open(f"actionslog{datetime.datetime.now().strftime("%y%d%m%H%M%S")}.json", "w"), indent = 2)
+
     return actions, aafa # return divided action lists!
+
 
 def analysisHabit(keyList, dividedActionList, aafa):
     # now we divid all the habits and listed them, , its time for us to actually analysis it
@@ -66,8 +62,6 @@ def analysisHabit(keyList, dividedActionList, aafa):
         actionStatistics[i]["onceInAWhile"] = totleTime / actionStatistics[i]["num"]
         actionStatistics[i]["timePercentage"] = actionStatistics[i]["timeSpent"] / totleTime
 
-    # debug data
-    # json.dump(actionStatistics, open(f"actionStatisticslog{datetime.datetime.now().strftime("%y%d%m%H%M%S")}.json", "w"), indent = 2)
     return actionStatistics # returning the staticstics of actions
 
 def analysisStops(keyList, dividedActionList, aafa):
@@ -77,12 +71,12 @@ def analysisStops(keyList, dividedActionList, aafa):
     stops = []
     lastEnd = keyList[0][1]
     lastStart = keyList[0][1]
-    actionsConsideredActive = ["copy", "paste", "type"]
-    dividedActionList = [action for i in actionsConsideredActive for action in dividedActionList[i]]
-    dividedActionList.sort(key = lambda x : x[0])
-    # check each stop and active time and adds then together
-    ##################################################################
-    for _, unixTime in keyList:# make keyList dividedActionList later
+
+    # actionsConsideredActive = ["switchTab", "copy", "paste", "type"]
+    # dividedActionList = [action for i in actionsConsideredActive for action in dividedActionList[i]]
+    # dividedActionList.sort(key = lambda x : x[0])
+    
+    for _, unixTime in keyList:
         # if your stoped for too long
         if unixTime - lastEnd > shortestStop:
             stops.append((lastEnd, unixTime, unixTime - lastEnd))
@@ -100,4 +94,6 @@ def analysisStops(keyList, dividedActionList, aafa):
 
     return active, stops, activeTotle, stopTotle
     
+def analysisHours(keyList, dividedActionList, aafa):
+    return list(zip(*keyList))[0]
 
