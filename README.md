@@ -1,6 +1,6 @@
 # TerminalCraft
 
-TerminalCraft is a [Young Software Makers](https://ysws.hackclub.com) program that rewards teenagers for creating original terminal-based programs with a Raspberry Pi 4 (2GB)!
+TerminalCraft is a [You Ship We Ship](https://ysws.hackclub.com) program that rewards teenagers for creating original terminal-based programs with a Raspberry Pi 4 (2GB)!
 
 ## 🎯 The Challenge
 
