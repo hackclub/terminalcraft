@@ -74,6 +74,6 @@ This project was built for Hack Club's TerminalCraft 🛠️
 
 ## 📬 Contact
 Created by Sameer Kulhari
-GitHub Repository : https://github.com/Sameer-Kulhari/TerminalTalks
+GitHub Repository : https://github.com/Sameer-Kulhari/Terminal_Talks
 
 💡 Pro Tip: Add your own custom commands by editing the mapping dictionary!
