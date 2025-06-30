@@ -108,7 +108,7 @@ pub fn update(model: &mut Model, msg: Msg) {
                     }
                     if let Some(problem) = &model.game_state.active_problem {
                         if let Ok(user_answer) = model.game_state.user_input.parse::<i32>() {
-                            if problem.check_answer(user_answer) { return; }
+                            if !problem.check_answer(user_answer) { return; }
                             model.game_state.current_score += 1;
                             let problem_stat = ProblemStat {
                                 problem_text: get_problem_text(Some(&problem)),
