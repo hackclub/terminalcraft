@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+include requirements.txt
+include pyproject.toml
+include peeky.py
+include peeky.bat
+recursive-include peeky * 
