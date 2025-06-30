@@ -199,19 +199,22 @@ def rename(
     config = load_config()
     repos = config.get("repos", [])
 
-    if find_repo_by_alias(new_alias):
+    if old_alias == new_alias:
+        console.print("[yellow]⚠ New alias is the same as the old one. Nothing to do.[/yellow]")
+        raise typer.Exit()
+
+    if any(r["alias"] == new_alias for r in repos):
         console.print(f"[bold red]Error:[/bold red] An alias '{new_alias}' already exists.")
         raise typer.Exit(1)
-    
-    repo = find_repo_by_alias(old_alias)
-    if not repo:
-        console.print(f"[bold red]Error:[/bold red] No repository found with alias '{old_alias}'")
-        raise typer.Exit(1)
-    
 
-    repo["alias"] = new_alias
-    save_config(config)
-    console.print(f"[bold green]✔ Renamed repository from '{old_alias}' to '{new_alias}'[/bold green]")
+    for repo in repos:
+        if repo["alias"] == old_alias:
+            repo["alias"] = new_alias
+            save_config(config)
+            console.print(f"[bold green]✔ Renamed repository from '{old_alias}' to '{new_alias}'[/bold green]")
+            return
+
+    console.print(f"[bold red]Error:[/bold red] No repository found with alias '{old_alias}'")
 
 @app.command()
 def open(alias: str = typer.Argument(..., help="Alias of the repository to open")):
@@ -338,16 +341,16 @@ def pull(only: str = typer.Option(None, help="Alias of a specific repo to pull")
             console.print(f"[red]✗ No repo found with alias '{only}'[/red]")
             raise typer.Exit(1)
         try:
-            run_git_command(repo["path"], "pull")
+            run_git_command(repo["path"], ["pull"])
             console.print(f"[green]✔ Pulled latest changes for '{only}'[/green]")
         except Exception as e:
             console.print(f"[red]✗ Pull failed for '{only}': {e}[/red]")
         return
-    
+
     console.print("[cyan]Pulling latest changes for all repos...[/cyan]")
     for repo in repos:
         try:
-            run_git_command(repo["path"], "pull")
+            run_git_command(repo["path"], ["pull"])
             console.print(f"[green]✔ Pulled '{repo['alias']}'[/green]")
         except Exception as e:
             console.print(f"[red]✗ Pull failed for '{repo['alias']}': {e}[/red]")
