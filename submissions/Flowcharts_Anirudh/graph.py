@@ -58,7 +58,7 @@ def render(graph):
     if not graph.nodes:
         return
 
-    console.print(f"\n----------{graph.name}----------")
+    console.print(f"\n [bold underline bright_white on black] ----------{graph.name}---------- [/bold underline bright_white on black]")
 
     def draw_n(node):
         l = len(node.label)
@@ -69,9 +69,9 @@ def render(graph):
 
         if node.shape == "circle":
             return [
-                " .---. ",
-                f" ( {final})",
-                "  '---'"
+                " .---------. ",
+                f" (   {final} ) ",
+                "  '---------'"
             ]
         elif node.shape == "square":
             return [
@@ -116,7 +116,7 @@ def render(graph):
         for idx, edge in enumerate(outedge):
             child = edge.target
             lastc = idx == len(outedge) - 1
-            label = f"{edge.label} " if edge.label else ""
+            label = f"[bold bright_cyan] {edge.label} [/bold bright_cyan] " if edge.label else ""
             edgel = f"{np}{'└──▶' if lastc else '├──▶'} {label}".rstrip()
             console.print(edgel, style="bold cyan")
             r_dfs(child, np, lastc)
@@ -169,31 +169,39 @@ def create(name: str):
         return
 
     g = Graph(name)
-    console.print(f"[green]Creating graph '{name}'[/green]")
+    console.print(f"[bold green]Creating graph '{name}'[/bold green]")
 
     try:
-        num_nodes = int(typer.prompt("How many nodes do you want to add?"))
-        for i in range(num_nodes):
-            console.print(f"\n[bold cyan]Node {i + 1}:[/bold cyan]")
+        i = 0
+        while True:
+            console.print(f"\n[bold cyan]Node {i + 1}:[/bold cyan] (type 'exit' to stop)")
             label = typer.prompt("  Label (e.g. Start, User Input)")
+            if label.strip().lower() in ["exit", "quit"]:
+                break
             shape = typer.prompt("  Shape (process, square, circle, diamond)", default="process")
             ntype = typer.prompt("  Type (e.g. action, decision)", default="")
             g.addn(str(i), label.strip(), shape.strip(), ntype.strip())
             console.print(f"   Node '{i}': '{label}' added.")
+            i += 1
+
 
     except Exception as e:
         console.print(f"[red] {e}[/red]")
         return
 
     try:
-        e = int(typer.prompt("How many edges do you want to add?"))
-        for i in range(e):
-            console.print(f"\n[bold yellow]Edge {i + 1}:[/bold yellow]")
-            src = typer.prompt("  Source Node ID")
-            tgt = typer.prompt("  Target Node ID")
-            elabel = typer.prompt("  Edge Label (can be empty)", default="")
+        i = 0
+        while True:
+            console.print(f"\n[bold yellow]Edge {i + 1}:[/bold yellow] (type 'exit' to stop)")
+            src = typer.prompt(" Source Node ID")
+            if src.strip().lower() in ["exit", "done"]:
+                break
+            tgt = typer.prompt(" Target Node ID")
+            elabel = typer.prompt(" Edge Label ", default="")
             g.adde(src.strip(), tgt.strip(), elabel.strip())
             console.print(f"  🔗 Edge {src} -> {tgt} added.")
+            i += 1
+
     except Exception as e:
         console.print(f"[red]Error while adding edges: {e}[/red]")
         return
@@ -210,6 +218,91 @@ def show(name: str):
     if g is None:
         return
     render(g)
+
+
+@app.command()
+def edit(name: str):
+    g = loadpickle(name)
+    if g is None:
+        return
+    console.print(f"[cyan]Editing graph '{name}'[/cyan]")
+    while True:
+        choice = typer.prompt("What do you want to edit? [node/edge/add node/add edge/delete/show/exit]").strip().lower()
+
+        if choice == "exit":
+            break
+
+        elif choice == "node":
+            nid = typer.prompt("Node id to edit")
+            if nid in g.nodes:
+                node = g.nodes[nid]
+                label = typer.prompt(f"New Label (current: {node.label})", default=node.label)
+                shape = typer.prompt(f"New Shape (current: {node.shape})", default=node.shape)
+                ntype = typer.prompt(f"New Type (current: {node.type})", default=node.type)
+                node.label = label
+                node.shape = shape
+                node.type = ntype
+                console.print("[green]Node updated[/green]")
+            else:
+                console.print("[red]Node not found [/red]")
+        elif choice == "add node":
+            nid = typer.prompt("New Node ID")
+            if nid in g.nodes:
+                console.print("[red]Node already exists[/red]")
+                continue
+            label = typer.prompt("  Label (Start, User Input)")
+            shape = typer.prompt("  Shape (process, square, circle, diamond)", default="process")
+            ntype = typer.prompt("  Type (action, decision)", default="")
+            g.addn(nid, label.strip(), shape.strip(), ntype.strip())
+            console.print(f"[green]Node '{nid}' added[/green]")
+
+        elif choice == "add edge":
+            src = typer.prompt("  Source Node ID")
+            tgt = typer.prompt("  Target Node ID")
+            elabel = typer.prompt("  Edge Label (can be empty)", default="")
+            g.adde(src.strip(), tgt.strip(), elabel.strip())
+            console.print(f"[green]Edge '{src}' → '{tgt}' added[/green]")
+
+        elif choice == "edge":
+            src = typer.prompt("Source node ID")
+            tgt = typer.prompt("Target node ID")
+            found = False
+            for edge in g.edges:
+                if edge.source == src and edge.target == tgt:
+                    new_label = typer.prompt(f"New label (current: {edge.label})", default=edge.label)
+                    edge.label = new_label
+                    found = True
+                    console.print("[green]Edge label updated[/green]")
+                    break
+            if not found:
+                console.print("[red]Edge not found[/red]")
+
+        elif choice == "delete":
+            to_delete = typer.prompt("Delete [node/edge]?")
+            if to_delete == "node":
+                nid = typer.prompt("Node ID to delete")
+                if nid in g.nodes:
+                    del g.nodes[nid]
+                    g.edges = [e for e in g.edges if e.source != nid and e.target != nid]
+                    console.print(f"[green]Node {nid} and its edges deleted[/green]")
+                else:
+                    console.print("[red]Node not found[/red]")
+            elif to_delete == "edge":
+                src = typer.prompt("Source node")
+                tgt = typer.prompt("Target node")
+                before = len(g.edges)
+                g.edges = [e for e in g.edges if not (e.source == src and e.target == tgt)]
+                after = len(g.edges)
+                if before == after:
+                    console.print("[red]Edge not found.[/red]")
+                else:
+                    console.print("[green]Edge deleted.[/green]")
+
+        elif choice == "show":
+            render(g)
+
+    savepickle(name, g)
+    console.print(f"[green]Graph '{name}' updated.[/green]")
 
 
 
