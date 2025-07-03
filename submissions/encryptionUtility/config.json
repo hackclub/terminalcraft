@@ -1,0 +1,4 @@
+{
+  "setup": "gcc -o app *.c -g -lssl -lcrypto",
+  "run": "sh"
+}

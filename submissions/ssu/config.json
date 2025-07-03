@@ -1,0 +1,4 @@
+{
+  "setup": "go install github.com/awesomebrownies/ssu/cmd/ssu@latest",
+  "run": "sh"
+}

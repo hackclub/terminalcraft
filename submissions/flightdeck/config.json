@@ -1,0 +1,4 @@
+{
+  "setup": "pip install flightdeck",
+  "run": "sh"
+}
