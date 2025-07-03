@@ -1,0 +1,4 @@
+{
+  "setup": "echo hello",
+  "run": "sh game2048.sh"
+}
