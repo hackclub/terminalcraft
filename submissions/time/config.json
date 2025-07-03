@@ -1,0 +1,4 @@
+{
+  "setup": "echo hello",
+  "run": "python3 time_drift.py"
+}

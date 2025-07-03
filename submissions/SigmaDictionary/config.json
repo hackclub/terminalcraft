@@ -1,0 +1,4 @@
+{
+  "setup": "echo ehllo",
+  "run": "uv run main.py"
+}
