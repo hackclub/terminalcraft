@@ -158,7 +158,7 @@ def termgraph_calc_begin():
             parser.add_argument("--label",default=True,type=bool,help="add labels to x axis of samples")
             parser.add_argument("--x-space",default=False,type=int)
         parser.add_argument("--file",default="function.csv",type=str)
-        parser.add_argument("--sample",default=16,type=int,help="number of function samples taken")
+        parser.add_argument("--sample",default=8,type=int,help="number of function samples taken")
         arguments = parser.parse_args()
     else:
         arguments = ()
@@ -170,7 +170,7 @@ def termgraph_calc_begin():
     sampleY = []
     csvText = ""
     for i in range(sampleSize-1):
-        samplePlaces.append(round(i*rangeStep+getArg("x_offset",arguments),2))
+        samplePlaces.append(round(i*rangeStep+getArg("x_offset",arguments),3))
     functionArg = arguments.function
     csvXLabel = ""
     for i in samplePlaces:
