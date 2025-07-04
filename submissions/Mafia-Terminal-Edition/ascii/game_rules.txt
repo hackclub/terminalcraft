@@ -1,0 +1,97 @@
++-------------------------------------------------------------------------------------------------------------------------------+
+|                                             The Games Objective                                                               |
+|                                                                                                                               |
+|                                                                                                                               |
+|   The main objective of the game is for the mafia to “kill off” civilians until they are the majority,                        |
+|   or for the civilians to vote off the entire mafia. When one of those two things happens, the game is over.                  |
+|                                                                                                                               |
+|   Roles must be assigned to each person in secret. There will be 3 mafia,1 detective, 1 doctor, 1 narrator, and 8 civilians.  |
+|   It's very important to not tell anyone your identity! Once everyone has a role, the game can finally start.                 |
+|                                                                                                                               |
+|   The game itself is divided into two phases: day and night. During the night, everyone keeps his or her eyes closed until    |
+|   the narrator "awakens" each role, beginning with the mafia, then the doctor, then the detective and last the civilians.     |
+|                                                                                                                               |
+|                                                                                                                               |
++-------------------------------------------------------------------------------------------------------------------------------+
+
+
++-------------------------------------------------------------------------------------------------------------------------------+
+|                                                                                                                               |
+|                                THE ROLES                                                                                      |
+|                                                                                                                               |
+|   The narrator!                                                                                                               |
+|                                                                                                                               |
+|   The Narrator keeps time rolling. The narrator does not officially participate in the game, but acts as a moderator.         |
+|   During the night, when all players have their eyes closed, the narrator awakens each role and asks them a question.         |
+|   For the mafia, the question is: Who do you want to kill?                                                                    |
+|   For the doctor: Who do you want to save?                                                                                    |
+|   For the detective: Who do you want to know about?                                                                           |
+|   During the day, when everyone is awake, the narrator prompts players to nominate those they’d like to vote off,             |
+|   a.k.a. those they think are in the mafia. The game repeats in phases from night to day, night to day,                       |
+|   with one person murdered in each phase (unless are saved at night by the doctor).                                           |
+|                                                                                                                               |
+|                                                                                                                               |
+|                                                                                                                               |
+|                                                                                                                               |
+|   The Mafia!                                                                                                                  |
+|                                                                                                                               |
+|   As per our 13-person example, consists of 3 people who find out each other’s identity in the first nighttime phase.         |
+|   While the other players are attempting to figure out who they are, the mafia must lie throughout the entire game and        |
+|   act and act as though they are civilians. The mafia must strategize together during the day without giving themselves       |
+|   away. At night, when the mafia awakens, they point silently to the player they’d like to kill. If all mafia agree,          |
+|   the player is offed.                                                                                                        |
+|                                                                                                                               |
+|                                                                                                                               |
+|                                                                                                                               |
+|                                                                                                                               |
+|   The Civilians!                                                                                                              |
+|                                                                                                                               |
+|   The Civilians are attempting to figure out who is in the mafia simply by talking it out, accusing,                          |
+|   and seeing who is acting suspicious. As a civilian, it’s best to use verbal/non-verbal cues and                             |
+|   your gut to make alliances.                                                                                                 |
+|                                                                                                                               |
+|                                                                                                                               |
+|                                                                                                                               |
+|   The Doctor!                                                                                                                 |
+|                                                                                                                               |
+|   The Doctor is a civilian role that, at each nighttime phase, can save a player he or she thinks the mafia has killed.       |
+|   As mentioned earlier, if the doctor saves the right player, that player is brought back into the game. The doctor           |
+|   cannot save themselves.                                                                                                     |
+|                                                                                                                               |
+|                                                                                                                               |
+|                                                                                                                               |
+|   The Detective!                                                                                                              |
+|                                                                                                                               |
+|   The Detective is a civilian role that, at each nighttime phase, can point to a player he or she thinks is in the mafia      |
+|   and the narrator will nod their head yes or no. This role is perhaps the most fun, because once the detective begins        |
+|   to find out the identities of players, they can begin to make alliances with true civilians and or persuade the group       |
+|   to vote off the true mafia.                                                                                                 |
+|                                                                                                                               |
+|                                                                                                                               |
+|   HOW TO PLAY                                                                                                                 |
+|                                                                                                                               |
+|   First Night: The narrator begins at night by telling all players to close their eyes. Then the narrator awakens the         |
+|   mafia and lets them to choose a person that they want to kill.                                                              |
+|                                                                                                                               |
+|                                                                                                                               |
+|   First Day: Everyone opens their eyes and the games begin. You must just start accusing people out of nowhere. Who is        |
+|   acting shyer than usual? Who is talking a bit too much? Ask straight-forward questions about identities. Ask them if        |
+|   they are in the mafia. Once a nomination to vote off is made, someone must second it for the player to be seriously         |
+|   considered in the mafia. If you have two solid nominations, all players then vote someone off, majority wins.               |
+|   You can have as many nominations as you want, but you need a majority to vote a player out.                                 |
+|   When a player is voted off, they are no longer allowed to speak and their identity is not revealed.                         |
+|                                                                                                                               |
+|                                                                                                                               |
+|   Second Night: All players' eyes are closed and the narrator awakens the mafia and asks who they want to kill.               |
+|   The narrator then awakens the doctor for the first time and asks who they want to save. And then, she awakens               |
+|   the detective and asks who they want to know about.                                                                         |
+|                                                                                                                               |
+|                                                                                                                               |
+|   Third Day: The narrator awakens all players and someone has been killed, unless the doctor has figured out who the          |
+|   mafia had their sights on and saved this player. The game continues in these phases, day and night, day and night,          |
+|   until civilians vote out all mafia members or mafia outnumber civilians.                                                    |
+|                                                                                                                               |
+|                                                                                                                               |
+|   §Good Luck!                                                                                                                 |
+|                                                                                                                               |
++-------------------------------------------------------------------------------------------------------------------------------+
