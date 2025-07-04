@@ -16,4 +16,13 @@ You also can copy the file and paste it in /usr/bin/ to be able to run it from a
 It is more easy. Download the CryptoHacks.exe file and double click it. 
 
 
+### How to build?
+Install Golang from [here](https://go.dev/dl/)
+and then clone the repository.
+> git clone https://github.com/Nadoooor/Crypto-Hacks
+
+then go to /Crypto-Hacks/main
+and run
+> go build main.go
+
 ### And that's it HOPE YOU ENJOY. 🥰
