@@ -1,0 +1,23 @@
+[project]
+name = "earthscii"
+version = "0.1.15"
+description = "Terminal-based 3D terrain viewer."
+authors = [{ name = "Lennier Mulder", email = "lenniermulder@icloud.com" }]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["numpy", "rasterio"]
+
+[project.scripts]
+earthscii = "earthscii.main:main_wrapper"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["LICENSE"]
+"earthscii" = ["data/*.tif"]
