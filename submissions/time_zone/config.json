@@ -1,0 +1,4 @@
+{
+  "setup": "python -m pip install -e .",
+  "run": "sh"
+}

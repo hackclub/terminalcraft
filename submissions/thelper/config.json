@@ -1,0 +1,4 @@
+{
+  "setup": "pip install -r requirements.txt && chmod +x thelper",
+  "run": "sh"
+}

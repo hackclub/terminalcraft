@@ -25,6 +25,8 @@ Create an original program that runs in the terminal. If your submission is appr
 
 6. **Terminal-Only**: Your program must run entirely in the terminal and must not depend on a graphical user interface (GUI).
 
+7. **Coding Time Tracking**:  You must track all your coding time using Hackatime. A minimum of 11 hours of logged development time is required for your submission to be eligible.
+
 ## 🚀 How to Submit
 
 1. Fork this repository
@@ -53,6 +55,9 @@ Here are some unique ideas to get you started:
 - A command-line tool that visualizes sorting algorithms with ASCII art
 - A terminal-based music synthesizer that creates sounds using mathematical functions
 - A text-based roguelike game with unique mechanics
+- Terminal-Based Time Capsule
+- Terminal-Only Spreadsheet App
+- ASCII Neural Network Visualizer
 
 Remember: The more original and creative your project is, the better! These are just starting points - feel free to come up with your own unique ideas!
 

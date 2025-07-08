@@ -1,0 +1,4 @@
+{
+  "setup": "pip3 install -r Netminal/requirements.txt",
+  "run": "python3 Netminal/netminal.py"
+}

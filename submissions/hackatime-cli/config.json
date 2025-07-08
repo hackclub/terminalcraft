@@ -1,0 +1,4 @@
+{
+  "setup": "bun install && bun build --compile --outfile=hackatime-cli --minify --target=bun-linux-amd64 index.tsx",
+  "run": "sh"
+}

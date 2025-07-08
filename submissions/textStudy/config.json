@@ -1,0 +1,4 @@
+{
+  "setup": "pip3 install sentencepiece --prefer-binary && pip3 install -r requirements.txt && pip3 install -e .",
+  "run": "sh"
+}
