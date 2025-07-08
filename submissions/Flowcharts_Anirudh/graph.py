@@ -93,13 +93,13 @@ def render(graph):
             ]
 
     all = {edge.target for edge in graph.edges}
-    rnode = [node_id for node_id in graph.nodes if node_id not in all]
+    rnode = [nid for nid in graph.nodes if nid not in all]
 
     if not rnode:
         rnode = list(graph.nodes.keys())
     
-    def r_dfs(node_id, prefix="", is_last=True):
-        node = graph.nodes[node_id]
+    def r_dfs(nid, prefix="", is_last=True):
+        node = graph.nodes[nid]
         nodeascii = draw_n(node)
         connector = "└──▶" if is_last else "├──▶"
         el = f"{prefix}{connector} "
@@ -111,7 +111,7 @@ def render(graph):
             else:
                 console.print(np + line, style="bold green")
 
-        outedge = [e for e in graph.edges if e.source == node_id]
+        outedge = [e for e in graph.edges if e.source == nid]
 
         for idx, edge in enumerate(outedge):
             child = edge.target
@@ -129,17 +129,17 @@ def render(graph):
 
 GRAPH_DIR = Path("graphs")
 
-def savepickle(graphname: str, graph_obj: Graph):
+def savepickle(n: str, graph_obj: Graph):
     GRAPH_DIR.mkdir(exist_ok=True)
-    path = GRAPH_DIR / f"{graphname}.pkl"
+    path = GRAPH_DIR / f"{n}.pkl"
     with open(path, "wb") as f:
         pickle.dump(graph_obj, f)
     console.print(f"[green]Graph object saved as: {path}[/green]")
 
-def loadpickle(graphname: str) -> Graph:
-    path = GRAPH_DIR / f"{graphname}.pkl"
+def loadpickle(n: str) -> Graph:
+    path = GRAPH_DIR / f"{n}.pkl"
     if not path.exists():
-        console.print(f"[red]Pickled graph '{graphname}' not found.[/red]")
+        console.print(f"[red]Pickled graph '{n}' not found.[/red]")
         return None
     with open(path, "rb") as f:
         graph = pickle.load(f)
@@ -254,6 +254,7 @@ def edit(name: str):
             shape = typer.prompt("  Shape (process, square, circle, diamond)", default="process")
             ntype = typer.prompt("  Type (action, decision)", default="")
             g.addn(nid, label.strip(), shape.strip(), ntype.strip())
+            render(g)
             console.print(f"[green]Node '{nid}' added[/green]")
 
         elif choice == "add edge":
@@ -261,6 +262,7 @@ def edit(name: str):
             tgt = typer.prompt("  Target Node ID")
             elabel = typer.prompt("  Edge Label (can be empty)", default="")
             g.adde(src.strip(), tgt.strip(), elabel.strip())
+            render(g)
             console.print(f"[green]Edge '{src}' → '{tgt}' added[/green]")
 
         elif choice == "edge":
@@ -305,26 +307,101 @@ def edit(name: str):
     console.print(f"[green]Graph '{name}' updated.[/green]")
 
 
-
-    
 @app.command()
-def export(graphname: str):
-    if graphname not in load():
-        console.print(f"[red]Graph '{graphname}' not found[/red]")
+def export(n: str):
+    if n not in load():
+        console.print(f"[red]Graph '{n}' not found[/red]")
         return
 
-    g = loadpickle(graphname)
+    g = loadpickle(n)
     if g is None:
         return
 
     GRAPH_DIR.mkdir(exist_ok=True)
-    export_path = GRAPH_DIR / f"{graphname}.txt"
 
-    render(g) 
-    console.save_text(str(export_path), clear=True, styles=False)
+    etxt = GRAPH_DIR / f"{n}.txt"
+    esvg = GRAPH_DIR / f"{n}.svg"
 
-    console.print(f"[green]Exported clean flowchart to: {export_path}[/green]")
+    tc = Console(record=True, width=console.width)
 
+    def rc(c, graph):
+        if not graph.nodes:
+            return
+
+        c.print(f"\n [bold underline bright_white on black] ----------{graph.name}---------- [/bold underline bright_white on black]")
+
+        def draw_n(node):
+            l = len(node.label)
+            p = node.width - l - 2  
+            lp = p // 2
+            rp = p - lp
+            final = " " * lp + node.label + " " * rp
+
+            if node.shape == "circle":
+                return [
+                    " .---------. ",
+                    f" (   {final} ) ",
+                    "  '---------'"
+                ]
+            elif node.shape == "square":
+                return [
+                    "+" + "-" * (node.width - 2) + "+",
+                    "|" + final + "|",
+                    "+" + "-" * (node.width - 2) + "+"
+                ]
+            elif node.shape == "diamond":
+                return [
+                    f"/{'-' * (node.width - 6)}\\",
+                    f"< {node.label} >",
+                    f" \\{'-' * (node.width - 6)}/"
+                ]
+            else:
+                return [
+                    "+" + "-" * (node.width - 2) + "+",
+                    "|" + final + "|",
+                    "+" + "-" * (node.width - 2) + "+"
+                ]
+
+        allt = {edge.target for edge in graph.edges}
+        roots = [nid for nid in graph.nodes if nid not in allt]
+        if not roots:
+            roots = list(graph.nodes.keys())
+
+        def r_dfs(nid, prefix="", is_last=True):
+            node = graph.nodes[nid]
+            nodeascii = draw_n(node)
+            connector = "└──▶" if is_last else "├──▶"
+            el = f"{prefix}{connector} "
+            np = prefix + ("    " if is_last else "│   ")
+
+            for i, line in enumerate(nodeascii):
+                if i == 0:
+                    c.print(el + line, style="bold green")
+                else:
+                    c.print(np + line, style="bold green")
+
+            outedges = [e for e in graph.edges if e.source == nid]
+
+            for idx, edge in enumerate(outedges):
+                child = edge.target
+                lastc = idx == len(outedges) - 1
+                label = f"[bold bright_cyan] {edge.label} [/bold bright_cyan] " if edge.label else ""
+                edgel = f"{np}{'└──▶' if lastc else '├──▶'} {label}".rstrip()
+                c.print(edgel, style="bold cyan")
+                r_dfs(child, np, lastc)
+
+        for root_id in roots:
+            r_dfs(root_id)
+            if len(roots) > 1:
+                c.print("\n" + "=" * 40 + "\n")
+
+    rc(tc, g)
+
+    tc.save_text(str(etxt), clear=False, styles=False)
+    console.print(f"[green]Exported text to: {etxt}[/green]")
+
+    tc.save_svg(str(esvg), clear=False, title=n)
+    console.print(f"[green]Exported SVG to: {esvg}[/green]")
 
 if __name__ == "__main__":
     app()
