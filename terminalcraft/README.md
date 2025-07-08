@@ -1,6 +1,6 @@
-# TerminalCraft Gallery
+# TerminalCraft Website
 
-A terminal-styled gallery showcasing amazing CLI applications built by the Hack Club community.
+A terminal-styled webiste showcasing amazing CLI applications built for Terminal Craft.
 
 ## Environment Setup
 
@@ -61,15 +61,6 @@ Open [http://localhost:3000](http://localhost:3000) to view the gallery.
 The gallery integrates with:
 - **GitHub API**: Loads projects from hackclub/terminalcraft/submissions
 - **TerminalCraft Deploy API**: Launches live demos at terminalcraft.josiasw.dev
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
 
