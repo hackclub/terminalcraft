@@ -122,3 +122,79 @@ body {
   60% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1E1E1E;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4AF626;
+  border-radius: 4px;
+  border: 1px solid #1E1E1E;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3FE01F;
+}
+
+::-webkit-scrollbar-corner {
+  background: #1E1E1E;
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4AF626 #1E1E1E;
+}
+
+/* Hide scrollbars for iframe content */
+iframe {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+iframe::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Modal animations */
+@keyframes modal-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modal-in {
+  animation: modal-fade-in 0.2s ease-out;
+}
+
+.modal-open {
+  overflow: hidden;
+}
