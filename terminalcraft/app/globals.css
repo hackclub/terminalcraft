@@ -194,3 +194,7 @@ iframe::-webkit-scrollbar {
 .animate-modal-in {
   animation: modal-fade-in 0.2s ease-out;
 }
+
+.modal-open {
+  overflow: hidden;
+}
