@@ -1,24 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TerminalCraft Gallery
+
+A terminal-styled gallery showcasing amazing CLI applications built by the Hack Club community.
+
+## Environment Setup
+
+### GitHub API Token
+
+To avoid rate limiting when loading projects, you'll need a GitHub Personal Access Token:
+
+1. Create a `.env.local` file in the project root
+2. Add your GitHub token:
+   ```
+   NEXT_PUBLIC_GITHUB_TOKEN=your_github_token_here
+   ```
+
+**Security Notes:**
+- The `.env.local` file is automatically ignored by Git
+- Never commit tokens to version control
+- Use tokens with minimal required permissions (public repository read access)
+
+### Rate Limits
+
+- **Without token**: 60 requests/hour per IP
+- **With token**: 5,000 requests/hour
 
 ## Getting Started
 
-First, run the development server:
+First, install dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the gallery.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 🚀 **Live Demo Integration**: Launch projects directly in browser
+- 📊 **Real-time Loading**: Fetches projects from GitHub submissions folder
+- 🎨 **Terminal UI**: Authentic terminal styling throughout
+- 💻 **Language Detection**: Automatically detects programming languages
+- 📱 **Responsive Design**: Works on all device sizes
+- 🔄 **Toast Notifications**: Real-time feedback for project launches
+
+## Project Structure
+
+- `app/page.tsx` - Main terminal interface
+- `app/gallery/page.tsx` - Project gallery with GitHub integration
+- `components/Navbar.tsx` - Terminal-styled navigation
+- `components/Prompt.tsx` - Terminal prompt component
+
+## API Integration
+
+The gallery integrates with:
+- **GitHub API**: Loads projects from hackclub/terminalcraft/submissions
+- **TerminalCraft Deploy API**: Launches live demos at terminalcraft.josiasw.dev
 
 ## Learn More
 
