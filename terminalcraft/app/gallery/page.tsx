@@ -193,141 +193,68 @@ async function detectProjectLanguage(projectName: string): Promise<string> {
       }
     });
     
-    // Map extensions to languages - expanded for CLI applications
-    const languageMap: { [key: string]: string } = {
-      // JavaScript/TypeScript
-      'js': 'JavaScript',
-      'mjs': 'JavaScript',
-      'cjs': 'JavaScript',
-      'jsx': 'JavaScript',
-      'ts': 'TypeScript',
-      'tsx': 'TypeScript',
-      
-      // Python
-      'py': 'Python',
-      'py3': 'Python',
-      'pyw': 'Python',
-      'pyx': 'Python',
-      'pyi': 'Python',
-      
-      // Shell scripting
-      'sh': 'Shell',
-      'bash': 'Bash',
-      'zsh': 'Shell', 
-      'fish': 'Shell',
-      'ksh': 'Shell',
-      'csh': 'Shell',
-      'tcsh': 'Shell',
-      'command': 'Shell',
-      
-      // C/C++
-      'c': 'C',
-      'cpp': 'C++',
-      'cxx': 'C++',
-      'cc': 'C++',
-      'c++': 'C++',
-      'h': 'C',
-      'hpp': 'C++',
-      'hxx': 'C++',
-      'hh': 'C++',
-      
-      // Systems languages
-      'rs': 'Rust',
-      'go': 'Go',
-      'zig': 'Zig',
-      'nim': 'Nim',
-      'crystal': 'Crystal',
-      'cr': 'Crystal',
-      'd': 'D',
-      
-      // JVM languages
-      'java': 'Java',
-      'kt': 'Kotlin',
-      'kts': 'Kotlin',
-      'scala': 'Scala',
-      'sc': 'Scala',
-      'clj': 'Clojure',
-      'cljs': 'Clojure',
-      'cljc': 'Clojure',
-      'groovy': 'Groovy',
-      'gvy': 'Groovy',
-      
-      // .NET languages
-      'cs': 'C#',
-      'fs': 'F#',
-      'fsx': 'F#',
-      'vb': 'VB.NET',
-      
-      // Scripting languages
-      'rb': 'Ruby',
-      'rbw': 'Ruby',
-      'php': 'PHP',
-      'php3': 'PHP',
-      'php4': 'PHP',
-      'php5': 'PHP',
-      'phtml': 'PHP',
-      'pl': 'Perl',
-      'pm': 'Perl',
-      'pod': 'Perl',
-      'lua': 'Lua',
-      
-      // Swift/Objective-C
-      'swift': 'Swift',
-      'm': 'Objective-C',
-      'mm': 'Objective-C++',
-      
-      // Dart/Flutter
-      'dart': 'Dart',
-      
-             // Functional languages
-       'hs': 'Haskell',
-       'lhs': 'Haskell',
-       'ml': 'OCaml',
-       'mli': 'OCaml',
-       'elm': 'Elm',
-      'ex': 'Elixir',
-      'exs': 'Elixir',
-      'erl': 'Erlang',
-      'hrl': 'Erlang',
-      
-      // Other popular CLI languages
-      'r': 'R',
-      'jl': 'Julia',
-      'v': 'V',
-      'odin': 'Odin',
-      'pas': 'Pascal',
-      'pp': 'Pascal',
-      'asm': 'Assembly',
-      's': 'Assembly',
-      'nasm': 'Assembly',
-      
-             // Config/Build files (often indicate language)
-       'makefile': 'Make',
-       'cmake': 'CMake',
-       'gradle': 'Gradle',
-       'sbt': 'Scala',
-       'cabal': 'Haskell',
-       'cargo': 'Rust',
-       'gemfile': 'Ruby',
-       'pipfile': 'Python',
-       'requirements': 'Python',
-       'package': 'JavaScript',
-       'pom': 'Java',
-       'docker': 'Docker',
-       'dockerfile': 'Docker',
-       'script': 'Script',
-       'toml': 'TOML',
-       'yaml': 'YAML',
-       'yml': 'YAML',
-       'json': 'JSON',
-       'xml': 'XML',
-      
-             // Executable files (common in CLI apps)
-       'exe': 'Executable',
-       'bin': 'Binary',
-       'out': 'Binary',
-       'app': 'Application'
+    const languageGroups: Record<string, string[]> = {
+      JavaScript: ['js', 'mjs', 'cjs', 'jsx'],
+      TypeScript: ['ts', 'tsx'],
+      Python: ['py', 'py3', 'pyw', 'pyx', 'pyi', 'pipfile', 'requirements'],
+      Shell: ['sh', 'zsh', 'fish', 'ksh', 'csh', 'tcsh', 'command'],
+      Bash: ['bash'],
+      C: ['c', 'h'],
+      'C++': ['cpp', 'cxx', 'cc', 'c++', 'hpp', 'hxx', 'hh'],
+      Rust: ['rs', 'cargo'],
+      Go: ['go'],
+      Zig: ['zig'],
+      Nim: ['nim'],
+      Crystal: ['crystal', 'cr'],
+      D: ['d'],
+      Java: ['java', 'pom'],
+      Kotlin: ['kt', 'kts'],
+      Scala: ['scala', 'sc', 'sbt'],
+      Clojure: ['clj', 'cljs', 'cljc'],
+      Groovy: ['groovy', 'gvy'],
+      'C#': ['cs'],
+      'F#': ['fs', 'fsx'],
+      'VB.NET': ['vb'],
+      Ruby: ['rb', 'rbw', 'gemfile'],
+      PHP: ['php', 'php3', 'php4', 'php5', 'phtml'],
+      Perl: ['pl', 'pm', 'pod'],
+      Lua: ['lua'],
+      Swift: ['swift'],
+      'Objective-C': ['m'],
+      'Objective-C++': ['mm'],
+      Dart: ['dart'],
+      Haskell: ['hs', 'lhs', 'cabal'],
+      OCaml: ['ml', 'mli'],
+      Elm: ['elm'],
+      Elixir: ['ex', 'exs'],
+      Erlang: ['erl', 'hrl'],
+      R: ['r'],
+      Julia: ['jl'],
+      V: ['v'],
+      Odin: ['odin'],
+      Pascal: ['pas', 'pp'],
+      Assembly: ['asm', 's', 'nasm'],
+      Make: ['makefile'],
+      CMake: ['cmake'],
+      Gradle: ['gradle'],
+      Docker: ['docker', 'dockerfile'],
+      Script: ['script'],
+      TOML: ['toml'],
+      YAML: ['yaml', 'yml'],
+      JSON: ['json', 'package'],
+      XML: ['xml'],
+      Executable: ['exe'],
+      Binary: ['bin', 'out'],
+      Application: ['app']
     };
+    
+    // Flatten the language groups into the final language map
+    const languageMap: Record<string, string> = {};
+    for (const [language, extensions] of Object.entries(languageGroups)) {
+      for (const ext of extensions) {
+        languageMap[ext.toLowerCase()] = language;
+      }
+    }
     
     // Find most common language
     let maxCount = 0;
@@ -443,7 +370,7 @@ async function loadAllProjectsFromGitHub(): Promise<Project[]> {
         description: description,
         author: author,
         language: language,
-        stars: 0, // Keep as 0 as requested
+        stars: 0,
         screenshot: `${submission.name} terminal interface`
       };
       
@@ -578,6 +505,18 @@ export default function Gallery() {
   useEffect(() => {
     loadAllProjects();
   }, []);
+
+  useEffect(() => {
+    if (selectedProject) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [selectedProject]);
 
   // Keyboard support for modal
   useEffect(() => {
@@ -1219,4 +1158,4 @@ export default function Gallery() {
       </div>
     </div>
   );
-} 
+}
