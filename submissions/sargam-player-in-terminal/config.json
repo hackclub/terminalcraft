@@ -1,4 +1,4 @@
 {
-  "setup": "pip3 install -r requirements.txt && python3 setup.py",
+  "setup": "pip3 install -r requirements.txt",
   "run": "python3 main.py"
 }
