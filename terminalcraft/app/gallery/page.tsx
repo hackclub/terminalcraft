@@ -728,72 +728,83 @@ export default function Gallery() {
         {/* Project Modal */}
         {selectedProject && (
           <div 
-            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 sm:p-4 z-50"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 closeModal();
               }
             }}
           >
-            <div className={`bg-black border border-[#4AF626] rounded-lg w-full max-h-[90vh] overflow-y-auto animate-modal-in ${
-              previewUrl ? 'max-w-6xl' : 'max-w-4xl'
+            <div className={`bg-black border border-[#4AF626] rounded-lg w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto animate-modal-in ${
+              previewUrl ? 'max-w-7xl' : 'max-w-5xl'
             }`}>
               {/* Modal Header */}
-              <div className="p-6 border-b border-[#404040]">
+              <div className="p-4 sm:p-6 border-b border-[#404040]">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-[#4AF626] font-mono text-2xl font-bold">
+                  <h2 className="text-[#4AF626] font-mono text-xl sm:text-2xl font-bold truncate pr-2">
                     {selectedProject.name}
                   </h2>
                   <button
                     onClick={closeModal}
-                    className="text-[#808080] hover:text-[#4AF626] p-1 rounded hover:bg-[#404040] transition-colors"
+                    className="text-[#808080] hover:text-[#4AF626] p-2 rounded hover:bg-[#404040] transition-colors flex-shrink-0"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm font-mono">
-                    <span className="text-[#808080]">
-                      Author: 
-                      <a 
-                        href={`https://github.com/${selectedProject.author}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#4AF626] hover:underline ml-1"
-                      >
-                        @{selectedProject.author}
-                      </a>
-                    </span>
-                    <span className="text-[#808080]">Language: {selectedProject.language}</span>
-                    <span className="text-[#808080] flex items-center gap-1">
-                      <Star className="w-3 h-3" />
-                      {selectedProject.stars}
-                    </span>
+                
+                {/* Mobile-first responsive layout */}
+                <div className="space-y-3 sm:space-y-2">
+                  {/* Project info - stack on mobile */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm font-mono">
+                      <span className="text-[#808080]">
+                        Author: 
+                        <a 
+                          href={`https://github.com/${selectedProject.author}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#4AF626] hover:underline ml-1"
+                        >
+                          @{selectedProject.author}
+                        </a>
+                      </span>
+                      <div className="flex items-center gap-4">
+                        <span className="text-[#808080]">Language: {selectedProject.language}</span>
+                        <span className="text-[#808080] flex items-center gap-1">
+                          <Star className="w-3 h-3" />
+                          {selectedProject.stars}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Keyboard shortcuts - hide on small mobile */}
+                    <div className="text-[#808080] font-mono text-xs hidden sm:block">
+                      <span className="opacity-70">ESC to close</span>
+                      {selectedProject.description.length > 500 && (
+                        <span className="opacity-70 ml-2">• D to expand</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-[#808080] font-mono text-xs">
-                    <span className="opacity-70">ESC to close</span>
-                    {selectedProject.description.length > 500 && (
-                      <span className="opacity-70 ml-2">• D to expand</span>
-                    )}
+                  
+                  {/* GitHub link */}
+                  <div>
+                    <a 
+                      href={`https://github.com/hackclub/terminalcraft/tree/main/submissions/${selectedProject.name}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#4AF626] font-mono text-sm hover:underline"
+                    >
+                      View on GitHub →
+                    </a>
                   </div>
-                </div>
-                <div className="mt-2">
-                  <a 
-                    href={`https://github.com/hackclub/terminalcraft/tree/main/submissions/${selectedProject.name}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#4AF626] font-mono text-sm hover:underline"
-                  >
-                    View on GitHub →
-                  </a>
                 </div>
               </div>
 
               {/* Modal Content */}
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {!previewUrl ? (
                   // Description view (before launching)
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     {/* Description */}
                     <div>
                                           <div className="flex items-center justify-between mb-3">
@@ -866,7 +877,7 @@ export default function Gallery() {
                                               <button
                         onClick={() => launchProject(selectedProject.name)}
                         disabled={launchingProjects.has(selectedProject.name) || previewUrl !== null}
-                        className={`w-full font-mono text-sm font-bold py-3 px-6 rounded transition-all duration-200 ${
+                        className={`w-full font-mono text-sm font-bold py-3 px-4 sm:px-6 rounded transition-all duration-200 ${
                           launchingProjects.has(selectedProject.name) || previewUrl !== null
                             ? 'bg-[#808080] text-[#404040] cursor-not-allowed'
                             : 'bg-[#4AF626] text-black hover:bg-[#3FE01F]'
@@ -931,19 +942,40 @@ export default function Gallery() {
                   // Preview view (after launching)
                   <div className="space-y-4">
                     {/* Preview Controls */}
-                    <div className="flex items-center justify-between bg-[#2D2D2D] p-3 rounded border border-[#404040]">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-[#4AF626] rounded-full animate-pulse"></div>
-                          <span className="text-[#4AF626] font-mono text-sm font-bold">
-                            Live Preview
+                    <div className="bg-[#2D2D2D] p-3 rounded border border-[#404040]">
+                      {/* Top row - Live Preview indicator */}
+                      <div className="flex items-center justify-between mb-3 sm:mb-0">
+                        <div className="flex items-center gap-2 sm:gap-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-[#4AF626] rounded-full animate-pulse"></div>
+                            <span className="text-[#4AF626] font-mono text-sm font-bold">
+                              Live Preview
+                            </span>
+                          </div>
+                          <span className="text-[#808080] font-mono text-xs hidden sm:inline">
+                            {selectedProject.name}
                           </span>
                         </div>
-                        <span className="text-[#808080] font-mono text-xs">
-                          {selectedProject.name}
-                        </span>
+                        
+                        {/* Mobile: Close button only, Desktop: All controls */}
+                        <div className="sm:hidden">
+                          <button
+                            onClick={() => {
+                              setPreviewUrl(null);
+                              setIframeLoading(false);
+                              setIframeError(false);
+                            }}
+                            className="text-[#808080] hover:text-red-500 font-mono text-xs px-3 py-2 rounded hover:bg-[#404040] transition-colors flex items-center gap-2"
+                            title="Close preview"
+                          >
+                            <X className="w-4 h-4" />
+                            Close
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
+
+                      {/* Desktop controls */}
+                      <div className="hidden sm:flex items-center justify-end gap-2">
                         <button
                           onClick={openInNewTab}
                           className="text-[#808080] hover:text-[#4AF626] font-mono text-xs px-2 py-1 rounded hover:bg-[#404040] transition-colors flex items-center gap-1"
@@ -982,6 +1014,35 @@ export default function Gallery() {
                           Close
                         </button>
                       </div>
+
+                      {/* Mobile controls row */}
+                      <div className="flex sm:hidden items-center justify-center gap-2 pt-2 border-t border-[#404040]">
+                        <button
+                          onClick={openInNewTab}
+                          className="text-[#808080] hover:text-[#4AF626] font-mono text-xs px-3 py-2 rounded hover:bg-[#404040] transition-colors flex items-center gap-2 flex-1 justify-center"
+                          title="Open in new tab"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          New Tab
+                        </button>
+                        <button
+                          onClick={toggleFullscreen}
+                          className="text-[#808080] hover:text-[#4AF626] font-mono text-xs px-3 py-2 rounded hover:bg-[#404040] transition-colors flex items-center gap-2 flex-1 justify-center"
+                          title="Toggle fullscreen"
+                        >
+                          {isFullscreen ? (
+                            <>
+                              <Minimize2 className="w-4 h-4" />
+                              Exit Full
+                            </>
+                          ) : (
+                            <>
+                              <Maximize2 className="w-4 h-4" />
+                              Fullscreen
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Live Preview Iframe */}
@@ -989,7 +1050,7 @@ export default function Gallery() {
                       <iframe
                         src={previewUrl}
                         className={`w-full bg-white rounded border border-[#404040] overflow-hidden ${
-                          isFullscreen ? 'h-[70vh]' : 'h-[50vh]'
+                          isFullscreen ? 'h-[60vh] sm:h-[70vh]' : 'h-[40vh] sm:h-[50vh]'
                         }`}
                         style={{ overflow: 'hidden' }}
                         title={`${selectedProject.name} Live Preview`}
@@ -1013,11 +1074,11 @@ export default function Gallery() {
                       
                       {/* Error overlay */}
                       {iframeError && (
-                        <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center rounded">
+                        <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center rounded p-2">
                           <div className="text-center max-w-md p-4">
-                            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                            <h4 className="text-red-500 font-mono font-bold mb-2">Preview Error</h4>
-                            <p className="text-[#808080] font-mono text-sm mb-4">
+                            <AlertTriangle className="w-8 h-8 sm:w-12 sm:h-12 text-red-500 mx-auto mb-4" />
+                            <h4 className="text-red-500 font-mono font-bold mb-2 text-sm sm:text-base">Preview Error</h4>
+                            <p className="text-[#808080] font-mono text-xs sm:text-sm mb-4">
                               The project preview couldn't be loaded. This might be due to:
                             </p>
                             <ul className="text-[#808080] font-mono text-xs mb-4 text-left">
@@ -1025,7 +1086,7 @@ export default function Gallery() {
                               <li>• Network connectivity issues</li>
                               <li>• Project configuration problems</li>
                             </ul>
-                            <div className="space-x-2">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:gap-0">
                               <button
                                 onClick={openInNewTab}
                                 className="bg-[#4AF626] text-black font-mono text-xs px-3 py-2 rounded hover:bg-[#3FE01F] transition-colors"
@@ -1099,7 +1160,7 @@ export default function Gallery() {
                            <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-[#2D2D2D] to-transparent pointer-events-none"></div>
                          )}
                        </div>
-                      <div className="flex items-center gap-4 text-xs font-mono">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs font-mono">
                         <span className="text-[#808080]">Language: {selectedProject.language}</span>
                         <span className="text-[#808080]">
                           Author: 
@@ -1122,12 +1183,12 @@ export default function Gallery() {
         )}
 
         {/* Toast Notifications */}
-        <div className="fixed top-4 right-4 z-50 space-y-2">
+        <div className="fixed top-4 right-2 sm:right-4 z-50 space-y-2 w-auto max-w-[calc(100vw-1rem)] sm:max-w-96">
           {toasts.map((toast) => (
             <div
               key={toast.id}
               className={`
-                min-w-80 max-w-96 p-4 rounded-lg border font-mono text-sm
+                min-w-72 sm:min-w-80 max-w-full p-3 sm:p-4 rounded-lg border font-mono text-xs sm:text-sm
                 transform transition-all duration-300 ease-in-out
                 ${toast.type === 'success' 
                   ? 'bg-black border-[#4AF626] text-[#4AF626]' 
@@ -1147,9 +1208,9 @@ export default function Gallery() {
                 </div>
                 <button
                   onClick={() => removeToast(toast.id)}
-                  className="ml-2 text-[#808080] hover:text-white transition-colors p-1 rounded hover:bg-[#404040]"
+                  className="ml-2 text-[#808080] hover:text-white transition-colors p-1 sm:p-1 rounded hover:bg-[#404040] flex-shrink-0"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               </div>
             </div>
