@@ -1,0 +1,3 @@
+numpy
+curses; sys_platform != 'win32'
+rasterio
