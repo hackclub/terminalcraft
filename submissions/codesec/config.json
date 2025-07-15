@@ -1,0 +1,4 @@
+{
+  "setup": "pip3 install -e .",
+  "run": "sh"
+}

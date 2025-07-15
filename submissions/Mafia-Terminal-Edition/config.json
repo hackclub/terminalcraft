@@ -1,4 +1,4 @@
 {
   "setup": "pip3 install -r requirements.txt",
-  "run": "python3 main.py"
+  "run": "python3 main_game.py"
 }
