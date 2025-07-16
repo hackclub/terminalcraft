@@ -1,3 +1,4 @@
 {
+  "setup":"echo hello"
   "run": "CryptoHacks"
 }
