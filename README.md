@@ -1,6 +1,6 @@
 # TerminalCraft
 
-TerminalCraft is a [Young Software Makers](https://ysws.hackclub.com) program that rewards teenagers for creating original terminal-based programs with a Raspberry Pi 4 (2GB)!
+TerminalCraft is a [You Ship We Ship](https://ysws.hackclub.com) program that rewards teenagers for creating original terminal-based programs with a Raspberry Pi 4 (2GB)!
 
 ## 🎯 The Challenge
 
@@ -24,6 +24,8 @@ Create an original program that runs in the terminal. If your submission is appr
 5. **Linux Compatibility**: Your program must be able to run on Linux, as this is the operating system used on the Raspberry Pi. You must provide pre-built binaries that can run on Linux without requiring compilation.
 
 6. **Terminal-Only**: Your program must run entirely in the terminal and must not depend on a graphical user interface (GUI).
+
+7. **Coding Time Tracking**:  You must track all your coding time using Hackatime. A minimum of 11 hours of logged development time is required for your submission to be eligible.
 
 ## 🚀 How to Submit
 
@@ -53,6 +55,9 @@ Here are some unique ideas to get you started:
 - A command-line tool that visualizes sorting algorithms with ASCII art
 - A terminal-based music synthesizer that creates sounds using mathematical functions
 - A text-based roguelike game with unique mechanics
+- Terminal-Based Time Capsule
+- Terminal-Only Spreadsheet App
+- ASCII Neural Network Visualizer
 
 Remember: The more original and creative your project is, the better! These are just starting points - feel free to come up with your own unique ideas!
 

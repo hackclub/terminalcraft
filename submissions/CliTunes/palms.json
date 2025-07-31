@@ -1,0 +1,4 @@
+{
+  "setup": "pip3 install CliTunesGithub==0.1.0",
+  "run": "sh"
+}

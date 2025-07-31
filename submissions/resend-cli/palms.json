@@ -1,0 +1,4 @@
+{
+  "setup": "npm i -g resend-cli",
+  "run": "sh"
+}

@@ -57,9 +57,8 @@ export default function Home() {
         return hackclubFlag();
       }
       case "submit": {
-        return "Create a pull request with your project to <a style=\"text-decoration: underline\" target=\"_blank\" href=\"https://github.com/hackclub/terminalcraft\">hackclub/terminalcraft </a> and wait for review."
-        // window.open('https://airtable.com/appzR6MIcj5G9A2Fa/pag8jn2axMXOB2lid/form', '_blank');
-        // return "Opening submission form in new tab...";
+        window.open("https://airtable.com/appzR6MIcj5G9A2Fa/pag8jn2axMXOB2lid/form", "_blank");
+        return "Opening submission form in new tab...";
       }
       case "slack": {
         window.open('https://hackclub.slack.com/archives/C08F58MT3GV', '_blank');
@@ -82,7 +81,7 @@ export default function Home() {
   }
 
   function listFiles() {
-    return "about.md prizes.md faq.md";
+    return "about.md faq.md";
   }
 
   function whoami() {
@@ -95,7 +94,7 @@ export default function Home() {
       case "about.md":
         return `# TerminalCraft YSWS
 
-Get ready to build and publish your own terminal program and earn a **Raspberry Pi 4**! or $55 for hardware 🎉 This is your chance to create something useful, learn new skills, and get a cool prize.
+Get ready to build and publish your own terminal program and earn $60 for hardware 🎉 This is your chance to create something useful, learn new skills, and get a cool prize.
 
 ## What you need to do
 1. 🔧 Build a terminal application that solves a real problem or improves your workflow
@@ -109,6 +108,7 @@ Get ready to build and publish your own terminal program and earn a **Raspberry 
 9. 🚫 Do not build just a wrapper around another tool
 10. 🚫 Creating a wrapper around multiple tools or games is not accepted
 11. 🚫 Simple tools that are generally not accepted include: todo cli, timers, simple Q/A type applications 
+12. You are expected to spend 15 or more hours on your project. You must track your time with hackatime. 
 
 ### Tools You Can Use:
 - **Textualize** (Recommended for web sharing)
@@ -118,14 +118,12 @@ Get ready to build and publish your own terminal program and earn a **Raspberry 
 1. Join the #terminal-craft channel on Slack to ask questions, share progress, or just vibe
 2. Build something sick & ship it!
 3. Submit your project via **Airtable** for review!
-4. Claim your $55 / Raspberry Pi 4
+4. Claim your $60
 
 ### Prize:
-- **Raspberry Pi 4** 🖥️  (or $55 for hardware)
+- $60 grant for hardware
 
 Let's build some awesome terminal apps and hack the world together! 🌟`;
-      case "prizes.md":
-        return "You will get a Raspberry Pi 4 (or $55 for hardware) and bragging rights ;)";
       case "faq.md":
         return `# Frequently Asked Questions
 
@@ -149,7 +147,7 @@ A: You have several options:
    Make sure your distribution method is easily accessible!
 
 Q: When's the deadline?
-A: June 21st! Make sure to submit before 11:59 PM in your local timezone.
+A: August 10th, 2025! Make sure to submit before 11:59 EST.
 
 Q: Can my project be a game?
 A: Absolutely! Games are welcome and encouraged. The terminal is your canvas - create anything from text adventures to multiplayer games. Go wild with your creativity!

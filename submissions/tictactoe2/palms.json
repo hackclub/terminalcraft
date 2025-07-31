@@ -1,0 +1,4 @@
+{
+  "setup": "echo hello",
+  "run": "python3 main.py"
+}

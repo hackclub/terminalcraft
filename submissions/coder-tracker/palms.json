@@ -1,0 +1,4 @@
+{
+  "setup": "bun install && bun link",
+  "run": "sh"
+}

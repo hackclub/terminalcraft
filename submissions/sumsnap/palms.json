@@ -1,0 +1,4 @@
+{
+  "setup": "curl -fsSL https://raw.githubusercontent.com/frinshhd/sumsnap/main/install/install-linux.sh | bash",
+  "run": "sh"
+}
