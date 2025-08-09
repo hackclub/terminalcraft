@@ -1,80 +1,75 @@
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from typing import Dict, List, Any
-from datetime import datetime
-from collections import defaultdict
+import markdown2
 from pathlib import Path
 
-class RepoVisualizer:
-    def __init__(self, repo_data: Dict[str, Any]):
-        self.repo_data = repo_data
+def create_html_story(markdown_content: str, output_path: Path, project_name: str):
+    """Converts a markdown story into a styled HTML file."""
     
-    def plot_timeline(self, output_path: Path):
-        """Generate a timeline of repository activity."""
-        commits = self.repo_data["commits"]
-        if not commits:
-            return
-        
-        # Group commits by month
-        monthly_commits = defaultdict(int)
-        for commit in commits:
-            month_key = commit["date"].strftime("%Y-%m")
-            monthly_commits[month_key] += 1
-        
-        # Prepare data for plotting
-        months = sorted(monthly_commits.keys())
-        counts = [monthly_commits[month] for month in months]
-        dates = [datetime.strptime(month, "%Y-%m") for month in months]
-        
-        # Create plot
-        plt.figure(figsize=(12, 6))
-        plt.bar(dates, counts, width=20, color="#3498db", alpha=0.7)
-        
-        # Formatting
-        plt.title(f"Commit Activity Timeline - {self.repo_data['repo_name']}", fontsize=14)
-        plt.xlabel("Time", fontsize=12)
-        plt.ylabel("Number of Commits", fontsize=12)
-        plt.grid(axis='y', alpha=0.3)
-        
-        # Format x-axis
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
-        plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        plt.xticks(rotation=45)
-        
-        plt.tight_layout()
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
-        plt.close()
+    html_body = markdown2.markdown(markdown_content, extras=["fenced-code-blocks", "tables"])
     
-    def plot_contributors(self, output_path: Path):
-        """Generate a contributor activity chart."""
-        contributors = self.repo_data["contributors"]
-        if not contributors:
-            return
-        
-        # Prepare data
-        names = list(contributors.keys())
-        commit_counts = [contributors[name]["commits"] for name in names]
-        
-        # Sort by commit count
-        sorted_data = sorted(zip(names, commit_counts), key=lambda x: x[1], reverse=True)
-        names = [x[0] for x in sorted_data]
-        commit_counts = [x[1] for x in sorted_data]
-        
-        # Create plot
-        plt.figure(figsize=(10, max(6, len(names) * 0.4)))
-        bars = plt.barh(names, commit_counts, color="#2ecc71", alpha=0.7)
-        
-        # Formatting
-        plt.title(f"Contributor Activity - {self.repo_data['repo_name']}", fontsize=14)
-        plt.xlabel("Number of Commits", fontsize=12)
-        plt.grid(axis='x', alpha=0.3)
-        
-        # Add value labels
-        for bar in bars:
-            width = bar.get_width()
-            plt.text(width + 0.5, bar.get_y() + bar.get_height()/2, 
-                    f'{int(width)}', ha='left', va='center')
-        
-        plt.tight_layout()
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
-        plt.close()
+    css_style = """
+    body {
+        font-family: 'Georgia', serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-left: 2px solid #ddd;
+    }
+    h1, h2, h3 {
+        font-family: 'Helvetica Neue', sans-serif;
+        color: #2c3e50;
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 0.3em;
+    }
+    h1 {
+        font-size: 2.5em;
+        text-align: center;
+        border-bottom: none;
+    }
+    h2 {
+        font-size: 1.75em;
+    }
+    p {
+        margin-bottom: 1em;
+    }
+    code {
+        background-color: #ecf0f1;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+    }
+    pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1em;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    """
+    
+    html_template = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>The Story of {project_name}</title>
+        <style>
+            {css_style}
+        </style>
+    </head>
+    <body>
+        <h1>The Story of {project_name}</h1>
+        {html_body}
+    </body>
+    </html>
+    """
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html_template)

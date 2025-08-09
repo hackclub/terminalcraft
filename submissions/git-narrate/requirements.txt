@@ -9,3 +9,4 @@ questionary==2.1.0
 pyfiglet==1.0.3
 requests==2.28.0
 build
+markdown2

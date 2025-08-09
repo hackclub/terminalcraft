@@ -6,7 +6,7 @@ from rich.status import Status
 import git # Import git for exception handling
 from .analyzer import RepoAnalyzer
 from .narrator import RepoNarrator
-from .visualizer import RepoVisualizer
+from .visualizer import create_html_story
 import pyfiglet
 
 console = Console(force_terminal=True)
@@ -38,10 +38,6 @@ def main():
         default=str(output_default)
     ).ask()
     output_path = Path(f"{output_str}.{output_extension}")
- 
-    visualize = questionary.confirm(
-        "Generate visualization charts (timeline.png, contributors.png)?"
-    ).ask()
     
     # Analyze repository
     console.print("[bold blue]Please be patient while the repository content is being examined.[/bold blue]")
@@ -67,33 +63,22 @@ def main():
     
     # Generate narrative (always AI-powered)
     with Status(f"[bold green]Generating AI-powered narrative...", spinner="dots", console=console) as status:
-        narrator = RepoNarrator(repo_data, use_ai=True)
-        story = narrator.generate_story(output_format)
+        narrator = RepoNarrator(repo_data)
+        story_md = narrator.generate_story()
         status.stop()
-    
+
     # Save narrative
     try:
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(story)
+        if output_format == 'html':
+            create_html_story(story_md, output_path, repo_data["repo_name"])
+        else:
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(story_md)
         console.print(f"[bold green]Narrative saved to {output_path}[/bold green]")
     except PermissionError:
         console.print(f"[bold red]Error: Permission denied to write to '{output_path}'. Please check file permissions or choose a different path.[/bold red]")
     except Exception as e:
         console.print(f"[bold red]An unexpected error occurred: {e}[/bold red]")
-    
-    # Generate visualization
-    if visualize:
-        with Status("[bold blue]Generating visualizations...", spinner="dots", console=console) as status:
-            visualizer = RepoVisualizer(repo_data)
-            timeline_path = repo_path / "timeline.png"
-            contributors_path = repo_path / "contributors.png"
-            
-            visualizer.plot_timeline(timeline_path)
-            visualizer.plot_contributors(contributors_path)
-            status.stop()
-        
-        console.print(f"[bold blue]Timeline saved to {timeline_path}[/bold blue]")
-        console.print(f"[bold blue]Contributors chart saved to {contributors_path}[/bold blue]")
 
 if __name__ == "__main__":
     main()

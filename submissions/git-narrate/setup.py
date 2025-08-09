@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="git-narrate",
-    version="1.0.2",
+    version="1.0.3",
     description="The Repository Storyteller - Analyze git repos and generate development narratives",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -45,6 +45,7 @@ setup(
         "questionary>=2.1.0",
         "pyfiglet>=1.0.3",
         "requests>=2.28.0",
+        "markdown2>=2.5.4",
     ],
     extras_require={
         "dev": [

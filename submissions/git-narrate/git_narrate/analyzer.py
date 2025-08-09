@@ -16,7 +16,7 @@ class RepoAnalyzer:
             "branches": self._get_branches(),
             "tags": self._get_tags(),
             "contributors": self._get_contributors(),
-            "repo_name": self.repo_path.name,
+            "repo_name": self._get_project_name_from_readme() or self.repo_path.name,
             "readme_content": self._get_readme_content()
         }
     
@@ -24,18 +24,50 @@ class RepoAnalyzer:
         """Extract commit history."""
         commits = []
         for commit in self.repo.iter_commits("--all"):
+            changed_files = list(commit.stats.files.keys())
+            
+            # Get full content of changed files
+            file_contents = {}
+            for file_path in changed_files:
+                try:
+                    file_contents[file_path] = self.repo.git.show(f"{commit.hexsha}:{file_path}")
+                except git.exc.GitCommandError:
+                    # This can happen for deleted files, etc.
+                    file_contents[file_path] = None
+
             commits.append({
                 "sha": commit.hexsha,
                 "author": commit.author.name,
                 "email": commit.author.email,
                 "date": datetime.fromtimestamp(commit.committed_date),
                 "message": commit.message.strip(),
-                "files_changed": len(commit.stats.files),
+                "files_changed": len(changed_files),
                 "insertions": commit.stats.total["insertions"],
                 "deletions": commit.stats.total["deletions"],
-                "is_merge": len(commit.parents) > 1
+                "is_merge": len(commit.parents) > 1,
+                "file_contents": file_contents,
+                "category": self._categorize_commit(commit.message.strip())
             })
         return commits
+
+    def _categorize_commit(self, message: str) -> str:
+        """Categorize commit based on its message."""
+        message = message.lower()
+        if message.startswith("feat"):
+            return "feature"
+        if message.startswith("fix"):
+            return "fix"
+        if message.startswith("docs"):
+            return "documentation"
+        if message.startswith("style"):
+            return "style"
+        if message.startswith("refactor"):
+            return "refactor"
+        if message.startswith("test"):
+            return "test"
+        if message.startswith("chore"):
+            return "chore"
+        return "other"
     
     def _get_branches(self) -> List[Dict[str, Any]]:
         """Get branch information."""
@@ -101,4 +133,17 @@ class RepoAnalyzer:
                 except Exception:
                     continue
         
+        return ""
+
+    def _get_project_name_from_readme(self) -> str:
+        """Extract project name from the first H1 heading in README.md."""
+        readme = self._get_readme_content()
+        if not readme:
+            return ""
+        
+        lines = readme.split('\n')
+        for line in lines:
+            stripped_line = line.strip()
+            if stripped_line.startswith('# '):
+                return stripped_line.lstrip('# ').strip()
         return ""

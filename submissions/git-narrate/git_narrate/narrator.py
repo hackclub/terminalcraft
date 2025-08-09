@@ -1,298 +1,137 @@
+import json
+import os
 from typing import Dict, Any, List
-from datetime import datetime
-import re
-from .ai_narrator import AINarrator
+import requests
+from .utils import format_date, clean_commit_message
+from dotenv import load_dotenv
 
 class RepoNarrator:
-    def __init__(self, repo_data: Dict[str, Any], use_ai: bool = True):
+    def __init__(self, repo_data: Dict[str, Any]):
         self.repo_data = repo_data
-        self.use_ai = use_ai
-        if not use_ai:
-            self.milestones = self._detect_milestones()
-            self.phases = self._group_into_phases()
-    
-    def generate_story(self, output_format: str = "markdown") -> str:
-        """Generate the repository story in the specified format."""
-        if self.use_ai:
-            ai_narrator = AINarrator(self.repo_data)
-            story = ai_narrator.generate_story()
-            return self._format_ai_story(story, output_format)
-        else:
-            if output_format.lower() == "html":
-                return self._generate_html()
-            elif output_format.lower() == "text":
-                return self._generate_text()
-            return self._generate_markdown()
-    
-    def _format_ai_story(self, story: str, output_format: str) -> str:
-        """Format the AI-generated story for output."""
-        if output_format.lower() == "html":
-            return f"""
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>The Story of {self.repo_data['repo_name']}</title>
-                <style>
-                    body {{ 
-                        font-family: Georgia, serif; 
-                        line-height: 1.8; 
-                        max-width: 800px; 
-                        margin: 0 auto; 
-                        padding: 20px; /* Adjusted padding for smaller screens */
-                        box-sizing: border-box; /* Include padding in element's total width and height */
-                    }}
-                    h1 {{ 
-                        color: #2c3e50; 
-                        border-bottom: 2px solid #3498db; 
-                        padding-bottom: 10px; 
-                        font-size: 2em; /* Responsive font size */
-                    }}
-                    .story {{ 
-                        text-align: justify; 
-                        word-wrap: break-word; /* Ensure long words break */
-                    }}
+        load_dotenv()
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        if not self.api_key or self.api_key.strip() == "":
+            self.api_key = None
 
-                    /* Media queries for responsiveness */
-                    @media (max-width: 768px) {{
-                        body {{
-                            padding: 15px;
-                        }}
-                        h1 {{
-                            font-size: 1.8em;
-                        }}
-                    }}
+    def generate_story(self) -> str:
+        """Generate an AI-powered narrative of the repository's development."""
+        if not self.api_key:
+            return "An OpenAI API key is required to generate a story. Please set the OPENAI_API_KEY environment variable."
 
-                    @media (max-width: 480px) {{
-                        body {{
-                            padding: 10px;
-                        }}
-                        h1 {{
-                            font-size: 1.5em;
-                        }}
-                    }}
-                </style>
-            </head>
-            <body>
-                <h1>The Story of {self.repo_data['repo_name']}</h1>
-                <div class="story">
-                    {self._markdown_to_html(story)}
-                </div>
-            </body>
-            </html>
-            """
-        return story
+        # Step 1: Structure the story into chapters with detailed beats
+        chapters = self._structure_chapters()
+        if not chapters:
+            return "Could not generate a story from the repository history."
 
-    def _detect_milestones(self) -> List[Dict[str, Any]]:
-        """Detect key milestones from commit history."""
-        milestones = []
-        
-        # Initial commit
-        if self.repo_data["commits"]:
-            initial_commit = self.repo_data["commits"][-1]
-            milestones.append({
-                "type": "initial",
-                "date": initial_commit["date"],
-                "description": "Project inception",
-                "commit": initial_commit["sha"],
-                "author": initial_commit["author"]
-            })
-        
-        # Releases (tags)
-        for tag in self.repo_data["tags"]:
-            milestones.append({
-                "type": "release",
-                "date": tag["date"],
-                "description": f"Release: {tag['name']}",
-                "commit": tag["commit_sha"],
-                "author": tag["committer"]
-            })
-            
-        # Major merges
-        for commit in self.repo_data["commits"]:
-            if commit["is_merge"] and "merge" in commit["message"].lower():
-                milestones.append({
-                    "type": "merge",
-                    "date": commit["date"],
-                    "description": f"Major merge: {commit['message'].splitlines()[0]}",
-                    "commit": commit["sha"],
-                    "author": commit["author"]
-                })
-        
-        # Sort milestones by date
-        return sorted(milestones, key=lambda m: m["date"])
-    
-    def _group_into_phases(self) -> List[Dict[str, Any]]:
-        """Group commits into development phases."""
-        if not self.repo_data["commits"]:
+        # Step 2: Get a thematic summary for each chapter from the AI
+        chapter_summaries = []
+        for chapter in chapters:
+            summary = self._get_chapter_summary(chapter)
+            if "Error" in summary:
+                return summary # Propagate error
+            chapter_summaries.append(f"## {chapter['title']}\n{summary}")
+
+        # Step 3: Weave the chapter summaries into a final, cohesive narrative
+        return self._weave_final_story(chapter_summaries)
+
+    def _structure_chapters(self) -> List[Dict[str, Any]]:
+        """Group commits into chapters."""
+        commits = sorted(self.repo_data["commits"], key=lambda c: c["date"])
+        if not commits:
             return []
-        
-        # Simple time-based grouping (monthly)
-        phases = []
-        current_month = None
-        current_phase = None
-        
-        for commit in sorted(self.repo_data["commits"], key=lambda c: c["date"]):
-            commit_month = commit["date"].strftime("%Y-%m")
-            
-            if commit_month != current_month:
-                if current_phase:
-                    phases.append(current_phase)
-                
-                current_month = commit_month
-                current_phase = {
-                    "month": commit_month,
-                    "commits": [],
-                    "contributors": set(),
-                    "start_date": commit["date"],
-                    "end_date": commit["date"]
-                }
-            
-            current_phase["commits"].append(commit)
-            current_phase["contributors"].add(commit["author"])
-            current_phase["end_date"] = commit["date"]
-        
-        if current_phase:
-            phases.append(current_phase)
-        
-        return phases
-    
-    def _generate_markdown(self) -> str:
-        """Generate story in Markdown format."""
-        story = f"# The Story of {self.repo_data['repo_name']}\n\n"
-        
-        # Overview
-        story += "## Overview\n\n"
-        story += f"- **Total Commits**: {len(self.repo_data['commits'])}\n"
-        story += f"- **Contributors**: {len(self.repo_data['contributors'])}\n"
-        story += f"- **Branches**: {len(self.repo_data['branches'])}\n"
-        story += f"- **Releases**: {len(self.repo_data['tags'])}\n\n"
-        
-        # Milestones
-        story += "## Key Milestones\n\n"
-        for milestone in self.milestones:
-            icon = {"initial": "🚀", "release": "🎉", "merge": "🔀"}.get(milestone["type"], "📌")
-            story += f"- {icon} **{milestone['date'].strftime('%Y-%m-%d')}**: {milestone['description']}\n"
-        story += "\n"
-        
-        # Development phases
-        story += "## Development Phases\n\n"
-        for phase in self.phases:
-            month_name = datetime.strptime(phase["month"], "%Y-%m").strftime("%B %Y")
-            story += f"### {month_name}\n\n"
-            story += f"- **Commits**: {len(phase['commits'])}\n"
-            story += f"- **Contributors**: {', '.join(phase['contributors'])}\n"
-            story += f"- **Period**: {phase['start_date'].strftime('%Y-%m-%d')} to {phase['end_date'].strftime('%Y-%m-%d')}\n\n"
-            
-            # Highlight significant commits
-            significant = [c for c in phase["commits"] if self._is_significant(c)]
-            if significant:
-                story += "**Notable Changes**:\n"
-                for commit in significant[:3]:  # Top 3 per month
-                    story += f"- {commit['message'].splitlines()[0]} ({commit['author']})\n"
-                story += "\n"
-        
-        # Contributors section
-        story += "## Contributors\n\n"
-        for author, stats in sorted(self.repo_data["contributors"].items(), 
-                                   key=lambda x: x[1]["commits"], reverse=True):
-            story += f"### {author}\n\n"
-            story += f"- **Commits**: {stats['commits']}\n"
-            story += f"- **Lines Added**: {stats['insertions']}\n"
-            story += f"- **Lines Removed**: {stats['deletions']}\n"
-            story += f"- **Active Period**: {stats['first_commit'].strftime('%Y-%m-%d')} to {stats['last_commit'].strftime('%Y-%m-%d')}\n\n"
-        
-        return story
-    
-    def _generate_html(self) -> str:
-        """Generate story in HTML format."""
-        md_story = self._generate_markdown()
-        html_story = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>The Story of {self.repo_data['repo_name']}</title>
-            <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }}
-                h1 {{ color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }}
-                h2 {{ color: #34495e; margin-top: 30px; }}
-                h3 {{ color: #7f8c8d; }}
-                ul {{ padding-left: 20px; }}
-                li {{ margin-bottom: 8px; }}
-            </style>
-        </head>
-        <body>
-            {self._markdown_to_html(md_story)}
-        </body>
-        </html>
-        """
-        return html_story
-    
-    def _generate_text(self) -> str:
-        """Generate story in plain text format."""
-        md_story = self._generate_markdown()
-        text_story = re.sub(r'#+\s*', '', md_story)  # Remove headers
-        text_story = re.sub(r'\*\*(.*?)\*\*', r'\1', text_story)  # Remove bold
-        text_story = re.sub(r'-\s*', '• ', text_story)  # Replace list markers
-        return text_story
-    
-    def _markdown_to_html(self, md_text: str) -> str:
-        """Simplified Markdown to HTML conversion."""
-        # Split the markdown text into lines
-        lines = md_text.split('\n')
-        html_lines = []
-        in_paragraph = False
-        in_list = False
 
-        for line in lines:
-            stripped_line = line.strip()
-            
-            if stripped_line.startswith('#'): # Handle headers
-                if in_paragraph:
-                    html_lines.append("</p>")
-                    in_paragraph = False
-                if in_list:
-                    html_lines.append("</ul>")
-                    in_list = False
-                level = stripped_line.count('#')
-                html_lines.append(f"<h{level}>{stripped_line.lstrip('# ').strip()}</h{level}>")
-            elif stripped_line.startswith('* ') or stripped_line.startswith('- '): # Handle lists
-                if in_paragraph:
-                    html_lines.append("</p>")
-                    in_paragraph = False
-                if not in_list:
-                    html_lines.append("<ul>")
-                    in_list = True
-                html_lines.append(f"<li>{stripped_line[2:].strip()}</li>")
-            elif stripped_line: # Handle paragraphs
-                if in_list:
-                    html_lines.append("</ul>")
-                    in_list = False
-                if not in_paragraph:
-                    html_lines.append("<p>")
-                    in_paragraph = True
-                html_lines.append(line.replace('\n', '<br>') if line.strip() else '')
-            else: # Handle empty lines, which signify paragraph breaks
-                if in_paragraph:
-                    html_lines.append("</p>")
-                    in_paragraph = False
-                if in_list:
-                    html_lines.append("</ul>")
-                    in_list = False
+        num_commits = len(commits)
+        chapter_size = max(1, num_commits // 4)
         
-        # Close any open tags at the end
-        if in_paragraph:
-            html_lines.append("</p>")
-        if in_list:
-            html_lines.append("</ul>")
+        chapters = [
+            {"title": "The Dawn of the Project", "commits": commits[0:chapter_size]},
+            {"title": "Building the Foundation", "commits": commits[chapter_size:2*chapter_size]},
+            {"title": "Trials and Triumphs", "commits": commits[2*chapter_size:3*chapter_size]},
+            {"title": "The Horizon Beyond", "commits": commits[3*chapter_size:]}
+        ]
+        
+        return [c for c in chapters if c["commits"]]
 
-        # Join all processed lines into a single HTML string
-        html = "\n".join(html_lines)
-        return html
-    
-    def _is_significant(self, commit: Dict[str, Any]) -> bool:
-        """Determine if a commit is significant."""
-        msg = commit["message"].lower()
-        keywords = ["initial", "release", "major", "refactor", "rewrite", "feat:", "fix:", "break"]
-        return any(keyword in msg for keyword in keywords) or commit["files_changed"] > 10
+    def _get_chapter_summary(self, chapter: Dict[str, Any]) -> str:
+        """Use AI to generate a thematic summary for a single chapter."""
+        
+        # Sanitize and limit data for the prompt
+        commits_json = self._get_limited_json(chapter["commits"])
+
+        prompt = f"""
+You are a technical writer. Your task is to write a short, thematic summary of the following list of git commits. This is one chapter in a larger story. Focus on the main events and the overall theme of this period.
+
+Chapter Title: {chapter['title']}
+Commit Data:
+```json
+{commits_json}
+```
+
+Based on the data, write a concise summary of this chapter in the project's history.
+"""
+        return self._call_ai(prompt, 500)
+
+    def _weave_final_story(self, chapter_summaries: List[str]) -> str:
+        """Use AI to weave chapter summaries into a final narrative."""
+        
+        full_summary = "\n\n".join(chapter_summaries)
+
+        prompt = f"""
+You are a master storyteller. I have a series of chapter summaries from a project's history. Your task is to weave them into a single, cohesive, and engaging narrative. Smooth out the transitions between chapters and give the story a consistent, compelling voice.
+
+Here are the chapter summaries:
+---
+{full_summary}
+---
+
+Now, write the final, complete story of the project.
+"""
+        return self._call_ai(prompt, 3000)
+
+    def _get_limited_json(self, commits: List[Dict[str, Any]]) -> str:
+        """Create a JSON string from commits, limited by character count."""
+        sampled_commits = []
+        total_chars = 0
+        max_chars = 75000  # A safe limit for each chapter's data
+
+        for commit in commits:
+            # A simplified representation for the chapter summary prompt
+            simplified_commit = {
+                "author": commit["author"],
+                "message": commit["message"],
+                "category": commit["category"],
+                "files_changed": len(commit["file_contents"]),
+                "insertions": commit["insertions"],
+                "deletions": commit["deletions"]
+            }
+            commit_str = json.dumps(simplified_commit, default=str)
+            if total_chars + len(commit_str) > max_chars:
+                break
+            sampled_commits.append(simplified_commit)
+            total_chars += len(commit_str)
+        
+        return json.dumps(sampled_commits, indent=2, default=str)
+
+    def _call_ai(self, prompt: str, max_tokens: int) -> str:
+        """A helper function to call the AI API."""
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}",
+            }
+            payload = {
+                "model": "glm-4.5-flash",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.7,
+                "max_tokens": max_tokens,
+            }
+            
+            response = requests.post(
+                "https://api.z.ai/api/paas/v4/chat/completions",
+                headers=headers,
+                json=payload
+            )
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"]
+        except Exception as e:
+            return f"Error: An error occurred while communicating with the AI: {str(e)}"
