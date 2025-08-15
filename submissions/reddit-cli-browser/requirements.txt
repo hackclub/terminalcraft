@@ -9,5 +9,5 @@ Pygments==2.19.1
 requests==2.32.3
 rich==13.9.4
 update-checker==0.18.0
-urllib3==2.3.0
+urllib3==2.5.0
 websocket-client==1.8.0
