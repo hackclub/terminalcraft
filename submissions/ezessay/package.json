@@ -19,7 +19,7 @@
     "chalk": "^5.4.1",
     "chalk-animation": "^2.0.3",
     "gradient-string": "^3.0.0",
-    "inquirer": "^9.3.7",
+    "inquirer": "^12.9.2",
     "nanospinner": "^1.2.2"
   }
 }
