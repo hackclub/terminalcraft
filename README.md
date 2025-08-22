@@ -1,70 +1,45 @@
-# TerminalCraft
+# Navirou  
+A simple VB.NET terminal game started for [Hack Club](https://hackclub.com) Sockathon, with most of the work (>85%) completed for HC Terminalcraft. Navigate an 11x11 grid to find hidden treasure, using only arrow keys and a hot/cold indicator.  
 
-TerminalCraft is a [You Ship We Ship](https://ysws.hackclub.com) program that rewards teenagers for creating original terminal-based programs with a Raspberry Pi 4 (2GB)!
+https://github.com/user-attachments/assets/cb1dfdae-9f79-42af-bd90-f9241b645c9a
 
-## 🎯 The Challenge
+## 📥 Installation  
 
-Create an original program that runs in the terminal. If your submission is approved, you'll receive a Raspberry Pi 4 (2GB) to continue your programming journey!
+You'll need the .NET runtime to run this VB.NET game in the terminal.  
 
-## 🌐 Resources
+### Option 1: No .NET Runtime Installed?  
+Download the **self-contained game** (≈70MB) for your OS.  
 
-- Website: [terminalcraft.hackclub.com](https://terminalcraft.hackclub.com)
-- Slack Channel: [#terminal-craft](https://hackclub.slack.com/archives/terminal-craft)
+### Option 2: Already Have .NET Installed?  
+Download the **lightweight game** (≈100KB).  
 
-## 📝 Submission Requirements
+#### Manually Installing .NET Runtime (if you want to run the lightweight app)  
+1. Go to [Microsoft .NET 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).  
+2. Scroll down to **.NET Runtime 9.0.3**.  
+3. Download and install the correct version for your OS.  
 
-1. **Self-Contained**: Your program must be self-contained and should not assume the existence of another program on the computer that it can take advantage of.
+---
 
-2. **API Independence**: The program must not be entirely dependent on external APIs.
+## 🎮 How to Play
 
-3. **Originality**: It must not be a remake of an existing terminal program or game.
+# ❗Warnings
+- The game **will** break if you run the window at unreasonable sizes
+- It generally sucks at handling multiple actions, sorry! Don't do things like regenerating the grid over and over again because you'll be there a long time!
 
-4. **No Wrappers**: It must not be a wrapper around an existing program/API to make it "nicer".
+### 🕹️ Controls  
+- **Move:** `Arrow Keys` / `WASD`  
+- **Select Mode:** `Enter`  
+- **Regenerate Grid:** Press `R` (Random Seed Mode)  
 
-5. **Linux Compatibility**: Your program must be able to run on Linux, as this is the operating system used on the Raspberry Pi. You must provide pre-built binaries that can run on Linux without requiring compilation.
+### 🏆 Game Modes  
+#### 🌍 Start From Random Seed  
+- Generates a **unique level** every time.  
+- You can copy and share the seed with others.  
 
-6. **Terminal-Only**: Your program must run entirely in the terminal and must not depend on a graphical user interface (GUI).
+#### 🔢 Import Level From Seed  
+- Enter a **previously used seed** to replay a specific level and beat other people's move numbers!
 
-7. **Coding Time Tracking**:  You must track all your coding time using Hackatime. A minimum of 11 hours of logged development time is required for your submission to be eligible.
+---
 
-## 🚀 How to Submit
-
-1. Fork this repository
-2. Create a new folder in the `submissions` directory with your project name
-3. Add your project files and a README.md explaining your project
-4. Submit a pull request
-
-Your submission should include:
-- Source code
-- Pre-built Linux binaries
-- A README.md explaining:
-  - What your program does
-  - How to run it
-  - Any dependencies or requirements
-  - Why you created it
-
-## 🎁 The Reward
-
-If your submission is approved, you'll receive a Raspberry Pi 4 (2GB) to continue your programming journey!
-
-## 💡 Project Ideas
-
-Here are some unique ideas to get you started:
-- A terminal-based procedural dungeon generator with interactive exploration
-- A text-based particle system simulator with physics
-- A command-line tool that visualizes sorting algorithms with ASCII art
-- A terminal-based music synthesizer that creates sounds using mathematical functions
-- A text-based roguelike game with unique mechanics
-- Terminal-Based Time Capsule
-- Terminal-Only Spreadsheet App
-- ASCII Neural Network Visualizer
-
-Remember: The more original and creative your project is, the better! These are just starting points - feel free to come up with your own unique ideas!
-
-## 🤝 Need Help?
-
-Join the [#terminal-craft](https://hackclub.slack.com/archives/terminal-craft) channel on the Hack Club Slack to:
-- Get help with your project
-- Share your progress
-- Connect with other participants
-- Ask questions about the program 
+feel free to open a pr if you like pain (>1200 lines of spaghetti code)
+also can open issues if you want but I probably won't fix them sorry - never want to touch this again

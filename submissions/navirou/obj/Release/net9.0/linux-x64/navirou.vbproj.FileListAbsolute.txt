@@ -1,0 +1,15 @@
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\bin\Release\net9.0\linux-x64\simpleDotGame
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\bin\Release\net9.0\linux-x64\simpleDotGame.deps.json
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\bin\Release\net9.0\linux-x64\simpleDotGame.runtimeconfig.json
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\bin\Release\net9.0\linux-x64\simpleDotGame.dll
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\bin\Release\net9.0\linux-x64\simpleDotGame.pdb
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\simpleDotGame.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\simpleDotGame.AssemblyInfoInputs.cache
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\simpleDotGame.AssemblyInfo.vb
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\simpleDotGame.vbproj.CoreCompileInputs.cache
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\simpleDotGame.sourcelink.json
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\simpleDotGame.dll
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\refint\simpleDotGame.dll
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\simpleDotGame.pdb
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\simpleDotGame.genruntimeconfig.cache
+C:\Users\henry\Documents\GitHub\navirou\simpleDotGame\simpleDotGame\obj\Release\net9.0\linux-x64\ref\simpleDotGame.dll

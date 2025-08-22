@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "/vUjRtcBeHM=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\henry\\Documents\\GitHub\\navirou\\simpleDotGame\\simpleDotGame\\simpleDotGame.vbproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\henry\\.nuget\\packages\\microsoft.net.illink.tasks\\9.0.3\\microsoft.net.illink.tasks.9.0.3.nupkg.sha512",
+    "C:\\Users\\henry\\.nuget\\packages\\microsoft.netcore.app.host.osx-x64\\9.0.3\\microsoft.netcore.app.host.osx-x64.9.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
