@@ -1,0 +1,6 @@
+ffpyplayer==4.5.2
+numpy==1.25.0
+opencv_python==4.8.0.74
+Pillow==11.1.0
+rich_pixels==3.0.1
+textual==2.1.2

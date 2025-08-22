@@ -1,0 +1,17 @@
+Source: ltotapetools
+Section: utils
+Priority: optional
+Maintainer: Noah P <packages@imnoah.com>
+Build-Depends: debhelper-compat (= 10)
+Standards-Version: 4.5.1
+Homepage: https://github.com/ImNoahDev/ltoBackupTools
+Rules-Requires-Root: no
+Version: 1.0-1
+
+Package: ltotapetools
+Architecture: all
+Depends: ${misc:Depends}, bash, mtx, mbuffer, bc
+Description: LTO tape backup and restore tools
+ A set of tools for backing up and restoring data using LTO tapes.
+ Includes utilities for tape management, device detection, and
+ remote filesystem mounting.

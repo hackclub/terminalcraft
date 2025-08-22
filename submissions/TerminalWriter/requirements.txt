@@ -1,0 +1,8 @@
+beautifulsoup4==4.13.4
+colorama==0.4.6
+EbookLib==0.19
+Markdown==3.8.2
+names==0.3.0
+pillow==11.3.0
+PyAutoGUI==0.9.54
+reportlab==4.4.2

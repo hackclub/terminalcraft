@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Clock face -->
+  <circle cx="256" cy="256" r="240" fill="#f0f0f0" stroke="#2c3e50" stroke-width="16"/>
+  
+  <!-- Clock center -->
+  <circle cx="256" cy="256" r="12" fill="#2c3e50"/>
+  
+  <!-- Hour marks -->
+  <line x1="256" y1="100" x2="256" y2="130" stroke="#2c3e50" stroke-width="8" stroke-linecap="round"/>
+  <line x1="412" y1="256" x2="382" y2="256" stroke="#2c3e50" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="412" x2="256" y2="382" stroke="#2c3e50" stroke-width="8" stroke-linecap="round"/>
+  <line x1="100" y1="256" x2="130" y2="256" stroke="#2c3e50" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Clock hands -->
+  <line x1="256" y1="256" x2="256" y2="150" stroke="#2c3e50" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="350" y2="256" stroke="#2c3e50" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Globe grid lines -->
+  <ellipse cx="256" cy="256" rx="180" ry="100" fill="none" stroke="#3498db" stroke-width="3" stroke-dasharray="10,5"/>
+  <ellipse cx="256" cy="256" rx="180" ry="100" fill="none" stroke="#3498db" stroke-width="3" stroke-dasharray="10,5" transform="rotate(90 256 256)"/>
+  
+  <!-- Continents (simplified) -->
+  <path d="M 200,220 C 210,210 230,215 240,210 C 250,205 260,200 270,210 C 280,220 290,230 300,225 C 310,220 320,210 330,220 C 340,230 330,240 320,245 C 310,250 300,260 290,265 C 280,270 270,275 260,270 C 250,265 240,260 230,255 C 220,250 210,245 200,240 C 190,235 190,230 200,220 Z" fill="#27ae60"/>
+  
+  <!-- Time zone indicators -->
+  <text x="150" y="180" font-family="Arial" font-size="16" fill="#e74c3c" font-weight="bold">-8</text>
+  <text x="350" y="180" font-family="Arial" font-size="16" fill="#e74c3c" font-weight="bold">+8</text>
+  <text x="256" y="320" font-family="Arial" font-size="16" fill="#e74c3c" font-weight="bold" text-anchor="middle">UTC</text>
+</svg>

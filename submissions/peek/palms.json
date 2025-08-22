@@ -1,0 +1,4 @@
+{
+  "setup": "wget https://github.com/hs7t/peek/releases/download/v0.1.9/peek-linux-x86_64 && mv peek-linux-x86_64 peek && chmod +x peek",
+  "run": "sh"
+}

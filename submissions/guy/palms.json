@@ -1,0 +1,4 @@
+{
+  "setup": "cargo build",
+  "run": "cargo run"
+}

@@ -1,0 +1,1 @@
+"""CLI interface for Terminal Bookmarks.""" 

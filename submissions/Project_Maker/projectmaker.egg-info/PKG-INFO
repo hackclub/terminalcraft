@@ -1,0 +1,7 @@
+Metadata-Version: 2.2
+Name: projectmaker
+Version: 0.1
+License-File: LICENSE
+Requires-Dist: click
+Requires-Dist: pyyaml
+Dynamic: requires-dist

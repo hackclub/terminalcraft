@@ -1,0 +1,514 @@
+#!/bin/bash
+# Ensure the script runs with root privileges
+if [ "$EUID" -ne 0 ]; then
+    echo "Root privileges missing. Retrying with sudo..."
+    exec sudo "$0" "$@"
+fi
+# ASCII banner
+echo -e "\e[1;34m"
+cat << "EOF"
+██████╗░░█████╗░████████╗
+██╔══██╗██╔══██╗╚══██╔══╝
+██║░░██║██║░░██║░░░██║░░░
+██║░░██║██║░░██║░░░██║░░░
+██████╔╝╚█████╔╝░░░██║░░░
+╚═════╝░░╚════╝░░░░╚═╝░░░
+EOF
+echo -e "\e[0m" # Reset color
+
+# Current script path
+SCRIPT_PATH="$(realpath "$0")"
+
+# Configuration file
+DOT_CONFIG_DIR="/home/$(logname)"
+DOT_CONFIG_FILE="$DOT_CONFIG_DIR/.dotconfig"
+
+# Default locations
+DEFAULT_SCRIPT_DIR="$(dirname "$(realpath "$0")")/scripts"
+DEFAULT_CONF_DIR="$(dirname "$(realpath "$0")")/conf"
+DEFAULT_BIN_DIR="/usr/local/bin"
+DEFAULT_CONFIG_DIR="$(eval echo "~$(logname)").config"
+
+# Run as user function
+run_as_user() {
+    if [ "$EUID" -eq 0 ]; then
+        local actual_user=$(logname)
+        sudo -u "$actual_user" "$@"
+    else
+        "$@"
+    fi
+}
+
+# Load configuration
+load_config() {
+    if [ -f "$DOT_CONFIG_FILE" ]; then
+        source "$DOT_CONFIG_FILE"
+    else
+        # Create default config if it doesn't exist
+        cat > "$DOT_CONFIG_FILE" << EOL
+# Dot configuration file
+# Source directories
+SCRIPT_DIR="$DEFAULT_SCRIPT_DIR"
+CONF_DIR="$DEFAULT_CONF_DIR"
+
+# Destination directories
+BIN_DIR="$DEFAULT_BIN_DIR"
+CONFIG_DIR="$DEFAULT_CONFIG_DIR"
+
+# Editor (Default: nano)
+EDITOR="nano"
+EOL
+    fi
+
+    # Ensure variables are set
+    SCRIPT_DIR="${SCRIPT_DIR:-$DEFAULT_SCRIPT_DIR}"
+    CONF_DIR="${CONF_DIR:-$DEFAULT_CONF_DIR}"
+    BIN_DIR="${BIN_DIR:-$DEFAULT_BIN_DIR}"
+    CONFIG_DIR="${CONFIG_DIR:-$DEFAULT_CONFIG_DIR}"
+    EDITOR="${EDITOR:-${VISUAL:-${EDITOR:-nano}}}"
+}
+
+# Load configuration
+load_config
+
+# Create directories if they don't exist
+mkdir -p "$BIN_DIR"
+mkdir -p "$CONFIG_DIR"
+
+# Create symlink
+create_symlink() {
+    local source="$(readlink -f "$1")"
+    local destination="$2"
+    if [ -L "$destination" ]; then
+        echo "Symbolic link already exists: $destination → $(readlink -f "$destination")"
+    elif [ -e "$destination" ]; then
+        echo "File/directory exists at $destination (not a symlink). Skipping."
+    else
+        ln -s "$source" "$destination"
+        echo "Linked $source → $destination."
+    fi
+}
+
+# Remove symlink
+remove_symlink() {
+    local destination="$1"
+    if [ -L "$destination" ]; then
+        rm "$destination"
+        echo "Removed symbolic link: $destination."
+    elif [ -e "$destination" ]; then
+        echo "Cannot remove $destination: Not a symlink."
+    else
+        echo "No symlink found at $destination."
+    fi
+}
+
+# Function to list symlinks in a directory
+list_symlinks() {
+    local dir="$1"
+    local title="$2"
+    echo -e "\033[1;32m$title\033[0m"
+    printf "%-30s → %s\n" "------------------------------" "------------------------------------------"
+    find "$dir" -maxdepth 1 -type l | while read -r link; do
+        target=$(readlink -f "$link")
+        printf "%-30s → %s\n" "$(basename "$link")" "$target"
+    done
+    echo ""
+}
+
+# dot make: create symlinks
+make() {
+    if [ ! -d "$SCRIPT_DIR" ]; then
+        echo "Script directory $SCRIPT_DIR not found. Skipping scripts."
+    else
+        for script in "$SCRIPT_DIR"/*; do
+            [ -f "$script" ] && [ -x "$script" ] && create_symlink "$script" "$BIN_DIR/$(basename "$script")"
+        done
+    fi
+    if [ ! -d "$CONF_DIR" ]; then
+        echo "Config directory $CONF_DIR not found. Skipping configs."
+    else
+        for folder in "$CONF_DIR"/*; do
+            [ -d "$folder" ] && create_symlink "$folder" "$CONFIG_DIR/$(basename "$folder")"
+        done
+    fi
+}
+
+# dot kill: remove symlinks and cleanup
+remove() {
+    if [ -d "$SCRIPT_DIR" ]; then
+        for script in "$SCRIPT_DIR"/*; do
+            [ -f "$script" ] && [ -x "$script" ] && remove_symlink "$BIN_DIR/$(basename "$script")"
+        done
+    fi
+    if [ -d "$CONF_DIR" ]; then
+        for folder in "$CONF_DIR"/*; do
+            [ -d "$folder" ] && remove_symlink "$CONFIG_DIR/$(basename "$folder")"
+        done
+    fi
+}
+
+# Install dot script
+install() {
+    echo "Installing dot script to $BIN_DIR..."
+    create_symlink "$SCRIPT_PATH" "$BIN_DIR/dot"
+    chmod +x "$SCRIPT_PATH"
+    echo "Installation complete. You can now use 'dot' command globally."
+}
+
+# Edit configuration
+edit_config() {
+    run_as_user $EDITOR "$DOT_CONFIG_FILE"
+    echo "Configuration updated. Reloading..."
+    load_config
+}
+
+# Display menu for interactive selection
+display_selection_menu() {
+    local options=("$@")
+    local selected=0
+    local num_options=${#options[@]}
+    
+    # Get terminal size
+    local term_height=$(tput lines)
+    local term_width=$(tput cols)
+    
+    # Calculate center position
+    local box_height=$((num_options + 6))
+    local box_width=50
+    local start_row=$(( (term_height - box_height) / 2 ))
+    local start_col=$(( (term_width - box_width) / 2 ))
+    
+    # Function to draw menu
+    draw_menu() {
+        # Clear screen
+        clear
+        
+        # Draw border and menu
+        tput cup $start_row $start_col
+        echo -e "\033[1;36m╔$(printf '═%.0s' $(seq 1 $box_width))╗\033[0m"
+        
+        for i in $(seq 1 $box_height); do
+            tput cup $(($start_row + $i)) $start_col
+            if [ $i -eq 2 ]; then
+                printf "\033[1;36m║\033[0m%-${box_width}s\033[1;36m║\033[0m" "$(printf '%*s' $(( (box_width + 12) / 2 )) 'SELECT FILE TO EDIT')"
+            elif [ $i -ge 4 ] && [ $i -le $(( 4 + ${#options[@]} - 1 )) ]; then
+                local option_index=$(( $i - 4 ))
+                if [ $option_index -eq $selected ]; then
+                    printf "\033[1;36m║\033[0m\033[1;44m %-$(($box_width-1))s\033[0m\033[1;36m║\033[0m" " $(($option_index + 1)). ${options[$option_index]}"
+                else
+                    printf "\033[1;36m║\033[0m %-$(($box_width-1))s\033[1;36m║\033[0m" " $(($option_index + 1)). ${options[$option_index]}"
+                fi
+            else
+                printf "\033[1;36m║\033[0m%-${box_width}s\033[1;36m║\033[0m" ""
+            fi
+        done
+        
+        tput cup $(($start_row + $box_height + 1)) $start_col
+        echo -e "\033[1;36m╚$(printf '═%.0s' $(seq 1 $box_width))╝\033[0m"
+        
+        # Instructions
+        tput cup $(($start_row + $box_height + 3)) $start_col
+        echo "Navigation: Arrow Keys/Numbers"
+    }
+    
+    # Display menu initially
+    draw_menu
+    
+    # Handle input
+    while true; do
+        # Enable raw input mode
+        stty -echo
+        stty raw
+        
+        # Read a single character
+        char=$(dd if=/dev/tty bs=1 count=1 2>/dev/null)
+        
+        # Restore terminal settings
+        stty -raw
+        stty echo
+        
+        # Process arrow keys and number inputs
+        case "$char" in
+            # Arrow keys
+            $'\x1B')
+                # Read the rest of the escape sequence
+                read -rsn2 -t 0.1 rest
+                if [[ $rest == "[A" ]]; then  # Up arrow
+                    selected=$(( (selected - 1 + num_options) % num_options ))
+                    draw_menu
+                elif [[ $rest == "[B" ]]; then  # Down arrow
+                    selected=$(( (selected + 1) % num_options ))
+                    draw_menu
+                fi
+                ;;
+            # Enter key
+            $'\x0D')
+                return $selected
+                ;;
+            # Number keys
+            [0-9])
+                local num=$((10#$char))
+                if [ $num -gt 0 ] && [ $num -le $num_options ]; then
+                    selected=$((num - 1))
+                    return $selected
+                fi
+                ;;
+            # Escape key
+            $'\x1B')
+                return 255
+                ;;
+        esac
+    done
+}
+
+# Edit scripts or configuration files
+edit_files() {
+    local options=("Scripts" "Configuration files" "Dot configuration" "Cancel")
+    
+    # Display selection menu
+    display_selection_menu "${options[@]}"
+    local option=$?
+    
+    # Process selection
+    case $option in
+        0) # Scripts
+            if [ -d "$SCRIPT_DIR" ]; then
+                local files=()
+                local titles=()
+                
+                # List all scripts
+                while IFS= read -r file; do
+                    if [ -f "$file" ] && [ -x "$file" ]; then
+                        files+=("$file")
+                        titles+=("$(basename "$file")")
+                    fi
+                done < <(find "$SCRIPT_DIR" -type f | sort)
+                
+                if [ ${#files[@]} -eq 0 ]; then
+                    echo "No executable scripts found."
+                    return
+                fi
+                
+                titles+=("Cancel")
+                
+                display_selection_menu "${titles[@]}"
+                local file_option=$?
+                
+                if [ $file_option -eq ${#titles[@]}-1 ] || [ $file_option -eq 255 ]; then
+                    return
+                elif [ $file_option -ge 0 ] && [ $file_option -lt ${#files[@]} ]; then
+                    run_as_user $EDITOR "${files[$file_option]}"
+                fi
+            else
+                echo "Script directory not found."
+            fi
+            ;;
+        1) # Configuration files
+            if [ -d "$CONF_DIR" ]; then
+                local files=()
+                local titles=()
+                
+                # List all configuration files
+                while IFS= read -r file; do
+                    if [ -f "$file" ]; then
+                        files+=("$file")
+                        titles+=("$(basename "$file")")
+                    fi
+                done < <(find "$CONF_DIR" -type f | sort)
+                
+                if [ ${#files[@]} -eq 0 ]; then
+                    echo "No configuration files found."
+                    return
+                fi
+                
+                titles+=("Cancel")
+                
+                display_selection_menu "${titles[@]}"
+                local file_option=$?
+                
+                if [ $file_option -eq ${#titles[@]}-1 ] || [ $file_option -eq 255 ]; then
+                    return
+                elif [ $file_option -ge 0 ] && [ $file_option -lt ${#files[@]} ]; then
+                    run_as_user $EDITOR "${files[$file_option]}"
+                fi
+            else
+                echo "Configuration directory not found."
+            fi
+            ;;
+        2) # Dot configuration
+            edit_config
+            ;;
+        3|255) # Cancel or Escape
+            return
+            ;;
+    esac
+}
+
+# Interactive mode
+interactive() {
+    # Set up variables
+    local selected=0
+    local options=("Make - Create symlinks" "Kill - Remove symlinks" "List - Show active symlinks" "Edit - Files and configuration" "Config - Edit dot settings" "Exit")
+    local num_options=${#options[@]}
+    
+    # Get terminal size
+    local term_height=$(tput lines)
+    local term_width=$(tput cols)
+    
+    # Calculate center position
+    local box_height=12
+    local box_width=40
+    local start_row=$(( (term_height - box_height) / 2 ))
+    local start_col=$(( (term_width - box_width) / 2 ))
+    
+    # Function to display menu
+    display_menu() {
+        # Clear screen
+        clear
+        
+        # Draw border and menu
+        tput cup $start_row $start_col
+        echo -e "\033[1;36m╔$(printf '═%.0s' $(seq 1 $box_width))╗\033[0m"
+        
+        for i in $(seq 1 $box_height); do
+            tput cup $(($start_row + $i)) $start_col
+            if [ $i -eq 2 ]; then
+                printf "\033[1;36m║\033[0m%-${box_width}s\033[1;36m║\033[0m" "$(printf '%*s' $(( (box_width + 4) / 2 )) 'DOT')"
+            elif [ $i -ge 4 ] && [ $i -le $(( 4 + ${#options[@]} - 1 )) ]; then
+                local option_index=$(( $i - 4 ))
+                if [ $option_index -eq $selected ]; then
+                    printf "\033[1;36m║\033[0m\033[1;44m %-$(($box_width-1))s\033[0m\033[1;36m║\033[0m" " $(($option_index + 1)). ${options[$option_index]}"
+                else
+                    printf "\033[1;36m║\033[0m %-$(($box_width-1))s\033[1;36m║\033[0m" " $(($option_index + 1)). ${options[$option_index]}"
+                fi
+            else
+                printf "\033[1;36m║\033[0m%-${box_width}s\033[1;36m║\033[0m" ""
+            fi
+        done
+        
+        tput cup $(($start_row + $box_height + 1)) $start_col
+        echo -e "\033[1;36m╚$(printf '═%.0s' $(seq 1 $box_width))╝\033[0m"
+        
+        # Instructions
+        tput cup $(($start_row + $box_height + 3)) $start_col
+        echo "Navigation: Arrow Keys/Numbers"
+    }
+    
+    # Display menu initially
+    display_menu
+    
+    # Handle input
+    while true; do
+        # Enable raw input mode
+        stty -echo
+        stty raw
+        
+        # Read a single character
+        char=$(dd if=/dev/tty bs=1 count=1 2>/dev/null)
+        
+        # Restore terminal settings
+        stty -raw
+        stty echo
+        
+        # Process arrow keys and number inputs
+        case "$char" in
+            # Arrow keys
+            $'\x1B')
+                # Read the rest of the escape sequence
+                read -rsn2 -t 0.1 rest
+                if [[ $rest == "[A" ]]; then  # Up arrow
+                    selected=$(( (selected - 1 + num_options) % num_options ))
+                    display_menu
+                elif [[ $rest == "[B" ]]; then  # Down arrow
+                    selected=$(( (selected + 1) % num_options ))
+                    display_menu
+                fi
+                ;;
+            # Enter key
+            $'\x0D')
+                break
+                ;;
+            # Number keys
+            [1-6])
+                selected=$((10#$char - 1))
+                if [ $selected -lt $num_options ]; then
+                    break
+                fi
+                ;;
+        esac
+    done
+    
+    # Clear screen
+    clear
+    
+    # Execute selected option
+    case $selected in
+        0) make ;;
+        1) remove ;;
+        2) list ;;
+        3) edit_files ;;
+        4) edit_config ;;
+        5) clear; exit 0 ;;
+    esac
+    
+    echo
+    echo "Press any key to return to menu..."
+    read -n 1
+    interactive
+}
+
+# Function to list all symlinks
+list() {
+    echo "Symlinks in $BIN_DIR:"
+    list_symlinks "$BIN_DIR" "Scripts"
+    echo "Symlinks in $CONFIG_DIR:"
+    list_symlinks "$CONFIG_DIR" "Config Files"
+}
+
+# Print help
+show_help() {
+    echo "Usage: $0 {make|kill|list|install|edit|config|interactive|help}"
+    echo
+    echo "make        - Create symlinks for scripts and config files."
+    echo "kill        - Remove symlinks."
+    echo "list        - List active symlinks."
+    echo "install     - Install dot script to $BIN_DIR."
+    echo "edit        - Edit scripts and configuration files."
+    echo "config      - Edit dot configuration."
+    echo "interactive - Open interactive menu mode."
+    echo "help        - Show this help message."
+}
+
+# Main
+case "$1" in
+    make)
+        echo "Running make: Setting up symlinks..."
+        make
+        ;;
+    kill)
+        echo "Running kill: Removing symlinks..."
+        remove
+        ;;
+    list)
+        echo "Running list: Listing active symlinks..."
+        list
+        ;;
+    install)
+        echo "Running install: Adding dot script to PATH..."
+        install
+        ;;
+    edit)
+        echo "Running edit: Edit scripts and configuration files..."
+        edit_files
+        ;;
+    config)
+        echo "Running config: Edit dot configuration..."
+        edit_config
+        ;;
+    interactive)
+        interactive
+        ;;
+    help|*)
+        show_help
+        ;;
+esac

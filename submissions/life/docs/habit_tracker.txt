@@ -1,0 +1,56 @@
+Habit Tracker Documentation
+===========================
+
+Overview
+--------
+The Habit Tracker is a tool to help users build and maintain habits. It provides a simple interface for creating, tracking, and managing habits with automatic daily reset to automate resetting for the next day.
+
+Features
+--------
+1. Create and manage daily habits
+2. Mark habits as completed
+3. Delete unwanted habits
+4. Automatic daily reset of habit completion status
+5. Persistent storage of habits
+6. Visual completion status indicators
+
+Usage
+-----
+1. Launch the Habit Tracker from the main menu
+2. Enter a habit name in the input field
+3. Click "Add Habit" to create a new habit
+4. Use "Mark as Completed" to track completed habits
+5. Use "Delete Habit" to remove unwanted habits
+6. Click "Back" to return to the main menu
+
+Interface Elements
+----------------
+- Input Field: Enter new habit names
+- Add Habit Button: Creates a new habit
+- Mark as Completed Button: Tracks habit completion
+- Delete Habit Button: Removes selected habit
+- Habit Table: Displays all habits and their status
+- Back Button: Returns to the main menu
+
+Technical Details
+---------------
+- Habits are stored in a JSON file
+- Completion status is automatically reset daily
+- Status is indicated with checkmark (✔) or cross (✘)
+- Habits persist between sessions
+- Each habit has a name and completion status
+
+Data Storage
+-----------
+- Habits are stored in data/habits.json
+- Data structure includes:
+  - last_reset: Date of last reset
+  - habits: List of habit objects
+    - name: Habit name
+    - completed: Boolean completion status
+
+Error Handling
+-------------
+- Input validation for empty habit names
+- Safe handling of file operations
+- Graceful handling of missing data files

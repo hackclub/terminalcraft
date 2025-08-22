@@ -1,0 +1,14 @@
+{
+  "pressure": {
+    "current": 1013.25,
+    "history": []
+  },
+  "temperature": {
+    "current": 20.0,
+    "history": []
+  },
+  "humidity": {
+    "current": 50.0,
+    "history": []
+  }
+}

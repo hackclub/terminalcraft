@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telescope", "Telescope\Telescope.csproj", "{FDCE26E1-5E0A-401F-9120-A8FEE6EE6F01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telescope GUI", "Telescope GUI\Telescope GUI.csproj", "{D1F0A140-1F74-4CD4-805E-D22F5C1BF48F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FDCE26E1-5E0A-401F-9120-A8FEE6EE6F01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDCE26E1-5E0A-401F-9120-A8FEE6EE6F01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDCE26E1-5E0A-401F-9120-A8FEE6EE6F01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDCE26E1-5E0A-401F-9120-A8FEE6EE6F01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1F0A140-1F74-4CD4-805E-D22F5C1BF48F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1F0A140-1F74-4CD4-805E-D22F5C1BF48F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1F0A140-1F74-4CD4-805E-D22F5C1BF48F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1F0A140-1F74-4CD4-805E-D22F5C1BF48F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
