@@ -215,14 +215,6 @@ Keep hacking and building awesome things! 🚀</p>
     `.trim();
   }
 
-  useEffect(() => {
-    // Scroll to bottom whenever history changes
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth'
-    });
-  }, [history]);
-
   return (
     <div className="p-8 sm:p-20 min-h-screen bg-[#1E1E1E] flex items-center justify-center">
       {/* macOS Terminal Window */}
