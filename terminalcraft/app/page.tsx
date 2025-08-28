@@ -147,7 +147,7 @@ A: You have several options:
    Make sure your distribution method is easily accessible!
 
 Q: When's the deadline?
-A: August 10th, 2025! Make sure to submit before 11:59 EST.
+A: September 20, 2025! Make sure to submit before 11:59 EST.
 
 Q: Can my project be a game?
 A: Absolutely! Games are welcome and encouraged. The terminal is your canvas - create anything from text adventures to multiplayer games. Go wild with your creativity!
@@ -214,14 +214,6 @@ Keep hacking and building awesome things! 🚀</p>
 </div>
     `.trim();
   }
-
-  useEffect(() => {
-    // Scroll to bottom whenever history changes
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth'
-    });
-  }, [history]);
 
   return (
     <div className="p-8 sm:p-20 min-h-screen bg-[#1E1E1E] flex items-center justify-center">
