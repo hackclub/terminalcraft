@@ -147,7 +147,7 @@ A: You have several options:
    Make sure your distribution method is easily accessible!
 
 Q: When's the deadline?
-A: September 20, 2025! Make sure to submit before 11:59 EST.
+A: October 20, 2025! Make sure to submit before 11:59 EST.
 
 Q: Can my project be a game?
 A: Absolutely! Games are welcome and encouraged. The terminal is your canvas - create anything from text adventures to multiplayer games. Go wild with your creativity!
