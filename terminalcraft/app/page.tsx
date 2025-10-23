@@ -216,7 +216,17 @@ Keep hacking and building awesome things! 🚀</p>
   }
 
   return (
-    <div className="p-8 sm:p-20 min-h-screen bg-[#1E1E1E] flex items-center justify-center">
+    <>
+      <div
+        role="alert"
+        aria-live="polite"
+        className="w-full bg-yellow-50 border-b border-yellow-200 text-yellow-900 text-sm"
+      >
+        <div className="max-w-7xl mx-auto px-4 py-2 text-center">
+          Don’t cheat the time tracking system. No bots, no fake key presses, no UI manipulation. If you do, you’ll be banned from Hackatime and other participating YSWS / events / programs.
+        </div>
+      </div>
+      <div className="p-8 sm:p-20 min-h-screen bg-[#1E1E1E] flex items-center justify-center">
       {/* macOS Terminal Window */}
       <div className="w-full max-w-4xl bg-black rounded-lg overflow-hidden shadow-2xl">
         {/* Terminal Title Bar */}
@@ -276,6 +286,7 @@ Keep hacking and building awesome things! 🚀</p>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
