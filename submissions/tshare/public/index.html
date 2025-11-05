@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TShare</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 40px 20px;
+                line-height: 1.6;
+                color: #333;
+            }
+            pre {
+                background: #f5f5f5;
+                padding: 15px;
+                border-radius: 5px;
+                overflow-x: auto;
+            }
+            code {
+                background: #f5f5f5;
+                padding: 2px 4px;
+                border-radius: 3px;
+            }
+            h1, h2 {
+                margin-top: 40px;
+            }
+            h1 {
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>TShare</h1>
+        <p>Terminal sharing through web links.</p>
+        <h2>Installation</h2>
+        <p>
+            Download pre-built packages from <a href="https://github.com/RobbyV2/tshare/releases">releases</a> or build from source:
+        </p>
+        <pre>cargo build --release
+# Binaries will be in target/release/</pre>
+        <h2>Usage</h2>
+        <p>Start servers:</p>
+        <pre>tunnel-server &
+web-server &</pre>
+        <p>Share terminal:</p>
+        <pre>tshare connect</pre>
+        <h2>Development</h2>
+        <p>
+            See <code>justfile</code> for available commands:
+        </p>
+        <pre>just --list</pre>
+        <p>Common commands:</p>
+        <pre>just run            # Start both servers
+just client connect # Create session
+just build          # Build release
+just build-deb      # Build .deb package</pre>
+        <h2>Architecture</h2>
+        <ul>
+            <li>
+                <code>tshare</code>: CLI client, captures terminal sessions
+            </li>
+            <li>
+                <code>tunnel-server</code>: WebSocket relay and API, port 8385
+            </li>
+            <li>
+                <code>web-server</code>: Web interface, port 8386
+            </li>
+        </ul>
+        <h2>Configuration</h2>
+        <p>
+            All binaries accept <code>--help</code> for options. Default configuration works for local development.
+        </p>
+        <p>Production example:</p>
+        <pre>tunnel-server --host 0.0.0.0
+web-server --host 0.0.0.0 --tunnel-url http://tunnel.example.com:8385
+tshare connect --tunnel-host tunnel.example.com --web-host web.example.com</pre>
+        <p>
+            Source: <a href="https://github.com/RobbyV2/tshare">github.com/RobbyV2/tshare</a>
+        </p>
+    </body>
+</html>
