@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react'; //funny that DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES is something that exists
 import { 
   Rocket, 
   AlertTriangle, 
@@ -12,7 +12,8 @@ import {
   ChevronRight,
   XCircle,
   Github,
-  RefreshCw
+  RefreshCw,
+  Search
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -121,23 +122,18 @@ async function fetchProjectReadme(projectName: string): Promise<string> {
   }
 }
 
-// Helper function to create a plain text summary for card previews
-function createMarkdownSummary(markdown: string, maxLength: number = 150): string {
-  // Remove markdown syntax for card preview
-  const plainText = markdown
-    .replace(/^#{1,6}\s+/gm, '') // Remove headers
-    .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1') // Remove bold/italic
-    .replace(/`([^`]+)`/g, '$1') // Remove inline code
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links, keep text
-    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-    .replace(/^\s*[-*+]\s+/gm, '') // Remove list markers
-    .replace(/^\s*\d+\.\s+/gm, '') // Remove numbered list markers
-    .replace(/\n+/g, ' ') // Replace newlines with spaces
+// markdown -> plain text regex func
+function markdownToPlainText(markdown: string): string { //thre reason i changed it is cuz i wanna search multiple things not just desc
+  return markdown
+    .replace(/^#{1,6}\s+/gm, '') // headers
+    .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1') // bold/italic
+    .replace(/`([^`]+)`/g, '$1') // inline code
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links, keep text
+    .replace(/```[\s\S]*?```/g, '') // code blocks
+    .replace(/^\s*[-*+]\s+/gm, '') // list markers
+    .replace(/^\s*\d+\.\s+/gm, '') // numbered list markers
+    .replace(/\n+/g, ' ') // newlines with spaces
     .trim();
-  
-  return plainText.length > maxLength 
-    ? plainText.slice(0, maxLength) + '...'
-    : plainText;
 }
 
 async function detectProjectLanguage(projectName: string): Promise<string> {
@@ -407,6 +403,47 @@ export default function Gallery() {
   const [iframeLoading, setIframeLoading] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); //search query/term new var
+
+  const searchableDescs = useMemo(() => {
+    const descs = new Map<string, string>();
+
+    projects.forEach(project => {
+      descs.set(project.id, markdownToPlainText(project.description));
+    });
+
+    return descs;
+  }, [projects]);
+
+  const getProjectSummary = useCallback(
+    (project: Project, maxLength: number = 150) => { //type checking is killing me
+      const plainDesc = searchableDescs.get(project.id) ?? markdownToPlainText(project.description);
+
+      return plainDesc.length > maxLength
+        ? `${plainDesc.slice(0, maxLength)}...`
+        : plainDesc;
+    },
+    [searchableDescs]
+  );
+
+  const filteredProjs = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return projects;
+    }
+
+    const normSearch = searchQuery.trim().toLowerCase();
+
+    return projects.filter((project) => {
+      const plainDesc = (searchableDescs.get(project.id) ?? markdownToPlainText(project.description)).toLowerCase();
+
+      return (
+        project.name.toLowerCase().includes(normSearch) ||
+        project.author.toLowerCase().includes(normSearch) ||
+        project.language.toLowerCase().includes(normSearch) ||
+        plainDesc.includes(normSearch)
+      );
+    });
+  }, [projects, searchQuery, searchableDescs]);
 
   // Toast management
   const addToast = (message: string, type: 'success' | 'error') => {
@@ -627,13 +664,33 @@ export default function Gallery() {
               <p className="text-[#808080] font-mono text-xs">
                 Loaded {projects.length} projects from hackclub/terminalcraft/submissions by original creators
               </p>
+              <p className="text-[#808080] font-mono text-xs mt-1">
+                Showing {filteredProjs.length} project{filteredProjs.length === 1 ? '' : 's'} 
+              </p> {/*<!-- im so proud of myself i figured it out i hate the triple equality bs -->*/}
+            </div>
+            <div className="mt-4">
+              <label htmlFor="gallery-search" className="relative block">
+                <Search
+                  aria-hidden="true"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#808080]"
+                />
+                <input
+                  id="gallery-search"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search projects by name, author, language, or description..."
+                  aria-label='Search submissions'
+                  className="w-full bg-[#0f0f0f] border border-[#404040] rounded-md py-2 pl-10 pr-4 text-[#4AF626] placeholder:text-[#404040] font-mono text-sm focus:outline-none focus:border-[#4AF626] focus:ring-1 focus:ring-[#4AF626]"
+                />
+              </label>
             </div>
           </div>
         </div>
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {filteredProjs.map((project) => (
             <div
               key={project.id}
               className={`bg-black rounded-lg border overflow-hidden transition-all duration-300 cursor-pointer ${
@@ -670,7 +727,7 @@ export default function Gallery() {
               {/* Project Content */}
               <div className="p-4">
                 <p className="text-[#808080] font-mono text-sm mb-4 line-clamp-3">
-                  {createMarkdownSummary(project.description)}
+                  {getProjectSummary(project)}
                 </p>
                 
                 {/* Try Now Button */}
@@ -723,7 +780,11 @@ export default function Gallery() {
           </div>
         )}
 
-
+        {projects.length > 0 && filteredProjs.length === 0 && !loading && (
+          <div className="text-center py-12">
+            <p className="text-[#808080] font-mono">No projects match your search criteria</p>
+          </div>
+        )}
 
         {/* Project Modal */}
         {selectedProject && (
@@ -864,7 +925,7 @@ export default function Gallery() {
                           blockquote: ({children}) => <blockquote className="border-l-2 border-[#4AF626] pl-3 ml-2 text-[#808080] italic">{children}</blockquote>
                         }}
                       >
-                        {isDescriptionExpanded ? selectedProject.description : createMarkdownSummary(selectedProject.description, 500)}
+                        {isDescriptionExpanded ? selectedProject.description : getProjectSummary(selectedProject, 500)}
                       </ReactMarkdown>
                       {!isDescriptionExpanded && selectedProject.description.length > 500 && (
                         <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-[#1E1E1E] to-transparent pointer-events-none"></div>
@@ -1154,7 +1215,7 @@ export default function Gallery() {
                              a: ({href, children}) => <a href={href} className="text-[#4AF626] hover:underline" target="_blank" rel="noopener noreferrer">{children}</a>
                            }}
                          >
-                           {isDescriptionExpanded ? selectedProject.description : createMarkdownSummary(selectedProject.description, 300)}
+                           {isDescriptionExpanded ? selectedProject.description : getProjectSummary(selectedProject, 300)}
                          </ReactMarkdown>
                          {!isDescriptionExpanded && selectedProject.description.length > 300 && (
                            <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-[#2D2D2D] to-transparent pointer-events-none"></div>
