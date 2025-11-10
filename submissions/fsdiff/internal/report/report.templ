@@ -1,0 +1,406 @@
+package report
+
+import "fmt"
+
+templ reportTemplate(data *HTMLReportData) {
+	<!DOCTYPE html>
+	<html lang="en" class="dark">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>fsdiff - Filesystem Diff Report</title>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script>
+			tailwind.config = {
+				darkMode: 'class',
+				theme: {
+					extend: {
+						fontFamily: {
+							'mono': ['JetBrains Mono', 'Monaco', 'Menlo', 'Consolas', 'monospace']
+						},
+						animation: {
+							'fade-in': 'fadeIn 0.5s ease-in-out',
+							'slide-down': 'slideDown 0.3s ease-out',
+							'glow': 'glow 2s ease-in-out infinite alternate'
+						},
+						keyframes: {
+							fadeIn: {
+								'0%': { opacity: '0', transform: 'translateY(10px)' },
+								'100%': { opacity: '1', transform: 'translateY(0)' }
+							},
+							slideDown: {
+								'0%': { opacity: '0', transform: 'translateY(-10px)' },
+								'100%': { opacity: '1', transform: 'translateY(0)' }
+							},
+							glow: {
+								'0%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)' },
+								'100%': { boxShadow: '0 0 30px rgba(59, 130, 246, 0.8)' }
+							}
+						}
+					}
+				}
+			}
+
+			function toggleCollapse(id) {
+				const element = document.getElementById(id);
+				const icon = document.getElementById(id + '-icon');
+				if (element.style.display === 'none') {
+					element.style.display = 'block';
+					element.classList.add('animate-slide-down');
+					icon.style.transform = 'rotate(0deg)';
+				} else {
+					element.style.display = 'none';
+					icon.style.transform = 'rotate(-90deg)';
+				}
+			}
+		</script>
+			<link rel="preconnect" href="https://fonts.googleapis.com"/>
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+			<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+		</head>
+		<body class="bg-gray-900 min-h-screen text-gray-100">
+			<div class="container mx-auto px-4 py-8 max-w-7xl">
+				<!-- Header -->
+				<div class="bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 text-white rounded-3xl shadow-2xl mb-8 border border-gray-700/50 animate-glow">
+					<div class="px-8 py-12 text-center relative overflow-hidden">
+						<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+						<div class="relative z-10">
+							<div class="flex items-center justify-center mb-6">
+								<span class="text-6xl mr-4 animate-pulse">📊</span>
+								<div class="text-left">
+									<h1 class="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+										fsdiff
+									</h1>
+									<p class="text-xl text-gray-300 font-light">Filesystem Diff Report</p>
+								</div>
+							</div>
+							<div class="flex items-center justify-center space-x-6 text-sm text-gray-300">
+								<span>Generated: { formatTime(data.GeneratedAt) }</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Summary Cards -->
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+					<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300 group">
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="text-3xl font-bold text-green-400 group-hover:text-green-300 transition-colors">
+									{ fmt.Sprint(data.Result.Summary.AddedCount) }
+								</p>
+								<p class="text-gray-400 font-medium">Files Added</p>
+							</div>
+							<div class="text-green-400 text-3xl group-hover:scale-110 transition-transform">➕</div>
+						</div>
+						<div class="mt-3 h-1 bg-gray-700 rounded-full overflow-hidden">
+							<div class="h-full bg-gradient-to-r from-green-500 to-green-400 w-full transform origin-left"></div>
+						</div>
+					</div>
+					<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300 group">
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="text-3xl font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors">
+									{ fmt.Sprint(data.Result.Summary.ModifiedCount) }
+								</p>
+								<p class="text-gray-400 font-medium">Files Modified</p>
+							</div>
+							<div class="text-yellow-400 text-3xl group-hover:scale-110 transition-transform">🔄</div>
+						</div>
+						<div class="mt-3 h-1 bg-gray-700 rounded-full overflow-hidden">
+							<div class="h-full bg-gradient-to-r from-yellow-500 to-yellow-400 w-full transform origin-left"></div>
+						</div>
+					</div>
+					<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300 group">
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="text-3xl font-bold text-red-400 group-hover:text-red-300 transition-colors">
+									{ fmt.Sprint(data.Result.Summary.DeletedCount) }
+								</p>
+								<p class="text-gray-400 font-medium">Files Deleted</p>
+							</div>
+							<div class="text-red-400 text-3xl group-hover:scale-110 transition-transform">❌</div>
+						</div>
+						<div class="mt-3 h-1 bg-gray-700 rounded-full overflow-hidden">
+							<div class="h-full bg-gradient-to-r from-red-500 to-red-400 w-full transform origin-left"></div>
+						</div>
+					</div>
+					<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300 group">
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="text-3xl font-bold text-blue-400 group-hover:text-blue-300 transition-colors">
+									{ fmt.Sprint(data.Result.Summary.TotalChanges) }
+								</p>
+								<p class="text-gray-400 font-medium">Total Changes</p>
+							</div>
+							<div class="text-blue-400 text-3xl group-hover:scale-110 transition-transform">📊</div>
+						</div>
+						<div class="mt-3 h-1 bg-gray-700 rounded-full overflow-hidden">
+							<div class="h-full bg-gradient-to-r from-blue-500 to-blue-400 w-full transform origin-left"></div>
+						</div>
+					</div>
+				</div>
+				<!-- System Information -->
+				<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 mb-8 animate-fade-in">
+					<button onclick="toggleCollapse('system-info')" class="w-full text-left">
+						<h2 class="text-2xl font-bold text-gray-100 mb-4 flex items-center justify-between hover:text-blue-400 transition-colors">
+							<span class="flex items-center">
+								<span class="text-3xl mr-3">💻</span>
+								System Information
+							</span>
+							<span id="system-info-icon" class="text-gray-400 transition-transform duration-200">▼</span>
+						</h2>
+					</button>
+					<div id="system-info" class="animate-slide-down">
+						<div class="grid md:grid-cols-2 gap-6">
+							<div class="bg-gray-900/50 rounded-xl p-4 border border-gray-600/30">
+								<div class="flex items-center mb-3">
+									<span class="text-2xl mr-2">📡</span>
+									<p class="font-semibold text-blue-400">Baseline System</p>
+								</div>
+								<div class="space-y-2 text-sm">
+									<p class="text-gray-300">
+										<span class="text-gray-500 font-mono">host:</span>
+										<span class="text-green-400 font-mono">{ data.Result.Baseline.SystemInfo.Hostname }</span>
+									</p>
+									<p class="text-gray-300">
+										<span class="text-gray-500 font-mono">distro:</span>
+										<span class="text-yellow-400 font-mono">{ data.Result.Baseline.SystemInfo.Distro }</span>
+									</p>
+									<p class="text-gray-300">
+										<span class="text-gray-500 font-mono">timestamp:</span>
+										<span class="text-purple-400 font-mono">{ formatTime(data.Result.Baseline.SystemInfo.Timestamp) }</span>
+									</p>
+								</div>
+							</div>
+							<div class="bg-gray-900/50 rounded-xl p-4 border border-gray-600/30">
+								<div class="flex items-center mb-3">
+									<span class="text-2xl mr-2">🎯</span>
+									<p class="font-semibold text-green-400">Current System</p>
+								</div>
+								<div class="space-y-2 text-sm">
+									<p class="text-gray-300">
+										<span class="text-gray-500 font-mono">host:</span>
+										<span class="text-green-400 font-mono">{ data.Result.Current.SystemInfo.Hostname }</span>
+									</p>
+									<p class="text-gray-300">
+										<span class="text-gray-500 font-mono">distro:</span>
+										<span class="text-yellow-400 font-mono">{ data.Result.Current.SystemInfo.Distro }</span>
+									</p>
+									<p class="text-gray-300">
+										<span class="text-gray-500 font-mono">timestamp:</span>
+										<span class="text-purple-400 font-mono">{ formatTime(data.Result.Current.SystemInfo.Timestamp) }</span>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Critical Changes -->
+				if len(data.CriticalChanges) > 0 {
+					<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-red-500/30 p-6 mb-8 animate-fade-in">
+						<button onclick="toggleCollapse('critical-changes')" class="w-full text-left">
+							<h2 class="text-2xl font-bold text-gray-100 mb-4 flex items-center justify-between hover:text-red-400 transition-colors">
+								<span class="flex items-center">
+									<span class="text-3xl mr-3 animate-pulse">🚨</span>
+									Critical Changes
+									<span class="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">{ fmt.Sprint(len(data.CriticalChanges)) }</span>
+								</span>
+								<span id="critical-changes-icon" class="text-gray-400 transition-transform duration-200">▼</span>
+							</h2>
+						</button>
+						<div id="critical-changes" class="animate-slide-down">
+							<div class="overflow-x-auto">
+								<table class="w-full">
+									<thead>
+										<tr class="border-b border-gray-600">
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Severity</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Type</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Path</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Reason</th>
+										</tr>
+									</thead>
+									<tbody>
+										for _, change := range data.CriticalChanges {
+											<tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
+												<td class="py-3 px-4">
+													<span class={ getSeverityColorClass(change.Severity) + " px-2 py-1 rounded-full text-xs font-bold" }>
+														{ fmt.Sprintf("%d/10", change.Severity) }
+													</span>
+												</td>
+												<td class="py-3 px-4 text-gray-300">
+													<span class="mr-2">{ getChangeIcon(change.Type) }</span>
+													<span class="font-mono text-sm">{ fmt.Sprint(change.Type) }</span>
+												</td>
+												<td class="py-3 px-4">
+													<code class="bg-gray-900 text-green-400 px-2 py-1 rounded text-sm font-mono">
+														{ change.Path }
+													</code>
+												</td>
+												<td class="py-3 px-4 text-sm text-gray-400">{ change.Reason }</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				}
+				<!-- Added Files -->
+				<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 mb-8 animate-fade-in">
+					<button onclick="toggleCollapse('added-files')" class="w-full text-left">
+						<h2 class="text-2xl font-bold text-gray-100 mb-4 flex items-center justify-between hover:text-green-400 transition-colors">
+							<span class="flex items-center">
+								<span class="text-3xl mr-3">📁</span>
+								Added Files
+								<span class="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">{ fmt.Sprint(data.Result.Summary.AddedCount) }</span>
+							</span>
+							<span id="added-files-icon" class="text-gray-400 transition-transform duration-200">▼</span>
+						</h2>
+					</button>
+					<div id="added-files" class="animate-slide-down">
+						if len(data.Result.Added) > 0 {
+							<div class="overflow-x-auto">
+								<table class="w-full">
+									<thead>
+										<tr class="border-b border-gray-600">
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Path</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Size</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Modified</th>
+										</tr>
+									</thead>
+									<tbody>
+										for path, record := range data.Result.Added {
+											<tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors group">
+												<td class="py-3 px-4">
+													<code class="bg-gray-900 text-green-400 px-2 py-1 rounded text-sm font-mono group-hover:bg-gray-800 transition-colors">
+														{ path }
+													</code>
+												</td>
+												<td class="py-3 px-4 text-sm text-blue-400 font-mono">{ formatBytes(record.Size) }</td>
+												<td class="py-3 px-4 text-sm text-gray-400 font-mono">{ formatTime(record.ModTime) }</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						} else {
+							<div class="text-center py-8">
+								<span class="text-4xl text-gray-600">📭</span>
+								<p class="text-gray-500 italic mt-2">No files were added.</p>
+							</div>
+						}
+					</div>
+				</div>
+				<!-- Modified Files -->
+				<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 mb-8 animate-fade-in">
+					<button onclick="toggleCollapse('modified-files')" class="w-full text-left">
+						<h2 class="text-2xl font-bold text-gray-100 mb-4 flex items-center justify-between hover:text-yellow-400 transition-colors">
+							<span class="flex items-center">
+								<span class="text-3xl mr-3">🔄</span>
+								Modified Files
+								<span class="ml-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">{ fmt.Sprint(data.Result.Summary.ModifiedCount) }</span>
+							</span>
+							<span id="modified-files-icon" class="text-gray-400 transition-transform duration-200">▼</span>
+						</h2>
+					</button>
+					<div id="modified-files" class="animate-slide-down">
+						if len(data.Result.Modified) > 0 {
+							<div class="overflow-x-auto">
+								<table class="w-full">
+									<thead>
+										<tr class="border-b border-gray-600">
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Path</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Size</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Changes</th>
+										</tr>
+									</thead>
+									<tbody>
+										for path, change := range data.Result.Modified {
+											<tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors group">
+												<td class="py-3 px-4">
+													<code class="bg-gray-900 text-yellow-400 px-2 py-1 rounded text-sm font-mono group-hover:bg-gray-800 transition-colors">
+														{ path }
+													</code>
+												</td>
+												<td class="py-3 px-4 text-sm text-blue-400 font-mono">{ formatBytes(change.NewRecord.Size) }</td>
+												<td class="py-3 px-4 text-sm text-gray-400">
+													for i, ch := range change.Changes {
+														if i > 0 {
+															<span class="text-gray-600">, </span>
+														}
+														<span class="bg-orange-500/20 text-orange-300 px-1 rounded text-xs">{ ch }</span>
+													}
+												</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						} else {
+							<div class="text-center py-8">
+								<span class="text-4xl text-gray-600">📝</span>
+								<p class="text-gray-500 italic mt-2">No files were modified.</p>
+							</div>
+						}
+					</div>
+				</div>
+				<!-- Deleted Files -->
+				<div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 mb-8 animate-fade-in">
+					<button onclick="toggleCollapse('deleted-files')" class="w-full text-left">
+						<h2 class="text-2xl font-bold text-gray-100 mb-4 flex items-center justify-between hover:text-red-400 transition-colors">
+							<span class="flex
+
+							items-center">
+								<span class="text-3xl mr-3">❌</span>
+								Deleted Files
+								<span class="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">{ fmt.Sprint(data.Result.Summary.DeletedCount) }</span>
+							</span>
+							<span id="deleted-files-icon" class="text-gray-400 transition-transform duration-200">▼</span>
+						</h2>
+					</button>
+					<div id="deleted-files" class="animate-slide-down">
+						if len(data.Result.Deleted) > 0 {
+							<div class="overflow-x-auto">
+								<table class="w-full">
+									<thead>
+										<tr class="border-b border-gray-600">
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Path</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Size</th>
+											<th class="text-left py-3 px-4 font-semibold text-gray-300 bg-gray-900/50">Modified</th>
+										</tr>
+									</thead>
+									<tbody>
+										for path, record := range data.Result.Deleted {
+											<tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors group">
+												<td class="py-3 px-4">
+													<code class="bg-gray-900 text-red-400 px-2 py-1 rounded text-sm font-mono group-hover:bg-gray-800 transition-colors">
+														{ path }
+													</code>
+												</td>
+												<td class="py-3 px-4 text-sm text-blue-400 font-mono">{ formatBytes(record.Size) }</td>
+												<td class="py-3 px-4 text-sm text-gray-400 font-mono">{ formatTime(record.ModTime) }</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						} else {
+							<div class="text-center py-8">
+								<span class="text-4xl text-gray-600">🗑️</span>
+								<p class="text-gray-500 italic mt-2">No files were deleted.</p>
+							</div>
+						}
+					</div>
+				</div>
+				<!-- Footer -->
+				<div class="text-center py-8 text-gray-500">
+					<p class="text-sm">Report generated by <a
+									href="https://github.com/JasonLovesDoggo/jsn/tree/main/cmd/fsdiff"
+									target="_blank"
+									class="hover:text-blue-400 transition-colors duration-200"
+						>fsdiff</a> • { formatTime(data.GeneratedAt) }</p>
+				</div>
+			</div>
+		</body>
+	</html>
+}
