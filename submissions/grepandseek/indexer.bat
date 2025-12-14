@@ -1,0 +1,1 @@
+python -m grepandseek.main indexer update-index -s
