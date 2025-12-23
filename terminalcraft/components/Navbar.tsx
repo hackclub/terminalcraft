@@ -12,6 +12,7 @@ export default function Navbar() {
   const tabs = [
     { name: 'Terminal', path: '/', icon: '>' },
     { name: 'Gallery', path: '/gallery', icon: '[]' },
+    { name: 'Dungeon', path: '/dungeon', icon: '~$' },
   ];
 
   const toggleMobileMenu = () => {
