@@ -1,0 +1,12 @@
+click==8.2.1
+rich==14.1.0
+GitPython==3.1.44
+matplotlib==3.10.5
+numpy==2.3.2
+openai==1.99.1
+python-dotenv==1.0.1
+questionary==2.1.0
+pyfiglet==1.0.3
+requests==2.28.0
+build
+markdown2
