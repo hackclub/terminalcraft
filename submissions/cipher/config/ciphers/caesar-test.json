@@ -1,0 +1,20 @@
+{
+    "alphabets": [
+        "latin-upper",
+        "latin-lower",
+        "cyrillic-upper",
+        "cyrillic-lower",
+        "greek-upper",
+        "greek-lower",
+        "katakana"
+    ],
+    "ciphers":[
+        {
+            "type":"caesar",
+            "key": {
+                "shift":3
+            },
+            "caseSensitive": false
+        }
+    ]
+}
