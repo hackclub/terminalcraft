@@ -11,6 +11,7 @@ export default function Navbar() {
 
   const tabs = [
     { name: 'Terminal', path: '/', icon: '>' },
+    { name: 'Resources', path: '/resources', icon: '?' },
     { name: 'Gallery', path: '/gallery', icon: '[]' },
   ];
 

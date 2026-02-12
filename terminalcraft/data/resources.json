@@ -1,0 +1,42 @@
+[
+  {
+    "id": "python-textual-realpython",
+    "title": "Python Textual: Build Beautiful UIs in the Terminal",
+    "url": "https://realpython.com/python-textual/",
+    "description": "Beginner-friendly walkthrough for building your first terminal UI app with Textual.",
+    "category": "Python",
+    "duration": "About 38 minutes (published reading time)"
+  },
+  {
+    "id": "textual-official-tutorial",
+    "title": "Textual Official Tutorial",
+    "url": "https://textual.textualize.io/tutorial/",
+    "description": "Official step-by-step Textual tutorial to build a complete app.",
+    "category": "Python",
+    "duration": "About 60-90 minutes (self-paced estimate)"
+  },
+  {
+    "id": "python-curses-howto",
+    "title": "Curses Programming with Python",
+    "url": "https://docs.python.org/3/howto/curses.html",
+    "description": "Official Python HOWTO for making text-based terminal applications with curses.",
+    "category": "Python",
+    "duration": "About 45-60 minutes (self-paced estimate)"
+  },
+  {
+    "id": "ratatui-counter-basic-app",
+    "title": "Ratatui Counter App (Basic App)",
+    "url": "https://ratatui.rs/tutorials/counter-app/basic-app/",
+    "description": "Build an interactive counter terminal app in Rust, including event handling and tests.",
+    "category": "Rust",
+    "duration": "About 90-120 minutes (beginner estimate)"
+  },
+  {
+    "id": "ratatui-json-editor",
+    "title": "Ratatui JSON Editor Tutorial",
+    "url": "https://ratatui.rs/tutorials/json-editor/",
+    "description": "Build a multi-file Ratatui app for creating JSON through a terminal interface.",
+    "category": "Rust",
+    "duration": "About 2.5-4 hours (beginner estimate)"
+  }
+]
