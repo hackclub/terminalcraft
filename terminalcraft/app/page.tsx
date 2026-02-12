@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react";
 import Prompt from "@/components/Prompt";
+import resources from "@/data/resources.json";
 
 
 type CommandEntry = {
@@ -8,12 +9,37 @@ type CommandEntry = {
   content: string
 }
 
+type ResourceEntry = {
+  id: string;
+  title: string;
+  url: string;
+  description: string;
+  category: string;
+  duration: string;
+}
+
+const FIRST_TIME_STORAGE_KEY = "terminalcraft:first-time-builder";
+
 export default function Home() {
   const [command, setCommand] = useState<string>('');
   const [history, setHistory] = useState<CommandEntry[]>([{
     type: "output",
     content: "type 'help' to get started"
   }]);
+  const [isFirstTimeBuilder, setIsFirstTimeBuilder] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(FIRST_TIME_STORAGE_KEY);
+    if (saved === "yes") {
+      setIsFirstTimeBuilder(true);
+      return;
+    }
+    if (saved === "no") {
+      setIsFirstTimeBuilder(false);
+      return;
+    }
+    setIsFirstTimeBuilder(null);
+  }, []);
 
   function handleCommand(command: string) {
     if (command == "clear") {
@@ -53,6 +79,12 @@ export default function Home() {
       case "help": {
         return help();
       }
+      case "resources": {
+        return resourcesListForTerminal();
+      }
+      case "first-time": {
+        return setFirstTimeStatus(commandAndParams[0]);
+      }
       case "hackclub": {
         return hackclubFlag();
       }
@@ -81,7 +113,7 @@ export default function Home() {
   }
 
   function listFiles() {
-    return "about.md faq.md";
+    return "about.md faq.md resources.md";
   }
 
   function whoami() {
@@ -162,14 +194,70 @@ A: The best terminal projects are:
    - Well-documented
    - Creative in their approach
    Remember: Simple but well-executed is better than complex but buggy!`;
+      case "resources.md":
+        return resourcesListAsMarkdown();
       default:
         return `cat: ${filename}: No such file or directory`;
     }
   }
 
+  function setFirstTimeStatus(answer?: string) {
+    if (answer !== "yes" && answer !== "no") {
+      return "Usage: first-time <yes|no>\nExample: first-time yes";
+    }
+
+    const isFirstTimer = answer === "yes";
+    setIsFirstTimeBuilder(isFirstTimer);
+    window.localStorage.setItem(FIRST_TIME_STORAGE_KEY, answer);
+
+    if (isFirstTimer) {
+      return "Awesome - you're in the right place. Run `resources` or open /resources to find guides for your first terminal program.";
+    }
+
+    return "Perfect. I won't show the first-time starter prompt in `help` anymore.";
+  }
+
+  function resourcesListForTerminal() {
+    const links = (resources as ResourceEntry[])
+      .map((resource) => `<li><a href="${resource.url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline">${resource.title}</a> (${resource.category}) - ${resource.duration}</li>`)
+      .join("");
+
+    return `
+Need starter guides?
+<a href="/resources" target="_blank" rel="noopener noreferrer" style="text-decoration: underline">Open the Resources page</a> or use links below:
+<ul>${links}</ul>
+    `.trim();
+  }
+
+  function resourcesListAsMarkdown() {
+    const list = (resources as ResourceEntry[])
+      .map((resource) => `- [${resource.title}](${resource.url}) - ${resource.description} (Estimated time: ${resource.duration})`)
+      .join("\n");
+
+    return `
+# Starter Resources
+
+Edit this list in data/resources.json.
+
+${list}
+    `.trim();
+  }
+
   function help() {
+    const firstTimePrompt = isFirstTimeBuilder !== false
+      ? `
+First time making a program for the terminal?
+Go here for resources to make your first program: <a href="/resources" target="_blank" style="text-decoration: underline">/resources</a>
+Tell me once so I can personalize help:
+  first-time yes
+  first-time no
+`
+      : "";
+
     return `
 Available commands:
+
+${firstTimePrompt}
 
   ls
     Lists all available files
@@ -191,6 +279,14 @@ Available commands:
   help
     Shows this help message with command descriptions and examples
     Example: help
+
+  resources
+    Shows beginner tutorials and links to the resources section
+    Example: resources
+
+  first-time <yes|no>
+    Saves whether this is your first terminal project
+    Example: first-time yes
 
   submit
     Shows instructions on how to submit your project
