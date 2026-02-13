@@ -13,6 +13,7 @@ export default function Navbar() {
     { name: 'Terminal', path: '/', icon: '>' },
     { name: 'Resources', path: '/resources', icon: '?' },
     { name: 'Gallery', path: '/gallery', icon: '[]' },
+    { name: 'Dungeon', path: '/dungeon', icon: '~$' },
   ];
 
   const toggleMobileMenu = () => {
