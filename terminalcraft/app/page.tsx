@@ -140,7 +140,8 @@ Get ready to build and publish your own terminal program and earn $60 for hardwa
 9. 🚫 Do not build just a wrapper around another tool
 10. 🚫 Creating a wrapper around multiple tools or games is not accepted
 11. 🚫 Simple tools that are generally not accepted include: todo cli, timers, simple Q/A type applications 
-12. You are expected to spend 15 or more hours on your project. You must track your time with hackatime. 
+12. This program is not double-dippable.
+13. You must track your time with Hackatime, with a minimum of 10 hours logged on your project.
 
 ### Tools You Can Use:
 - **Textualize** (Recommended for web sharing)
@@ -149,7 +150,7 @@ Get ready to build and publish your own terminal program and earn $60 for hardwa
 ## How to Get Involved:
 1. Join the #terminal-craft channel on Slack to ask questions, share progress, or just vibe
 2. Build something sick & ship it!
-3. Submit your project via **Airtable** for review!
+3. Submit your project on Slack with the **/craftr** command for review!
 4. Claim your $60
 
 ### Prize:
