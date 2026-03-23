@@ -25,14 +25,16 @@ Create an original program that runs in the terminal. If your submission is appr
 
 6. **Terminal-Only**: Your program must run entirely in the terminal and must not depend on a graphical user interface (GUI).
 
-7. **Coding Time Tracking**:  You must track all your coding time using Hackatime. A minimum of 11 hours of logged development time is required for your submission to be eligible.
+7. **Coding Time Tracking**: You must track all your coding time using Hackatime. A minimum of 10 hours of logged development time is required for your submission to be eligible.
+
+8. **No Double-Dipping**: This program is not double-dippable.
 
 ## 🚀 How to Submit
 
 1. Fork this repository
 2. Create a new folder in the `submissions` directory with your project name
 3. Add your project files and a README.md explaining your project
-4. Submit a pull request
+4. Submit your project on Hack Club Slack with the `/craftr` command
 
 Your submission should include:
 - Source code
