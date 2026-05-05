@@ -28,4 +28,4 @@ tree-sitter-xml==0.7.0
 tree-sitter-yaml==0.7.0
 typing_extensions==4.12.2
 uc-micro-py==1.0.3
-urllib3==2.3.0
+urllib3==2.6.3
