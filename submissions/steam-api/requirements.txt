@@ -15,7 +15,7 @@ requests==2.32.4
 setuptools==78.1.1
 six==1.17.0
 steam==1.4.4
-urllib3==1.26.20
+urllib3==2.6.3
 vdf==3.4
 zope.event==5.0
 zope.interface==7.2
