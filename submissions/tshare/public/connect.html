@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TShare - Terminal Session {{ session_id }}</title>
+        <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
+        <script src="https://unpkg.com/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+        <link href="https://unpkg.com/xterm@5.3.0/css/xterm.css" rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+        .terminal-container {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        </style>
+    </head>
+    <body class="bg-gray-900 text-white font-sans">
+        <div id="auth-modal"
+             class="{{ modal_display }} fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+            <div class="bg-gray-800 p-8 rounded-lg shadow-2xl max-w-md w-full mx-4">
+                <h2 class="text-2xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                    Join Terminal Session
+                </h2>
+                <p class="text-gray-300 text-center mb-6">Session ID: {{ session_id }}</p>
+                <div class="space-y-4">
+                    <input type="password"
+                           id="password-input"
+                           placeholder="Enter password (leave empty if none)"
+                           class="w-full p-3 bg-gray-700 border border-gray-600 rounded focus:border-blue-500 focus:outline-none">
+                    <div id="auth-error" class="text-red-400 text-sm hidden"></div>
+                    <button id="connect-btn"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200">
+                        Connect
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="terminal-container"
+             class="{{ terminal_display }} min-h-screen bg-gray-900 text-white">
+            <div class="p-6">
+                <div class="mb-6 flex justify-between items-center bg-gray-800 rounded-lg p-4 shadow-lg">
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                            Terminal Session
+                        </h1>
+                        <p class="text-sm text-gray-400 mt-1">Session ID: {{ session_id }}</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <div class="text-xs px-2 py-1 rounded bg-blue-600 text-white"
+                                 id="user-type-badge">Guest</div>
+                            <div class="text-xs px-2 py-1 rounded bg-green-600 text-white hidden"
+                                 id="readonly-badge">Read-only</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-2 h-2 rounded-full bg-red-400" id="status-indicator"></div>
+                        <div id="status" class="text-sm font-medium text-red-400">Disconnected</div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 shadow-xl border border-gray-700">
+                    <div id="terminal"
+                         class="bg-black rounded border border-gray-600"
+                         style="width: 100%;
+                                height: calc(100vh - 280px);
+                                min-height: 400px"></div>
+                </div>
+            </div>
+        </div>
+        <script>
+        const sessionId = '{{ session_id }}';
+        const needsAuth = {{ needs_auth_js }};
+        let term = null;
+        let ws = null;
+        let sessionEnded = false;
+        let historyReceived = false;
+        let userType = 'guest';
+        let isReadonly = false;
+
+        const authModal = document.getElementById('auth-modal');
+        const terminalContainer = document.getElementById('terminal-container');
+        const passwordInput = document.getElementById('password-input');
+        const connectBtn = document.getElementById('connect-btn');
+        const authError = document.getElementById('auth-error');
+        const status = document.getElementById('status');
+        const statusIndicator = document.getElementById('status-indicator');
+        const userTypeBadge = document.getElementById('user-type-badge');
+        const readonlyBadge = document.getElementById('readonly-badge');
+
+        async function authenticate() {
+            const password = passwordInput.value || '';
+            
+            try {
+                const response = await fetch(`/api/auth/${sessionId}?password=${encodeURIComponent(password)}`);
+                const result = await response.json();
+                
+                if (result.authenticated) {
+                    userType = result.user_type || 'guest';
+                    isReadonly = result.is_readonly || false;
+                    console.log('Authenticated as:', userType, 'readonly:', isReadonly);
+                    updateStatusBadges();
+                    authModal.style.display = 'none';
+                    terminalContainer.style.display = 'block';
+                    initializeTerminal();
+                } else {
+                    authError.textContent = 'Invalid password';
+                    authError.classList.remove('hidden');
+                }
+            } catch (e) {
+                authError.textContent = 'Authentication failed';
+                authError.classList.remove('hidden');
+            }
+        }
+
+        function updateStatusBadges() {
+            // Update user type badge
+            userTypeBadge.textContent = userType.charAt(0).toUpperCase() + userType.slice(1);
+            
+            if (userType === 'owner') {
+                userTypeBadge.className = 'text-xs px-2 py-1 rounded bg-purple-600 text-white';
+            } else {
+                userTypeBadge.className = 'text-xs px-2 py-1 rounded bg-blue-600 text-white';
+            }
+            
+            // Update readonly badge
+            if (isReadonly) {
+                readonlyBadge.classList.remove('hidden');
+                readonlyBadge.className = 'text-xs px-2 py-1 rounded bg-orange-600 text-white';
+            } else {
+                readonlyBadge.classList.add('hidden');
+            }
+        }
+
+        function initializeTerminal() {
+            term = new Terminal({
+                theme: {
+                    background: '#000000',
+                    foreground: '#ffffff',
+                    cursor: '#ffffff',
+                    selection: '#ffffff33'
+                },
+                fontFamily: 'Monaco, "Cascadia Code", "SF Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace',
+                fontSize: 14,
+                lineHeight: 1.2,
+                cursorBlink: true,
+                cursorStyle: 'block',
+                allowTransparency: false
+            });
+            
+            const fitAddon = new FitAddon.FitAddon();
+            term.loadAddon(fitAddon);
+            
+            const terminalElement = document.getElementById('terminal');
+            term.open(terminalElement);
+            
+            // Small delay to ensure DOM is ready, then fit
+            setTimeout(() => {
+                fitAddon.fit();
+                sendTerminalSize();
+                term.focus();
+            }, 100);
+            
+            // Resize terminal when window resizes
+            window.addEventListener('resize', () => {
+                setTimeout(() => {
+                    fitAddon.fit();
+                    sendTerminalSize();
+                }, 100);
+            });
+            
+            // Send resize when terminal is manually resized
+            term.onResize((size) => {
+                sendTerminalSize();
+            });
+            
+            connectWebSocket();
+        }
+
+        function sendTerminalSize() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const cols = term.cols;
+                const rows = term.rows;
+                const resizeMsg = JSON.stringify({
+                    type: 'resize',
+                    cols: cols,
+                    rows: rows
+                });
+                ws.send(resizeMsg);
+                console.log(`Sent terminal resize: ${cols}x${rows}`);
+            }
+        }
+
+        function connectWebSocket() {
+            const wsUrl = `ws://${window.location.host}/ws/session/${sessionId}?user_type=${userType}`;
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+                status.textContent = 'Connected';
+                status.className = 'text-sm font-medium text-green-400';
+                statusIndicator.className = 'w-2 h-2 rounded-full bg-green-400';
+                
+                // Send initial terminal size
+                setTimeout(() => sendTerminalSize(), 200);
+                
+                term.onData(function(data) {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send(new TextEncoder().encode(data));
+                    }
+                });
+            };
+            
+            ws.onmessage = function(event) {
+                if (event.data instanceof Blob) {
+                    event.data.arrayBuffer().then(function(buffer) {
+                        const text = new TextDecoder().decode(buffer);
+                        // Check for session end marker
+                        if (text === '__TSHARE_SESSION_ENDED__') {
+                            console.log('Session ended signal received');
+                            if (!sessionEnded) {
+                                sessionEnded = true;
+                                status.textContent = 'Session ended';
+                                status.className = 'text-sm font-medium text-red-400';
+                                statusIndicator.className = 'w-2 h-2 rounded-full bg-red-400';
+                                term.write('\r\n\x1b[31mTerminal session has ended.\x1b[0m\r\n');
+                            }
+                            ws.close(1000, 'Session ended');
+                            return;
+                        }
+                        
+                        // If this is the first message and we haven't marked history as received,
+                        // this is likely the history data. Clear terminal first.
+                        if (!historyReceived) {
+                            term.clear();
+                            historyReceived = true;
+                            console.log('Received terminal history, cleared terminal and writing history');
+                        }
+                        
+                        term.write(text);
+                    });
+                }
+            };
+            
+            ws.onclose = function(event) {
+                console.log('WebSocket disconnected:', event.code, event.reason);
+                if (!sessionEnded) {
+                    status.textContent = event.code === 1000 ? 'Session ended' : 'Disconnected';
+                    status.className = 'text-sm font-medium text-red-400';
+                    statusIndicator.className = 'w-2 h-2 rounded-full bg-red-400';
+                    
+                    if (event.code === 1000) {
+                        term.write('\r\n\x1b[31mTerminal session has ended.\x1b[0m\r\n');
+                    }
+                }
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                status.textContent = 'Error';
+                status.className = 'text-sm font-medium text-red-400';
+                statusIndicator.className = 'w-2 h-2 rounded-full bg-red-400';
+            };
+        }
+
+        connectBtn.addEventListener('click', authenticate);
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                authenticate();
+            }
+        });
+
+        // Auto-connect if no auth needed
+        if (!needsAuth) {
+            userType = 'owner'; // No auth means owner access
+            isReadonly = false; // Owners are never readonly
+            updateStatusBadges();
+            authModal.style.display = 'none';
+            terminalContainer.style.display = 'block';
+            initializeTerminal();
+        }
+        </script>
+    </body>
+</html>
