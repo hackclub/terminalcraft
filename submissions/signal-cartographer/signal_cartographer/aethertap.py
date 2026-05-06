@@ -131,7 +131,8 @@ class AetherTap:
                 "No signal currently focused.",
                 "Use FOCUS <signal_id> to analyze a signal."
             ]
-          if 'cnp' in self.panes:
+        
+        if 'cnp' in self.panes:
             self.panes['cnp']['content'] = [
                 "Current Location: ALPHA-1",
                 "",
@@ -273,7 +274,8 @@ class AetherTap:
             if self.command_buffer:
                 self.command_buffer = self.command_buffer[:-1]
             return None
-              elif key == 27:  # Escape
+        
+        elif key == 27:  # Escape
             self.command_buffer = ""
             return None
         
@@ -290,7 +292,8 @@ class AetherTap:
         self._update_log_pane()
     
     def _update_log_pane(self):
-        """Update the Captain's Log pane content"""        if 'cld' in self.panes:
+        """Update the Captain's Log pane content"""
+        if 'cld' in self.panes:
             recent_entries = self.log_entries[-10:]
             self.panes['cld']['content'] = recent_entries
     
@@ -329,7 +332,8 @@ class AetherTap:
             ])
         
         self.panes['msa']['content'] = content
-      def update_focused_signal(self, signal: Any):
+    
+    def update_focused_signal(self, signal: Any):
         """Update the Signal Focus & Data pane with signal details"""
         if 'sfd' not in self.panes:
             return
