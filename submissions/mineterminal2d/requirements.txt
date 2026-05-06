@@ -21,7 +21,7 @@ perlin-noise==1.13
 pipreqs==0.4.13
 platformdirs==4.3.6
 propcache==0.3.0
-Pygments==2.19.1
+Pygments==2.20.0
 requests==2.32.3
 rich==13.9.4
 textual==2.1.2
