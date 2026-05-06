@@ -11,7 +11,7 @@ kdtree==0.16
 pillow==12.2.0
 protobuf==5.29.6
 pycryptodomex==3.21.0
-requests==2.32.4
+requests==2.33.0
 setuptools==78.1.1
 six==1.17.0
 steam==1.4.4
