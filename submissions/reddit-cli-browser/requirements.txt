@@ -6,7 +6,7 @@ mdurl==0.1.2
 praw==7.8.1
 prawcore==2.4.0
 Pygments==2.20.0
-requests==2.32.3
+requests==2.33.0
 rich==13.9.4
 update-checker==0.18.0
 urllib3==2.6.3
