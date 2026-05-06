@@ -1,15 +1,19 @@
 # TerminalCraft
 
-TerminalCraft is a [You Ship We Ship](https://ysws.hackclub.com) program that rewards teenagers for creating original terminal-based programs with a Raspberry Pi 4 (2GB)!
+TerminalCraft is an indefinite [You Ship We Ship](https://ysws.hackclub.com) program that rewards teenagers for creating original terminal-based programs with hardware grants for hackable electronics and hardware-project supplies.
 
 ## 🎯 The Challenge
 
-Create an original program that runs in the terminal. If your submission is approved, you'll receive a Raspberry Pi 4 (2GB) to continue your programming journey!
+Create an original program that runs in the terminal. If your submission is approved, you'll receive a hardware grant at $4 per approved Hackatime hour to spend on hackable electronics like Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items specifically for hardware projects.
 
 ## 🌐 Resources
 
 - Website: [terminalcraft.hackclub.com](https://terminalcraft.hackclub.com)
 - Slack Channel: [#terminal-craft](https://hackclub.slack.com/archives/terminal-craft)
+
+## ⏳ Program Status
+
+TerminalCraft is now indefinite. There is no fixed deadline currently listed for submissions.
 
 ## 📝 Submission Requirements
 
@@ -21,7 +25,7 @@ Create an original program that runs in the terminal. If your submission is appr
 
 4. **No Wrappers**: It must not be a wrapper around an existing program/API to make it "nicer".
 
-5. **Linux Compatibility**: Your program must be able to run on Linux, as this is the operating system used on the Raspberry Pi. You must provide pre-built binaries that can run on Linux without requiring compilation.
+5. **Linux Compatibility**: Your program must be able to run on Linux. You must provide pre-built binaries that can run on Linux without requiring compilation.
 
 6. **Terminal-Only**: Your program must run entirely in the terminal and must not depend on a graphical user interface (GUI).
 
@@ -47,7 +51,11 @@ Your submission should include:
 
 ## 🎁 The Reward
 
-If your submission is approved, you'll receive a Raspberry Pi 4 (2GB) to continue your programming journey!
+If your submission is approved, you'll receive a hardware grant at **$4 per approved Hackatime hour**.
+
+The grant is for hackable electronics and hardware-project supplies, such as Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items specifically for hardware projects.
+
+Outstanding projects can receive an additional **$10 to $30 grant** depending on the quality, creativity, usefulness, and polish of the project.
 
 ## 💡 Project Ideas
 

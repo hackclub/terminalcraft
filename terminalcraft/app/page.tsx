@@ -126,7 +126,7 @@ export default function Home() {
       case "about.md":
         return `# TerminalCraft YSWS
 
-Get ready to build and publish your own terminal program and earn $60 for hardware 🎉 This is your chance to create something useful, learn new skills, and get a cool prize.
+Get ready to build and publish your own terminal program and earn a hardware grant for hackable electronics. TerminalCraft is now an indefinite program, so you can take the time to build something useful, learn new skills, and ship a polished project.
 
 ## What you need to do
 1. 🔧 Build a terminal application that solves a real problem or improves your workflow
@@ -143,6 +143,12 @@ Get ready to build and publish your own terminal program and earn $60 for hardwa
 12. This program is not double-dippable.
 13. You must track your time with Hackatime, with a minimum of 10 hours logged on your project.
 
+## Grant Details
+- Approved projects receive a hardware grant at $4 per approved Hackatime hour.
+- Grants are for hackable electronics and hardware-project supplies, such as Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items that help you build hardware projects.
+- Outstanding projects can receive an additional $10 to $30 grant depending on the quality, creativity, usefulness, and polish of the project.
+- The program is indefinite. There is no fixed deadline currently listed for TerminalCraft.
+
 ### Tools You Can Use:
 - **Textualize** (Recommended for web sharing)
 - **Ncurses** (or any other framework)
@@ -151,10 +157,11 @@ Get ready to build and publish your own terminal program and earn $60 for hardwa
 1. Join the #terminal-craft channel on Slack to ask questions, share progress, or just vibe
 2. Build something sick & ship it!
 3. Submit your project on Slack with the **/craftr** command for review!
-4. Claim your $60
+4. Claim your $4/hour hardware grant if approved
 
-### Prize:
-- $60 grant for hardware
+### Reward:
+- $4/hour hardware grant for hackable electronics and hardware-project supplies
+- Outstanding-project bonus grant: $10-$30
 
 Let's build some awesome terminal apps and hack the world together! 🌟`;
       case "faq.md":
@@ -180,7 +187,16 @@ A: You have several options:
    Make sure your distribution method is easily accessible!
 
 Q: When's the deadline?
-A: December 31, 2025! Make sure to submit before 11:59 EST.
+A: TerminalCraft is indefinite. There is no fixed deadline currently listed, but submit only when your project is complete, documented, tested, and ready for review.
+
+Q: What is the grant rate?
+A: Approved projects receive a hardware grant at $4 per approved Hackatime hour.
+
+Q: What can I use the grant for?
+A: The grant is for hackable electronics and hardware-project supplies. Examples include Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items specifically for hardware projects.
+
+Q: Is there an additional grant for outstanding projects?
+A: Outstanding projects can receive an additional $10 to $30 grant depending on how great the project is. Reviewers consider quality, creativity, usefulness, and polish.
 
 Q: Can my project be a game?
 A: Absolutely! Games are welcome and encouraged. The terminal is your canvas - create anything from text adventures to multiplayer games. Go wild with your creativity!
