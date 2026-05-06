@@ -7,7 +7,7 @@ mdit-py-plugins==0.4.2
 mdurl==0.1.2
 platformdirs==4.3.6
 Pygments==2.20.0
-requests==2.32.3
+requests==2.33.0
 rich==13.9.4
 textual==2.1.2
 tree-sitter==0.24.0
