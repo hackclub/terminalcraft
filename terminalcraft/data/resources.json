@@ -5,7 +5,9 @@
     "url": "https://realpython.com/python-textual/",
     "description": "Beginner-friendly walkthrough for building your first terminal UI app with Textual.",
     "category": "Python",
-    "duration": "About 38 minutes (published reading time)"
+    "duration": "About 38 minutes",
+    "difficulty": "Beginner",
+    "tags": ["tui", "textual", "terminal-ui", "beginner"]
   },
   {
     "id": "textual-official-tutorial",
@@ -13,7 +15,9 @@
     "url": "https://textual.textualize.io/tutorial/",
     "description": "Official step-by-step Textual tutorial to build a complete app.",
     "category": "Python",
-    "duration": "About 60-90 minutes (self-paced estimate)"
+    "duration": "About 60-90 minutes",
+    "difficulty": "Beginner",
+    "tags": ["textual", "tui", "event-loop", "widgets"]
   },
   {
     "id": "python-curses-howto",
@@ -21,7 +25,9 @@
     "url": "https://docs.python.org/3/howto/curses.html",
     "description": "Official Python HOWTO for making text-based terminal applications with curses.",
     "category": "Python",
-    "duration": "About 45-60 minutes (self-paced estimate)"
+    "duration": "About 45-60 minutes",
+    "difficulty": "Intermediate",
+    "tags": ["curses", "terminal", "input", "low-level"]
   },
   {
     "id": "ratatui-counter-basic-app",
@@ -29,7 +35,9 @@
     "url": "https://ratatui.rs/tutorials/counter-app/basic-app/",
     "description": "Build an interactive counter terminal app in Rust, including event handling and tests.",
     "category": "Rust",
-    "duration": "About 90-120 minutes (beginner estimate)"
+    "duration": "About 90-120 minutes",
+    "difficulty": "Beginner",
+    "tags": ["ratatui", "rust", "tui", "testing"]
   },
   {
     "id": "ratatui-json-editor",
@@ -37,6 +45,8 @@
     "url": "https://ratatui.rs/tutorials/json-editor/",
     "description": "Build a multi-file Ratatui app for creating JSON through a terminal interface.",
     "category": "Rust",
-    "duration": "About 2.5-4 hours (beginner estimate)"
+    "duration": "About 2.5-4 hours",
+    "difficulty": "Intermediate",
+    "tags": ["ratatui", "json", "multi-file", "tui"]
   }
 ]
