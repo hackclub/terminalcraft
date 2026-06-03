@@ -407,6 +407,7 @@ export default function Gallery() {
   const [iframeLoading, setIframeLoading] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [search, setSearch] = useState('');
 
   // Toast management
   const addToast = (message: string, type: 'success' | 'error') => {
@@ -604,6 +605,20 @@ export default function Gallery() {
       </div>
     );
   }
+ 
+  const filteredProjects = projects.filter((project) => {
+    const q = search.toLowerCase();
+
+    return (
+      project.name.toLowerCase().includes(q) ||
+      project.author.toLowerCase().includes(q) ||
+      project.language.toLowerCase().includes(q) ||
+      createMarkdownSummary(project.description)
+        .toLowerCase()
+        .includes(q)
+    );
+  });
+
 
   return (
     <div className="p-8 min-h-screen bg-[#1E1E1E]">
@@ -631,9 +646,42 @@ export default function Gallery() {
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="mt-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="search projects..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="
+                w-full
+                bg-black
+                border border-[#404040]
+                focus:border-[#4AF626]
+                outline-none
+                rounded-lg
+                px-4 py-3
+                pl-11
+                text-[#4AF626]
+                placeholder:text-[#808080]
+                font-mono
+                text-sm
+                transition-colors
+              "
+            />
+
+            <Github className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#808080]" />
+          </div>
+
+          <p className="text-[#808080] font-mono text-xs mt-2">
+            Search by project name, author, or language
+          </p>
+        </div>
+        <br />
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <div
               key={project.id}
               className={`bg-black rounded-lg border overflow-hidden transition-all duration-300 cursor-pointer ${
@@ -717,9 +765,9 @@ export default function Gallery() {
           ))}
         </div>
 
-        {projects.length === 0 && !loading && (
+        {filteredProjects.length === 0 && !loading && (
           <div className="text-center py-12">
-            <p className="text-[#808080] font-mono">No projects found in submissions folder</p>
+            <p className="text-[#808080] font-mono">No matching projects found in submissions folder</p>
           </div>
         )}
 
