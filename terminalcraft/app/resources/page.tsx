@@ -16,7 +16,14 @@ type Resource = {
 
 export default function ResourcesPage() {
   const [query, setQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   
+  const categories = [
+    "All",
+    ...new Set((resources as Resource[]).map((r) => r.category)),
+  ];
+
   return (
     <div className="p-8 min-h-screen bg-[#1E1E1E]">
       <div className="max-w-4xl mx-auto">
@@ -52,20 +59,56 @@ export default function ResourcesPage() {
           "
         />
         </div>
+        <div className="flex flex-wrap gap-2 mt-4">
+        {categories.map((category) => (
+          <button
+            key={category}
+            onClick={() => setSelectedCategory(category)}
+            className={`
+              px-3 py-1
+              text-xs
+              font-mono
+              border
+              rounded
+              transition-colors
+              ${
+                selectedCategory === category
+                  ? "bg-[#4AF626] text-black border-[#4AF626]"
+                  : "bg-black text-[#808080] border-[#404040] hover:border-[#4AF626]"
+              }
+            `}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
 
         <div className="mt-6 space-y-4">
           {(resources as Resource[])
             .filter((resource) => {
               const q = query.toLowerCase();
 
-              return (
+              const matchesQuery =
                 resource.title.toLowerCase().includes(q) ||
                 resource.description.toLowerCase().includes(q) ||
-                resource.tags.some((tag) => 
+                resource.tags.some((tag) =>
                   tag.toLowerCase().includes(q)
-                )
+                );
+
+              const matchesCategory =
+                selectedCategory === "All" ||
+                resource.category === selectedCategory;
+
+              const matchesTag =
+                !selectedTag ||
+                resource.tags.includes(selectedTag);
+
+              return (
+                matchesQuery &&
+                matchesCategory &&
+                matchesTag
               );
-                }).map((resource) => (
+            }).map((resource) => (
                   <article
                     key={resource.id}
                     className="
@@ -105,13 +148,31 @@ export default function ResourcesPage() {
               </div>
 
               <div className="flex flex-wrap gap-2 mt-3">
-                  {resource.tags.map((tag) => (
-                    <span key={tag} className="
-                      text-xs font-mono px-2 py-1 bg-[#1A1A1A] text-[#808080] border border-[#303030]
-                    ">
-                      #{tag}
-                    </span>
-                  ))}
+                {resource.tags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() =>
+                      setSelectedTag(
+                        selectedTag === tag ? null : tag
+                      )
+                    }
+                    className={`
+                      text-xs
+                      font-mono
+                      px-2
+                      py-1
+                      border
+                      transition-colors
+                      ${
+                        selectedTag === tag
+                          ? "bg-[#4AF626] text-black border-[#4AF626]"
+                          : "bg-[#1A1A1A] text-[#808080] border-[#303030]"
+                      }
+                    `}
+                  >
+                    #{tag}
+                  </button>
+                ))}
               </div>
               <a
                 href={resource.url}
