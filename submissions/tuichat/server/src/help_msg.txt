@@ -1,0 +1,5 @@
+The following commands are available:
+  /exit: disconnects the client -- Ctrl + C works better
+  /setname: changes your display name -- currently not working
+  /jc: Joins a channel -- Do not include the #
+  /help: shows this help message.
