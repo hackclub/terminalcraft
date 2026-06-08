@@ -1,0 +1,12 @@
+#statusbar {
+    layout: horizontal;
+    align: center middle;
+    padding: 1 2;
+    height: 3;
+    dock: top;
+}
+#table {
+    padding: 1 2;
+}
+
+
