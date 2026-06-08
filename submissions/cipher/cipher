@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+if test -d ./dist; then 
+    node ./dist/index.js
+else
+    echo "Build not found. Compiling...";
+    bash ./build;
+    node ./dist/index.js
+fi
