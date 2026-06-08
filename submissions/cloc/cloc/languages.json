@@ -1,0 +1,211 @@
+{
+    ".py": {
+        "name": "Python",
+        "color": "green",
+        "comments": "#"
+    },
+    ".cpp": {
+        "name": "C++",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".c++": {
+        "name": "C++",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".cc": {
+        "name": "C++",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".cxx": {
+        "name": "C++",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".c": {
+        "name": "C",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".hpp": {
+        "name": "C++ Header",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".hh": {
+        "name": "C++ Header",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".hxx": {
+        "name": "C++ Header",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".h": {
+        "name": "Header",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".go": {
+        "name": "Go",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".js": {
+        "name": "Javascript",
+        "color": "orange",
+        "comments": "//"
+    },
+    ".json": {
+        "name": "JSON",
+        "color": "red",
+        "comments": null
+    },
+    ".java": {
+        "name": "Java",
+        "color": "orange",
+        "comments": "//"
+    },
+    ".cs": {
+        "name": "C Sharp",
+        "color": "blue",
+        "comments": "//"
+    },
+    ".rs": {
+        "name": "Rust",
+        "color": "red",
+        "comments": "//"
+    },
+    ".toml": {
+        "name": "TOML",
+        "color": "purple",
+        "comments": "#"
+    },
+    ".yaml": {
+        "name": "YAML",
+        "color": "yellow",
+        "comments": "#"
+    },
+    ".yml": {
+        "name": "YAML",
+        "color": "yellow",
+        "comments": "#"
+    },
+    ".md": {
+        "name": "Markdown",
+        "color": "green",
+        "comments": null
+    },
+    ".markdown": {
+        "name": "Markdown",
+        "color": "green",
+        "comments": ""
+    },
+    ".rb": {
+        "name": "Ruby",
+        "color": "red",
+        "comments": "#"
+    },
+    ".php": {
+        "name": "PHP",
+        "color": "purple",
+        "comments": "#",
+        "extra_comments": "//"
+    },
+    ".swift": {
+        "name": "Swift",
+        "color": "orange",
+        "comments": "//"
+    },
+    ".kt": {
+        "name": "Kotlin",
+        "color": "purple",
+        "comments": "//"
+    },
+    ".kts": {
+        "name": "Kotlin",
+        "color": "purple",
+        "comments": "//"
+    },
+    ".scala": {
+        "name": "Scala",
+        "color": "red",
+        "comments": "//"
+    },
+    ".pl": {
+        "name": "Perl",
+        "color": "blue",
+        "comments": "#"
+    },
+    ".pm": {
+        "name": "Perl",
+        "color": "blue",
+        "comments": "#"
+    },
+    ".sh": {
+        "name": "Shell",
+        "color": "blue",
+        "comments": "#"
+    },
+    ".sql": {
+        "name": "SQL",
+        "color": "yellow",
+        "comments": "--"
+    },
+    ".html": {
+        "name": "HTML",
+        "color": "red",
+        "comments": "<!--"
+    },
+    ".htm": {
+        "name": "HTML",
+        "color": "red",
+        "comments": "<!--"
+    },
+    ".xml": {
+        "name": "XML",
+        "color": "blue",
+        "comments": "<!--"
+    },
+    ".tex": {
+        "name": "LaTeX",
+        "color": "",
+        "comments": "%"
+    },
+    ".Dockerfile": {
+        "name": "blue",
+        "color": "green",
+        "comments": "#"
+    },
+    ".Makefile": {
+        "name": "Makefile",
+        "color": "",
+        "comments": "#"
+    },
+    ".ini": {
+        "name": "INI",
+        "color": "green",
+        "comments": "#",
+        "extra_comments": ";"
+    },
+    ".bat": {
+        "name": "Batch",
+        "color": "",
+        "comments": "REM",
+        "extra_comments": "::"
+    },
+    ".cmd": {
+        "name": "Batch",
+        "color": "",
+        "comments": "REM",
+        "extra_comments": "::"
+    },
+    ".css": {
+        "name": "CSS",
+        "color": "blue",
+        "comments": null
+    }
+}
