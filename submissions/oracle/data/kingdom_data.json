@@ -1,0 +1,31 @@
+{
+    "kingdoms": [
+        {
+            "name": "Aethelgard",
+            "traits": ["Noble", "Cautious"],
+            "population": 12000,
+            "stability": 80,
+            "military_strength": 1100,
+            "food_reserves": 60000,
+            "wealth": 15000
+        },
+        {
+            "name": "Grak-Thar",
+            "traits": ["Barbaric", "Expansionist"],
+            "population": 8000,
+            "stability": 50,
+            "military_strength": 1500,
+            "food_reserves": 30000,
+            "wealth": 5000
+        },
+        {
+            "name": "Sylvanesti",
+            "traits": ["Isolationist", "Mystical"],
+            "population": 7000,
+            "stability": 90,
+            "military_strength": 800,
+            "food_reserves": 70000,
+            "wealth": 20000
+        }
+    ]
+}
