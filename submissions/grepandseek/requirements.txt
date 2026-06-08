@@ -1,0 +1,4 @@
+whoosh-reloaded~=2.7.5
+appdirs~=1.4.4
+rich~=13.9.4
+textract-py3 @ git+https://github.com/KyleKing/textract-py3.git@main
