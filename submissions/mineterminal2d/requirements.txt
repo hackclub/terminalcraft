@@ -15,7 +15,7 @@ markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdit-py-plugins==0.4.2
 mdurl==0.1.2
-msgpack==1.1.0
+msgpack==1.2.1
 multidict==6.1.0
 perlin-noise==1.13
 pipreqs==0.4.13
