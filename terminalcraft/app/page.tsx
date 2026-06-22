@@ -144,7 +144,7 @@ Get ready to build and publish your own terminal program and earn a hardware gra
 13. You must track your time with Hackatime, with a minimum of 10 hours logged on your project.
 
 ## Grant Details
-- Approved projects receive a hardware grant at $4 per approved Hackatime hour.
+- Approved projects receive a hardware grant at $5 per approved Hackatime hour.
 - Grants are for hackable electronics and hardware-project supplies, such as Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items that help you build hardware projects.
 - Outstanding projects can receive an additional $10 to $30 grant depending on the quality, creativity, usefulness, and polish of the project.
 - The program is indefinite. There is no fixed deadline currently listed for TerminalCraft.
@@ -157,10 +157,10 @@ Get ready to build and publish your own terminal program and earn a hardware gra
 1. Join the #terminal-craft channel on Slack to ask questions, share progress, or just vibe
 2. Build something sick & ship it!
 3. Submit your project on Slack with the **/craftr** command for review!
-4. Claim your $4/hour hardware grant if approved
+4. Claim your $5/hour hardware grant if approved
 
 ### Reward:
-- $4/hour hardware grant for hackable electronics and hardware-project supplies
+- $5/hour hardware grant for hackable electronics and hardware-project supplies
 - Outstanding-project bonus grant: $10-$30
 
 Let's build some awesome terminal apps and hack the world together! 🌟`;
@@ -168,7 +168,7 @@ Let's build some awesome terminal apps and hack the world together! 🌟`;
         return `# Frequently Asked Questions
 
 Q: How many projects can I submit?
-A: You can submit only one project. Make it count! Focus on quality and creativity.
+A: You can submit as many projects as you want! There's no limit, so build and ship as many terminal programs as you like.
 
 Q: I need help! Where can I get assistance?
 A: Join the <a href="https://hackclub.slack.com/archives/C08F58MT3GV" target="_blank" style="text-decoration: underline">#terminal-craft</a> channel on Slack! Our community is super friendly and always ready to help you out with coding, debugging, or brainstorming ideas.
@@ -190,7 +190,7 @@ Q: When's the deadline?
 A: TerminalCraft is indefinite. There is no fixed deadline currently listed, but submit only when your project is complete, documented, tested, and ready for review.
 
 Q: What is the grant rate?
-A: Approved projects receive a hardware grant at $4 per approved Hackatime hour.
+A: Approved projects receive a hardware grant at $5 per approved Hackatime hour.
 
 Q: What can I use the grant for?
 A: The grant is for hackable electronics and hardware-project supplies. Examples include Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items specifically for hardware projects.

@@ -4,7 +4,7 @@ TerminalCraft is an indefinite [You Ship We Ship](https://ysws.hackclub.com) pro
 
 ## 🎯 The Challenge
 
-Create an original program that runs in the terminal. If your submission is approved, you'll receive a hardware grant at $4 per approved Hackatime hour to spend on hackable electronics like Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items specifically for hardware projects.
+Create an original program that runs in the terminal. If your submission is approved, you'll receive a hardware grant at $5 per approved Hackatime hour to spend on hackable electronics like Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items specifically for hardware projects.
 
 ## 🌐 Resources
 
@@ -51,7 +51,9 @@ Your submission should include:
 
 ## 🎁 The Reward
 
-If your submission is approved, you'll receive a hardware grant at **$4 per approved Hackatime hour**.
+If your submission is approved, you'll receive a hardware grant at **$5 per approved Hackatime hour**.
+
+You can submit as many projects as you want — there's no limit on submissions.
 
 The grant is for hackable electronics and hardware-project supplies, such as Arduino boards, Raspberry Pi boards, sensors, components, tools, and other items specifically for hardware projects.
 
