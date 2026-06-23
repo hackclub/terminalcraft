@@ -1,0 +1,31 @@
+[package]
+name = "tshare"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Terminal sharing client - share your terminal session through a web link"
+keywords.workspace = true
+categories.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "tshare"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+clap = { workspace = true }
+portable-pty = { workspace = true }
+tokio-tungstenite = { workspace = true }
+futures-util = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+url = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+crossterm = { workspace = true }
+ctrlc = { workspace = true }
