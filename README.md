@@ -38,7 +38,7 @@ TerminalCraft is now indefinite. There is no fixed deadline currently listed for
 1. Fork this repository
 2. Create a new folder in the `submissions` directory with your project name
 3. Add your project files and a README.md explaining your project
-4. Submit your project on Hack Club Slack with the `/craftr` command
+4. Submit your project at https://syscall.hackclub.com/
 
 Your submission should include:
 - Source code

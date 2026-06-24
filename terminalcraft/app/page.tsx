@@ -89,8 +89,8 @@ export default function Home() {
         return hackclubFlag();
       }
       case "submit": {
-        window.open("https://airtable.com/appzR6MIcj5G9A2Fa/pag8jn2axMXOB2lid/form", "_blank");
-        return "Opening submission form in new tab...";
+        window.open("https://syscall.hackclub.com/", "_blank");
+        return "Opening submission page in new tab...";
       }
       case "slack": {
         window.open('https://hackclub.slack.com/archives/C08F58MT3GV', '_blank');
@@ -156,7 +156,7 @@ Get ready to build and publish your own terminal program and earn a hardware gra
 ## How to Get Involved:
 1. Join the #terminal-craft channel on Slack to ask questions, share progress, or just vibe
 2. Build something sick & ship it!
-3. Submit your project on Slack with the **/craftr** command for review!
+3. Submit your project at https://syscall.hackclub.com/ for review!
 4. Claim your $5/hour hardware grant if approved
 
 ### Reward:
