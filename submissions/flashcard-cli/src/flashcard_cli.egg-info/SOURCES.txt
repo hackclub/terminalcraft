@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+setup.cfg
+setup.py
+src/flashcard_cli/__init__.py
+src/flashcard_cli/data.py
+src/flashcard_cli/db.py
+src/flashcard_cli/main.py
+src/flashcard_cli/start.py
+src/flashcard_cli/tui.py
+src/flashcard_cli.egg-info/PKG-INFO
+src/flashcard_cli.egg-info/SOURCES.txt
+src/flashcard_cli.egg-info/dependency_links.txt
+src/flashcard_cli.egg-info/entry_points.txt
+src/flashcard_cli.egg-info/requires.txt
+src/flashcard_cli.egg-info/top_level.txt

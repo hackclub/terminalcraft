@@ -1,0 +1,2 @@
+[console_scripts]
+flashcard = flashcard_cli.main:app
