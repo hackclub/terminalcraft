@@ -1,0 +1,54 @@
+sessions_completed = 5
+chars_learned = 64
+words_learned = 0
+accuracy = 0.955731213092804
+
+[response_times]
+T = 0.860741138458252
+E = 1.4458223581314087
+N = 3.236259937286377
+I = 1.8315136432647705
+M = 1.7500873804092407
+A = 1.5086846351623535
+
+[word_response_times]
+
+[[session_history]]
+timestamp = "2025-06-23T18:00:14.464119132+02:00"
+duration = 24
+chars_practiced = []
+words_practiced = []
+accuracy = 0.9090909361839294
+difficulty = 1
+
+[[session_history]]
+timestamp = "2025-06-23T18:00:52.561435916+02:00"
+duration = 73
+chars_practiced = []
+words_practiced = []
+accuracy = 0.8695651888847351
+difficulty = 2
+
+[[session_history]]
+timestamp = "2025-06-24T16:23:03.191160718+02:00"
+duration = 20
+chars_practiced = []
+words_practiced = []
+accuracy = 1.0
+difficulty = 1
+
+[[session_history]]
+timestamp = "2025-06-26T19:49:30.238909462+02:00"
+duration = 25
+chars_practiced = []
+words_practiced = []
+accuracy = 1.0
+difficulty = 1
+
+[[session_history]]
+timestamp = "2025-06-26T19:52:01.189715364+02:00"
+duration = 20
+chars_practiced = []
+words_practiced = []
+accuracy = 1.0
+difficulty = 1
