@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flashcard-cli"
+version = "1.1.1"
+authors = [
+  { name="000xs", email="000xs@users.noreply.github.com" },
+]
+description = "A terminal-based flashcard system."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "typer[all]",
+    "rich",
+    "textual",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/000xs/flashcard-cli"
+"Bug Tracker" = "https://github.com/000xs/flashcard-cli/issues"
+
+[project.scripts]
+flashcard = "flashcard_cli.main:app"
