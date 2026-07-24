@@ -12,7 +12,7 @@ pillow==12.2.0
 protobuf==5.29.6
 pycryptodomex==3.21.0
 requests==2.33.0
-setuptools==78.1.1
+setuptools==83.0.0
 six==1.17.0
 steam==1.4.4
 urllib3==2.7.0
