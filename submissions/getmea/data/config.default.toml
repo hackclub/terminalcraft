@@ -1,0 +1,10 @@
+[openai]
+base_url = "https://api.groq.com/openai/v1"
+token = "..."
+
+[models]
+planner = "qwen-qwq-32b"          # Used for planning next steps
+scraper = "llama-3.3-70b-specdec" # Used for extracting information from markdown
+
+[updates]
+enableCheck = true
