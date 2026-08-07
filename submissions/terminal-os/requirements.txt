@@ -1,0 +1,9 @@
+textual>=0.41.0
+rich>=13.0.0
+click>=8.1.0
+psutil>=5.9.0
+pyfiglet>=0.8.0
+pygments>=2.14.0
+watchdog>=3.0.0
+pyyaml>=6.0
+typing-extensions>=4.0.0
