@@ -1,0 +1,25 @@
+{
+  "name": "cipher",
+  "version": "1.0.0",
+  "description": "a simple CLI program for encoding and decoding text messages.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.3.3",
+    "chalk": "^5.4.1",
+    "inquirer-file-selector": "^0.6.2",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "typescript": "^5.8.2"
+  }
+}
