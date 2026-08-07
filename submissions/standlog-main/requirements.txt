@@ -1,0 +1,6 @@
+rich
+cryptography
+yagmail
+sounddevice
+scipy
+ics
