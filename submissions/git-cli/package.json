@@ -1,0 +1,20 @@
+{
+  "name": "git-helper",
+  "version": "1.0.0",
+  "description": "A CLI app to simplify common git tasks and help new users get started with Git.",
+  "main": "index.js",
+  "bin": {
+    "git-helper": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "conf": "^10.2.0",
+    "inquirer": "^7.3.3",
+    "keytar": "^7.9.0",
+    "simple-git": "^3.22.0",
+    "yargs": "^17.7.2"
+  }
+}
