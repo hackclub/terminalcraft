@@ -1,0 +1,26 @@
+{
+    "events": [
+        {
+            "type": "GoodHarvest",
+            "description_template": "A bountiful harvest blesses the lands of {kingdom}, increasing their food reserves.",
+            "effects": {
+                "food_reserves_modifier": 1.2
+            }
+        },
+        {
+            "type": "BanditRaid",
+            "description_template": "Marauding bandits have raided the countryside of {kingdom}, plundering wealth and sowing chaos.",
+            "effects": {
+                "wealth_modifier": 0.9,
+                "stability_modifier": -5
+            }
+        },
+        {
+            "type": "RoyalWedding",
+            "description_template": "A royal wedding between {kingdom1} and {kingdom2} has been announced, strengthening their diplomatic ties.",
+            "effects": {
+                "relationship_modifier": 20
+            }
+        }
+    ]
+}
