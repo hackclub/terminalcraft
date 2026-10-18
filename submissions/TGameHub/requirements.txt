@@ -1,0 +1,6 @@
+numpy
+datetime
+curses
+random
+re
+chess
